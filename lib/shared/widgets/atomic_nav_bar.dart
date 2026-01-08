@@ -1,48 +1,66 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../../features/home/logic/home_signals.dart';
-import 'glass_container.dart';
 
 class AtomicNavBar extends StatelessWidget {
   const AtomicNavBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Watch signal
     final current = currentTab.watch(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: GlassContainer(
-        borderRadius: 28.0,
-        color: const Color.fromRGBO(10, 10, 10, 0.7), // Heavy glass
-        blur: 50.0,
-        child: SizedBox(
-          height: 70,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavButton(
-                icon: FontAwesomeIcons.house,
-                label: 'Home',
-                isActive: current == AppTabs.home.index,
-                onTap: () => switchTab(AppTabs.home.index),
-              ),
-              _NavButton(
-                icon: FontAwesomeIcons.barsStaggered, // stream equivalent
-                label: 'Planner',
-                isActive: current == AppTabs.planner.index,
-                onTap: () => switchTab(AppTabs.planner.index),
-              ),
-              _NavButton(
-                icon: FontAwesomeIcons.calendarDays,
-                label: 'Mois',
-                isActive: current == AppTabs.calendar.index,
-                onTap: () => switchTab(AppTabs.calendar.index),
-              ),
-            ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28.0),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          child: Container(
+            height: 70,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(28.0),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 32,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavButton(
+                  icon: FontAwesomeIcons.house,
+                  label: 'Home',
+                  isActive: current == AppTabs.home.index,
+                  onTap: () => switchTab(AppTabs.home.index),
+                ),
+                _NavButton(
+                  icon: FontAwesomeIcons.barsStaggered,
+                  label: 'Planner',
+                  isActive: current == AppTabs.planner.index,
+                  onTap: () => switchTab(AppTabs.planner.index),
+                ),
+                _NavButton(
+                  icon: FontAwesomeIcons.calendarDays,
+                  label: 'Mois',
+                  isActive: current == AppTabs.calendar.index,
+                  onTap: () => switchTab(AppTabs.calendar.index),
+                ),
+                _NavButton(
+                  icon: FontAwesomeIcons.wandMagicSparkles,
+                  label: 'Assistant',
+                  isActive: current == AppTabs.aiChat.index,
+                  onTap: () => switchTab(AppTabs.aiChat.index),
+                ),
+              ],
+            ),
           ),
         ),
       ),
