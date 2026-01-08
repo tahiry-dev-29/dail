@@ -17,7 +17,7 @@ class ChatOverlay extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       child: Container(
-        color: Colors.black.withOpacity(0.9),
+        color: Colors.black.withValues(alpha: 0.9),
         child: SafeArea(
           child: Column(
             children: [
@@ -108,7 +108,7 @@ class ChatOverlay extends StatelessWidget {
                 child: GlassContainer(
                   borderRadius: 30,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   child: Row(
                     children: [
                       const Expanded(
@@ -156,7 +156,7 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: const BoxConstraints(maxWidth: 260),
         decoration: BoxDecoration(
-          color: isAi ? Colors.white.withOpacity(0.1) : AppColors.accent,
+          color: isAi ? Colors.white.withValues(alpha: 0.1) : AppColors.accent,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),

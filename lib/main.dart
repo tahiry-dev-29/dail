@@ -121,7 +121,7 @@ class FloatingActionChatButton extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.purple500.withOpacity(0.4),
+              color: AppColors.purple500.withValues(alpha: 0.4),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

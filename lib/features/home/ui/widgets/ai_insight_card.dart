@@ -21,11 +21,11 @@ class AiInsightCard extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: Colors.purple.withOpacity(0.3),
+                color: Colors.purple.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(50),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.purple.withOpacity(0.3),
+                    color: Colors.purple.withValues(alpha: 0.3),
                     blurRadius: 60,
                     spreadRadius: 20,
                   ),
@@ -89,7 +89,7 @@ class AiInsightCard extends StatelessWidget {
                       Text(
                         'Appuyez pour discuter...',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.4),
+                          color: Colors.white.withValues(alpha: 0.4),
                           fontSize: 10,
                           fontStyle: FontStyle.italic,
                         ),

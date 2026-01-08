@@ -74,14 +74,18 @@ class _NavButton extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: isActive ? Colors.white : Colors.white.withOpacity(0.3),
+            color: isActive
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.3),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 9,
-              color: isActive ? Colors.white : Colors.white.withOpacity(0.3),
+              color: isActive
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.3),
             ),
           ),
         ],
