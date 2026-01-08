@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:signals_flutter/signals_flutter.dart';
-
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'core/theme/app_colors.dart';
 import 'core/utils/glass_scaffold.dart';
-import 'features/ai_chat/ui/chat_overlay.dart';
+// Removed ChatOverlay import
+import 'features/ai_chat/ui/ai_chat_page.dart';
 import 'features/calendar/ui/calendar_screen.dart';
 import 'features/home/logic/home_signals.dart';
 import 'features/home/ui/home_screen.dart';
 import 'features/planner/ui/planner_screen.dart';
+import 'features/planner/ui/widgets/add_task_inline.dart';
 import 'shared/widgets/atomic_header.dart';
 import 'shared/widgets/atomic_nav_bar.dart';
+import 'shared/widgets/safe_back_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,57 +62,80 @@ class MainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Watch current tab signal
     final current = currentTab.watch(context);
 
-    return GlassScaffold(
-      body: Stack(
-        children: [
-          // Main Content Layer
-          Column(
-            children: [
-              const AtomicHeader(),
-              Expanded(
-                child: IndexedStack(
-                  index: current,
-                  children: const [
-                    HomeScreen(),
-                    PlannerScreen(),
-                    CalendarScreen(),
-                  ],
+    return SafeBackHandler(
+      onBack: () {
+        // If add task is visible, hide it
+        if (isAddTaskVisible.value) {
+          isAddTaskVisible.value = false;
+          return;
+        }
+
+        // If not on Home tab, go to Home
+        if (current != 0) {
+          switchTab(0);
+          return;
+        }
+      },
+      child: GlassScaffold(
+        body: Stack(
+          children: [
+            // Main Content Layer
+            Column(
+              children: [
+                if (current != AppTabs.aiChat.index) const AtomicHeader(),
+                Expanded(
+                  child: IndexedStack(
+                    index: current,
+                    children: const [
+                      HomeScreen(),
+                      PlannerScreen(),
+                      CalendarScreen(),
+                      AiChatPage(), // New Page
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          // Dock (Bottom)
-          const Positioned(bottom: 0, left: 0, right: 0, child: AtomicNavBar()),
+            // Dock (Bottom)
+            const Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AtomicNavBar(),
+            ),
 
-          // Chat Overlay (Top Layer)
-          const Positioned.fill(child: ChatOverlay()),
-
-          // Floating Action Button for Chat (if closed)
-          // We can add this if needed, but the card triggers it, and the dock is there.
-          // HTML has a floating button too.
-          Positioned(bottom: 100, right: 16, child: FloatingActionChatButton()),
-        ],
+            // Floating Add Task Button (+ button)
+            const Positioned(
+              bottom: 100,
+              right: 16,
+              child: FloatingAddTaskButton(),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class FloatingActionChatButton extends StatelessWidget {
-  const FloatingActionChatButton({super.key});
+/// Floating + button to show add task input
+class FloatingAddTaskButton extends StatelessWidget {
+  const FloatingAddTaskButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isOpen = isChatOpen.watch(context);
+    final isVisible = isAddTaskVisible.watch(context);
+    final current = currentTab.watch(context);
 
-    // Hide if open
-    if (isOpen) return const SizedBox.shrink();
+    // Hide if add task is visible or not on Planner
+    if (isVisible || current != AppTabs.planner.index) {
+      return const SizedBox.shrink();
+    }
 
     return GestureDetector(
-      onTap: () => isChatOpen.value = true,
+      onTap: () => isAddTaskVisible.value = true,
       child: Container(
         width: 56,
         height: 56,
@@ -128,7 +153,7 @@ class FloatingActionChatButton extends StatelessWidget {
           ],
         ),
         child: const Center(
-          child: Icon(Icons.auto_awesome, color: Colors.white),
+          child: Icon(FontAwesomeIcons.plus, color: Colors.white, size: 20),
         ),
       ),
     );

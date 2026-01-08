@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import '../../../shared/widgets/glass_container.dart';
 import '../providers/calendar_provider.dart';
-import '../widgets/calendar_grid_2026.dart';
-import '../widgets/calendar_header_2026.dart';
+import '../widgets/calendar_grid.dart';
+import '../widgets/calendar_header.dart';
 
 class CalendarScreen extends StatelessWidget {
   const CalendarScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Watch signal to rebuild only when selectedDate changes (if needed here,
-    // mostly handled in sub-widgets, but good for top-level context)
     final currentMonth = calendarState.selectedDate.watch(context);
 
     return Scaffold(
@@ -20,12 +18,13 @@ class CalendarScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           children: [
+            // Calendar Card
             GlassContainer(
               borderRadius: 30,
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  CalendarHeader2026(currentMonth: currentMonth),
+                  CalendarHeader(currentMonth: currentMonth),
                   const SizedBox(height: 20),
                   // Weekday headers
                   Row(
@@ -47,10 +46,12 @@ class CalendarScreen extends StatelessWidget {
                         .toList(),
                   ),
                   const SizedBox(height: 10),
-                  const CalendarGrid2026(),
+                  const CalendarGrid(),
                 ],
               ),
             ),
+
+            const SizedBox(height: 100),
           ],
         ),
       ),

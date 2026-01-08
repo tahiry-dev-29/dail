@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../providers/calendar_provider.dart';
 
-class CalendarHeader2026 extends StatelessWidget {
+class CalendarHeader extends StatelessWidget {
   final DateTime currentMonth;
 
-  const CalendarHeader2026({super.key, required this.currentMonth});
+  const CalendarHeader({super.key, required this.currentMonth});
 
   @override
   Widget build(BuildContext context) {

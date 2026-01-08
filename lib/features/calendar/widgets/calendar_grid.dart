@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import '../providers/calendar_provider.dart';
 import 'calendar_day_tile.dart';
+import '../../home/logic/home_signals.dart';
 
-class CalendarGrid2026 extends StatelessWidget {
-  const CalendarGrid2026({super.key});
+class CalendarGrid extends StatelessWidget {
+  const CalendarGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,10 @@ class CalendarGrid2026 extends StatelessWidget {
           day: day,
           isSelected: isSelected,
           isToday: isToday,
-          onTap: () => calendarState.selectDate(day),
+          onTap: () {
+            calendarState.selectDate(day);
+            switchTab(1); // Navigate to Planner
+          },
         );
       },
     );
