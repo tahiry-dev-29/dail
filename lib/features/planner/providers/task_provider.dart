@@ -1,22 +1,55 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../planner/data/task_model.dart';
+import '../data/task_model.dart';
+import '../data/subtask_model.dart';
+import '../../calendar/providers/calendar_provider.dart';
 
 class TaskNotifier extends Notifier<List<Task>> {
   @override
   List<Task> build() {
-    // Initial Mock Data
+    // Initial mock data
+    final today = DateTime.now();
     return [
-      const Task(id: '1', name: 'Morning Routine', time: '07:00', isDone: true),
-      const Task(id: '2', name: 'Deep Work', time: '09:00', isDone: false),
-      const Task(id: '3', name: 'Gym', time: '18:00', isDone: false),
+      Task(
+        id: '1',
+        name: 'Morning Routine',
+        time: '07:00',
+        isDone: true,
+        date: today,
+      ),
+      Task(
+        id: '2',
+        name: 'Deep Work',
+        time: '09:00',
+        isDone: false,
+        isFavorite: true,
+        date: today,
+      ),
+      Task(
+        id: '3',
+        name: 'Gym',
+        time: '18:00',
+        isDone: false,
+        date: today,
+        deadline: DateTime(today.year, today.month, today.day, 19, 0),
+      ),
     ];
   }
 
-  void addTask(String name, String time) {
+  void addTask({
+    required String name,
+    required String time,
+    DateTime? date,
+    DateTime? deadline,
+    bool isFavorite = false,
+  }) {
     final newTask = Task(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: name,
       time: time,
+      date: date,
+      deadline: deadline,
+      isFavorite: isFavorite,
     );
     state = [...state, newTask]..sort((a, b) => a.time.compareTo(b.time));
   }
@@ -29,10 +62,82 @@ class TaskNotifier extends Notifier<List<Task>> {
   }
 
   void deleteTask(String id) {
-    state = state.where((task) => task.id != id).toList();
+    state = state.where((t) => t.id != id).toList();
+  }
+
+  void toggleFavorite(String id) {
+    state = [
+      for (final task in state)
+        if (task.id == id)
+          task.copyWith(isFavorite: !task.isFavorite)
+        else
+          task,
+    ];
+  }
+
+  void addSubtask(String taskId, String name) {
+    state = [
+      for (final task in state)
+        if (task.id == taskId)
+          task.copyWith(
+            subtasks: [
+              ...task.subtasks,
+              SubTask(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                name: name,
+              ),
+            ],
+          )
+        else
+          task,
+    ];
+  }
+
+  void toggleSubtask(String taskId, String subtaskId) {
+    state = [
+      for (final task in state)
+        if (task.id == taskId)
+          task.copyWith(
+            subtasks: [
+              for (final st in task.subtasks)
+                if (st.id == subtaskId) st.copyWith(isDone: !st.isDone) else st,
+            ],
+          )
+        else
+          task,
+    ];
+  }
+
+  // Refresh tasks (for pull-to-refresh)
+  Future<void> refreshTasks() async {
+    // In real app, fetch from API here
+    await Future.delayed(const Duration(milliseconds: 300));
+    // Trigger rebuild
+    state = [...state];
   }
 }
 
 final taskProvider = NotifierProvider<TaskNotifier, List<Task>>(
   TaskNotifier.new,
 );
+
+// Computed Provider: Tasks filtered by selected date (Performance optimized)
+final filteredTasksProvider = Provider<List<Task>>((ref) {
+  final allTasks = ref.watch(taskProvider);
+  final selectedDate = calendarState.selectedDate.value;
+
+  return allTasks.where((t) {
+    if (t.date == null) return false;
+    return DateUtils.isSameDay(t.date, selectedDate);
+  }).toList();
+});
+
+// Computed: Active tasks only
+final activeTasksProvider = Provider<List<Task>>((ref) {
+  return ref.watch(filteredTasksProvider).where((t) => !t.isDone).toList();
+});
+
+// Computed: Completed tasks only
+final completedTasksProvider = Provider<List<Task>>((ref) {
+  return ref.watch(filteredTasksProvider).where((t) => t.isDone).toList();
+});

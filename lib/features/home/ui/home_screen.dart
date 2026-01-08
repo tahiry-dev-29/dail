@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../planner/providers/task_provider.dart';
 import 'widgets/ai_insight_card.dart';
 import 'widgets/home_next_task_widget.dart';
-import 'widgets/stats_grid.dart';
+import 'widgets/stats_chart.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -12,9 +12,6 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasks = ref.watch(taskProvider);
-
-    final doneCount = tasks.where((t) => t.isDone).length;
-    final remainingCount = tasks.where((t) => !t.isDone).length;
 
     // Determine current task (first undone task)
     final currentTask = tasks.where((t) => !t.isDone).firstOrNull;
@@ -35,7 +32,7 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Stats
-          StatsGrid(doneCount: doneCount, remainingCount: remainingCount),
+          const StatsChart(),
 
           const SizedBox(height: 100), // Space for specific bottom padding
         ],
