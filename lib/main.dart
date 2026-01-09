@@ -78,42 +78,46 @@ class MainLayout extends StatelessWidget {
           return;
         }
       },
-      child: GlassScaffold(
-        body: Stack(
-          children: [
-            // Main Content Layer
-            Column(
-              children: [
-                if (current != AppTabs.aiChat.index) const AtomicHeader(),
-                Expanded(
-                  child: IndexedStack(
-                    index: current,
-                    children: const [
-                      HomeScreen(),
-                      PlannerScreen(),
-                      CalendarScreen(),
-                      AiChatPage(), // New Page
-                    ],
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: GlassScaffold(
+          body: Stack(
+            children: [
+              // Main Content Layer
+              Column(
+                children: [
+                  if (current != AppTabs.aiChat.index) const AtomicHeader(),
+                  Expanded(
+                    child: IndexedStack(
+                      index: current,
+                      children: const [
+                        HomeScreen(),
+                        PlannerScreen(),
+                        CalendarScreen(),
+                        AiChatPage(), // New Page
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // Dock (Bottom)
-            const Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: AtomicNavBar(),
-            ),
+              // Dock (Bottom)
+              const Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: AtomicNavBar(),
+              ),
 
-            // Floating Add Task Button (+ button)
-            const Positioned(
-              bottom: 100,
-              right: 16,
-              child: FloatingAddTaskButton(),
-            ),
-          ],
+              // Floating Add Task Button (+ button)
+              const Positioned(
+                bottom: 100,
+                right: 16,
+                child: FloatingAddTaskButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,22 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:signals_flutter/signals_flutter.dart';
+import '../task_edit_page.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../data/task_model.dart';
 import '../../providers/task_provider.dart';
-import 'subtask_list.dart';
-import 'subtask_input.dart';
 
 class TaskListItem extends ConsumerWidget {
   final Task task;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
 
-  // Use a local signal for expansion state per item
-  final isExpanded = signal(false);
-
-  TaskListItem({
+  const TaskListItem({
     super.key,
     required this.task,
     required this.onToggle,
@@ -26,14 +21,17 @@ class TaskListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final expanded = isExpanded.watch(context);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Opacity(
         opacity: task.isDone ? 0.5 : 1.0,
         child: GestureDetector(
-          onTap: () => isExpanded.value = !expanded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TaskEditPage(task: task)),
+            );
+          },
           child: GlassContainer(
             borderRadius: 22,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -166,16 +164,6 @@ class TaskListItem extends ConsumerWidget {
                     ),
                   ],
                 ),
-
-                // Subtasks Section (Composed Micro-components)
-                if (expanded) ...[
-                  const SizedBox(height: 12),
-                  const Divider(color: Colors.white12),
-                  const SizedBox(height: 8),
-                  SubtaskList(taskId: task.id, subtasks: task.subtasks),
-                  // No spacing needed here as SubtaskInput has top margin
-                  SubtaskInput(taskId: task.id),
-                ],
               ],
             ),
           ),

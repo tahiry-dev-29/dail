@@ -13,8 +13,8 @@ class GlassScaffold extends StatelessWidget {
         children: [
           // Background Image
           Positioned.fill(
-            child: Image.network(
-              'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop',
+            child: Image.asset(
+              'assets/images/background.jpg',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
