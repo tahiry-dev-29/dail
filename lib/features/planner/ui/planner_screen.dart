@@ -9,9 +9,14 @@ import 'widgets/add_task_inline.dart';
 import 'widgets/empty_task_state.dart';
 import '../../../shared/widgets/glass_container.dart';
 import '../../calendar/providers/calendar_provider.dart';
+import '../../../shared/utils/toast_service.dart';
+
+import 'package:daily_os/core/theme/adaptive_colors.dart';
 
 // Signal for completed section expansion (local UI state)
 final isCompletedExpanded = signal(false);
+// Signal for ignored section expansion (local UI state)
+final isIgnoredExpanded = signal(false);
 
 class PlannerScreen extends ConsumerWidget {
   const PlannerScreen({super.key});
@@ -25,10 +30,13 @@ class PlannerScreen extends ConsumerWidget {
     // Use computed providers (performance optimized)
     final activeTasks = ref.watch(activeTasksProvider);
     final completedTasks = ref.watch(completedTasksProvider);
+    final ignoredTasks = ref.watch(ignoredTasksProvider);
     final selectedDate = calendarState.selectedDate.watch(context);
-    final expanded = isCompletedExpanded.watch(context);
+    final expandedCompleted = isCompletedExpanded.watch(context);
+    final expandedIgnored = isIgnoredExpanded.watch(context);
 
-    final isEmpty = activeTasks.isEmpty && completedTasks.isEmpty;
+    final isEmpty =
+        activeTasks.isEmpty && completedTasks.isEmpty && ignoredTasks.isEmpty;
 
     return Column(
       children: [
@@ -41,10 +49,10 @@ class PlannerScreen extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Timeline',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: context.colors.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -52,7 +60,7 @@ class PlannerScreen extends ConsumerWidget {
                   Text(
                     DateFormat('d MMMM yyyy', 'fr_FR').format(selectedDate),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: context.colors.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -61,12 +69,12 @@ class PlannerScreen extends ConsumerWidget {
               // Refresh Button
               GestureDetector(
                 onTap: () => _onRefresh(ref),
-                child: const GlassContainer(
+                child: GlassContainer(
                   borderRadius: 50,
                   padding: EdgeInsets.all(8),
                   child: Icon(
                     FontAwesomeIcons.arrowsRotate,
-                    color: Colors.white38,
+                    color: context.colors.textSecondary,
                     size: 14,
                   ),
                 ),
@@ -83,80 +91,238 @@ class PlannerScreen extends ConsumerWidget {
             backgroundColor: Colors.grey[900],
             child: isEmpty
                 ? ListView(children: const [EmptyTaskState()])
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount:
-                        activeTasks.length +
-                        (completedTasks.isNotEmpty ? 1 : 0) +
-                        (expanded ? completedTasks.length : 0) +
-                        1, // +1 for bottom spacing
-                    itemBuilder: (context, index) {
-                      // Active Tasks
-                      if (index < activeTasks.length) {
-                        final task = activeTasks[index];
-                        return TaskListItem(
-                          task: task,
-                          onToggle: () => ref
+                : CustomScrollView(
+                    slivers: [
+                      // Active Tasks (Reorderable)
+                      SliverReorderableList(
+                        itemCount: activeTasks.length,
+                        onReorder: (oldIndex, newIndex) {
+                          ref
                               .read(taskProvider.notifier)
-                              .toggleTask(task.id),
-                          onDelete: () => ref
-                              .read(taskProvider.notifier)
-                              .deleteTask(task.id),
-                        );
-                      }
+                              .reorderTasks(oldIndex, newIndex);
+                        },
+                        itemBuilder: (context, index) {
+                          final task = activeTasks[index];
+                          // Backgrounds for swipes
+                          final nestBg = Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 20),
+                            color: Colors.transparent,
+                            child: Icon(
+                              FontAwesomeIcons.indent,
+                              color: context.colors.accent,
+                              size: 20,
+                            ),
+                          );
+                          final doneBg = Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            color: Colors.transparent,
+                            child: const Icon(
+                              FontAwesomeIcons.check,
+                              color: Colors.green,
+                              size: 20,
+                            ),
+                          );
+
+                          return ReorderableDragStartListener(
+                            key: Key(task.id),
+                            index: index,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24.0,
+                                vertical: 4.0,
+                              ),
+                              child: Dismissible(
+                                key: Key('dismiss_${task.id}'),
+                                // StartToEnd -> Nest (Right Swipe)
+                                // EndToStart -> Done (Left Swipe)
+                                direction: DismissDirection.horizontal,
+                                dismissThresholds: const {
+                                  DismissDirection.startToEnd: 0.2,
+                                  DismissDirection.endToStart: 0.2,
+                                },
+                                background: nestBg,
+                                secondaryBackground: doneBg,
+                                confirmDismiss: (direction) async {
+                                  if (direction ==
+                                      DismissDirection.startToEnd) {
+                                    // Right Swipe -> Nest (Demote)
+                                    if (index == 0) {
+                                      ToastService.warning(
+                                        context,
+                                        'Impossible de nester la première tâche',
+                                      );
+                                      return false;
+                                    }
+                                    ref
+                                        .read(taskProvider.notifier)
+                                        .demoteTask(
+                                          task.id,
+                                          targetParentId:
+                                              activeTasks[index - 1].id,
+                                        );
+                                    ToastService.success(
+                                      context,
+                                      '📂 "${task.name}" imbriquée sous "${activeTasks[index - 1].name}"',
+                                    );
+                                    return true; // Visual dismiss, moves to subtask
+                                  } else if (direction ==
+                                      DismissDirection.endToStart) {
+                                    // Left Swipe -> Done
+                                    ref
+                                        .read(taskProvider.notifier)
+                                        .toggleTask(task.id);
+                                    ToastService.success(
+                                      context,
+                                      '✨ "${task.name}" terminée !',
+                                    );
+                                    return true;
+                                  }
+                                  return false;
+                                },
+                                child: TaskListItem(
+                                  task: task,
+                                  onToggle: () => ref
+                                      .read(taskProvider.notifier)
+                                      .toggleTask(task.id),
+                                  onDelete: () => ref
+                                      .read(taskProvider.notifier)
+                                      .deleteTask(task.id),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
 
                       // Completed Header
-                      if (index == activeTasks.length &&
-                          completedTasks.isNotEmpty) {
-                        return GestureDetector(
-                          onTap: () => isCompletedExpanded.value = !expanded,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  expanded
-                                      ? FontAwesomeIcons.chevronDown
-                                      : FontAwesomeIcons.chevronRight,
-                                  color: Colors.white38,
-                                  size: 12,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Terminées (${completedTasks.length})',
-                                  style: const TextStyle(
-                                    color: Colors.white38,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
+                      if (completedTasks.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: GestureDetector(
+                            onTap: () =>
+                                isCompletedExpanded.value = !expandedCompleted,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 24,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    expandedCompleted
+                                        ? FontAwesomeIcons.chevronDown
+                                        : FontAwesomeIcons.chevronRight,
+                                    color: context.colors.textSecondary,
+                                    size: 12,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Terminées (${completedTasks.length})',
+                                    style: TextStyle(
+                                      color: context.colors.textSecondary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        );
-                      }
+                        ),
 
-                      // Completed Tasks
-                      if (expanded && completedTasks.isNotEmpty) {
-                        final completedIndex = index - activeTasks.length - 1;
-                        if (completedIndex >= 0 &&
-                            completedIndex < completedTasks.length) {
-                          final task = completedTasks[completedIndex];
-                          return TaskListItem(
-                            task: task,
-                            onToggle: () => ref
-                                .read(taskProvider.notifier)
-                                .toggleTask(task.id),
-                            onDelete: () => ref
-                                .read(taskProvider.notifier)
-                                .deleteTask(task.id),
-                          );
-                        }
-                      }
+                      // Completed Tasks List (Static)
+                      if (expandedCompleted && completedTasks.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final task = completedTasks[index];
+                              return TaskListItem(
+                                task: task,
+                                onToggle: () => ref
+                                    .read(taskProvider.notifier)
+                                    .toggleTask(task.id),
+                                onDelete: () => ref
+                                    .read(taskProvider.notifier)
+                                    .deleteTask(task.id),
+                              );
+                            }, childCount: completedTasks.length),
+                          ),
+                        ),
 
-                      // Bottom spacing
-                      return const SizedBox(height: 100);
-                    },
+                      // Ignored Header
+                      if (ignoredTasks.isNotEmpty)
+                        SliverToBoxAdapter(
+                          child: GestureDetector(
+                            onTap: () =>
+                                isIgnoredExpanded.value = !expandedIgnored,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 24,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    expandedIgnored
+                                        ? FontAwesomeIcons.chevronDown
+                                        : FontAwesomeIcons.chevronRight,
+                                    color: context.colors.textSecondary,
+                                    size: 12,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Ignorées (${ignoredTasks.length})',
+                                    style: TextStyle(
+                                      color: context.colors.textSecondary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                      // Ignored Tasks List (Static)
+                      if (expandedIgnored && ignoredTasks.isNotEmpty)
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate((
+                              context,
+                              index,
+                            ) {
+                              final task = ignoredTasks[index];
+                              // Ignored tasks look like completed/standard tasks but maybe dimmed?
+                              // For now using standard TaskListItem but you can un-ignore by swiping/tapping.
+                              // BUT since it's a SliverList here, no swipe. Only tap to 'toggle' (which usually means complete).
+                              // Let's assume toggle task still works (marks done -> moves to done).
+                              // Or maybe un-ignore?
+                              // User said: "Afficher comme le Termiees".
+                              return TaskListItem(
+                                task: task,
+                                onToggle: () => ref
+                                    .read(taskProvider.notifier)
+                                    .toggleTask(
+                                      task.id,
+                                    ), // Can complete directly
+                                onDelete: () => ref
+                                    .read(taskProvider.notifier)
+                                    .deleteTask(task.id),
+                              );
+                            }, childCount: ignoredTasks.length),
+                          ),
+                        ),
+
+                      // Bottom Spacing
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    ],
                   ),
           ),
         ),

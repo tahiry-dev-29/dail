@@ -16,6 +16,8 @@ class TaskEditHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Watch signals
     final fav = controller.isFavorite.watch(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black87;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -23,7 +25,7 @@ class TaskEditHeader extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: iconColor),
           ),
           const Spacer(),
           IconButton(
@@ -33,12 +35,12 @@ class TaskEditHeader extends StatelessWidget {
             },
             icon: Icon(
               fav ? Icons.star : Icons.star_border,
-              color: fav ? Colors.amber : Colors.white,
+              color: fav ? Colors.amber : iconColor,
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.more_vert, color: Colors.white),
+            icon: Icon(Icons.more_vert, color: iconColor),
           ),
         ],
       ),

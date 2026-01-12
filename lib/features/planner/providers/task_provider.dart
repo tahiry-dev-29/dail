@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../data/task_model.dart';
 import '../data/subtask_model.dart';
 import '../../calendar/providers/calendar_provider.dart';
@@ -74,6 +75,13 @@ class TaskNotifier extends Notifier<List<Task>> {
           task.copyWith(isFavorite: !task.isFavorite)
         else
           task,
+    ];
+  }
+
+  void toggleIgnore(String id) {
+    state = [
+      for (final task in state)
+        if (task.id == id) task.copyWith(isIgnored: !task.isIgnored) else task,
     ];
   }
 
@@ -181,6 +189,94 @@ class TaskNotifier extends Notifier<List<Task>> {
         if (task.id == updatedTask.id) updatedTask else task,
     ];
   }
+
+  void reorderTasks(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+
+    // 1. Separate Active (Reorderable) and Done (Static)
+    // 1. Separate Active (Reorderable), Done (Static), and Ignored
+    final activeTasks = state.where((t) => !t.isDone && !t.isIgnored).toList();
+    final doneTasks = state.where((t) => t.isDone).toList();
+    final ignoredTasks = state.where((t) => t.isIgnored && !t.isDone).toList();
+
+    // Safety check
+    if (oldIndex >= activeTasks.length || newIndex > activeTasks.length) {
+      return;
+    }
+
+    // 2. Capture times ONLY from active tasks (we exchange times between them)
+    final activeTimes = activeTasks.map((t) => t.time).toList();
+
+    // 3. Reorder the Active tasks list
+    final item = activeTasks.removeAt(oldIndex);
+    activeTasks.insert(newIndex, item);
+
+    // 4. Re-assign the original Active times to the tasks in their new positions
+    // This effectively "swaps" the tasks into the existing time slots
+    final reorderedActiveTasks = <Task>[];
+    for (int i = 0; i < activeTasks.length; i++) {
+      if (i < activeTimes.length) {
+        reorderedActiveTasks.add(activeTasks[i].copyWith(time: activeTimes[i]));
+      } else {
+        reorderedActiveTasks.add(activeTasks[i]);
+      }
+    }
+
+    // 5. Merge back: Active + Done
+    // Note: We might want to resort 'Done' tasks or keep them as is.
+    // Usually, Done tasks stay at the bottom or are filtered out.
+    // For safety, we just concat them.
+    // 5. Merge back: Active + Done + Ignored
+    state = [...reorderedActiveTasks, ...doneTasks, ...ignoredTasks];
+  }
+
+  void demoteTask(String taskId, {String? targetParentId}) {
+    final index = state.indexWhere((t) => t.id == taskId);
+    if (index == -1) return; // Not found
+
+    final taskToDemote = state[index];
+
+    int parentIndex = -1;
+    if (targetParentId != null) {
+      parentIndex = state.indexWhere((t) => t.id == targetParentId);
+    } else if (index > 0) {
+      parentIndex = index - 1;
+    }
+
+    if (parentIndex == -1) return; // No valid parent found
+
+    final parentTask = state[parentIndex];
+
+    // Create subtask from task
+    final newSubtask = SubTask(
+      id: taskToDemote.id,
+      name: taskToDemote.name,
+      description: taskToDemote.description,
+      time: taskToDemote.time,
+      deadline: taskToDemote.deadline,
+      isFavorite: taskToDemote.isFavorite,
+      isDone: taskToDemote.isDone,
+    );
+
+    // Update parent with new subtask
+    final updatedParent = parentTask.copyWith(
+      subtasks: [...parentTask.subtasks, newSubtask],
+    );
+
+    // Remove demoted task and update parent
+    // Simplest: Remove child first.
+    final items = [...state];
+    items.removeAt(index);
+
+    // Find parent index in NEW list (items)
+    final newParentIndex = items.indexWhere((t) => t.id == parentTask.id);
+    if (newParentIndex != -1) {
+      items[newParentIndex] = updatedParent;
+      state = items;
+    }
+  }
 }
 
 final taskProvider = NotifierProvider<TaskNotifier, List<Task>>(
@@ -198,12 +294,198 @@ final filteredTasksProvider = Provider<List<Task>>((ref) {
   }).toList();
 });
 
+// Helper to check if a task is overdue (IA Auto-Ignore Logic)
+// A task is overdue if:
+// 1. Its date is in the past (before today)
+// 2. Its date is today AND its time has already passed
+bool _isTaskOverdue(Task t, DateTime now) {
+  // Skip already handled states
+  if (t.isDone || t.isIgnored) return false;
+
+  // If no date, cannot be overdue (treat as valid)
+  if (t.date == null) return false;
+
+  final today = DateTime(now.year, now.month, now.day);
+  final taskDate = DateTime(t.date!.year, t.date!.month, t.date!.day);
+
+  // Case 1: Task date is before today -> OVERDUE
+  if (taskDate.isBefore(today)) {
+    debugPrint(
+      '[IA] Task "${t.name}" is OVERDUE: date ${t.date} is before today $today',
+    );
+    return true;
+  }
+
+  // Case 2: Task date is today -> Check time
+  if (taskDate.isAtSameMomentAs(today)) {
+    try {
+      final parts = t.time.split(':');
+      if (parts.length >= 2) {
+        final hour = int.parse(parts[0].trim());
+        final minute = int.parse(parts[1].trim());
+        final taskDateTime = DateTime(
+          now.year,
+          now.month,
+          now.day,
+          hour,
+          minute,
+        );
+
+        final isPastTime = taskDateTime.isBefore(now);
+
+        if (isPastTime) {
+          debugPrint(
+            '[IA] Task "${t.name}" is OVERDUE: ${t.time} < ${now.hour}:${now.minute}',
+          );
+        }
+
+        return isPastTime;
+      }
+    } catch (e) {
+      debugPrint('[IA] Error parsing time for "${t.name}": $e');
+    }
+  }
+
+  // Case 3: Task date is in the future -> NOT overdue
+  return false;
+}
+
 // Computed: Active tasks only
 final activeTasksProvider = Provider<List<Task>>((ref) {
-  return ref.watch(filteredTasksProvider).where((t) => !t.isDone).toList();
+  final tasks = ref.watch(filteredTasksProvider);
+  final now = DateTime.now(); // Server Time
+
+  return tasks.where((t) {
+    if (t.isDone || t.isIgnored) return false;
+    if (_isTaskOverdue(t, now)) return false; // Hide if overdue
+    return true;
+  }).toList();
+});
+
+// Computed: Ignored tasks only
+final ignoredTasksProvider = Provider<List<Task>>((ref) {
+  final tasks = ref.watch(filteredTasksProvider);
+  final now = DateTime.now(); // Server Time
+
+  final List<Task> ignored = [];
+
+  for (final t in tasks) {
+    if (t.isDone) continue;
+
+    // Explicitly ignored
+    if (t.isIgnored) {
+      ignored.add(t);
+      continue;
+    }
+
+    // Implicitly ignored (Overdue) -> Project as ignored for UI
+    if (_isTaskOverdue(t, now)) {
+      ignored.add(t.copyWith(isIgnored: true));
+    }
+  }
+
+  return ignored;
 });
 
 // Computed: Completed tasks only
 final completedTasksProvider = Provider<List<Task>>((ref) {
   return ref.watch(filteredTasksProvider).where((t) => t.isDone).toList();
+});
+
+// =============================================================================
+// STATISTICS PROVIDERS (Real Data)
+// =============================================================================
+
+class MonthStat {
+  final String label;
+  final int count;
+  final double normalizedValue;
+  final bool isCurrentMonth;
+
+  MonthStat({
+    required this.label,
+    required this.count,
+    required this.normalizedValue,
+    required this.isCurrentMonth,
+  });
+}
+
+class MonthlyStats {
+  final List<MonthStat> stats;
+  final int totalTasksLast6Months;
+
+  MonthlyStats({required this.stats, required this.totalTasksLast6Months});
+}
+
+// Provider for Monthly Stats (Real Data Aggregation)
+final monthlyTaskStatsProvider = Provider<MonthlyStats>((ref) {
+  final allTasks = ref.watch(taskProvider);
+  final now = DateTime.now();
+
+  List<MonthStat> stats = [];
+  int maxCount = 0;
+  int totalCount = 0;
+
+  // Generate last 7 months (including current)
+  for (int i = 6; i >= 0; i--) {
+    final monthDate = DateTime(now.year, now.month - i, 1);
+    final monthTasks = allTasks.where((t) {
+      if (t.date == null) return false;
+      return t.date!.year == monthDate.year && t.date!.month == monthDate.month;
+    }).length;
+
+    if (monthTasks > maxCount) maxCount = monthTasks;
+    totalCount += monthTasks;
+
+    // Format label (e.g., JAN, FEV)
+    String label = '';
+    try {
+      label = DateFormat('MMM', 'en_US').format(monthDate).toUpperCase();
+      // Using en_US for standard 3-letter months (JAN, FEB) or fr_FR if prefered.
+      // Given 'JUI' in reference, assume FR but let's stick to system locale logic if possible,
+      // but hardcoded FR for now to match UI ref.
+      const frMonths = [
+        'JAN',
+        'FEV',
+        'MAR',
+        'AVR',
+        'MAI',
+        'JUIN',
+        'JUIL',
+        'AOU',
+        'SEP',
+        'OCT',
+        'NOV',
+        'DEC',
+      ];
+      label = frMonths[monthDate.month - 1];
+      if (label.length > 3) label = label.substring(0, 3);
+    } catch (e) {
+      label = '${monthDate.month}';
+    }
+
+    stats.add(
+      MonthStat(
+        label: label,
+        count: monthTasks,
+        normalizedValue: 0, // Will set later
+        isCurrentMonth: i == 0,
+      ),
+    );
+  }
+
+  // Normalize
+  final normalizedStats = stats.map((s) {
+    return MonthStat(
+      label: s.label,
+      count: s.count,
+      normalizedValue: maxCount > 0 ? s.count / maxCount : 0.0,
+      isCurrentMonth: s.isCurrentMonth,
+    );
+  }).toList();
+
+  return MonthlyStats(
+    stats: normalizedStats,
+    totalTasksLast6Months: totalCount,
+  );
 });

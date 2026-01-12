@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:signals_flutter/signals_flutter.dart'; // Import signals_flutter properly
+import 'package:signals_flutter/signals_flutter.dart';
 import '../../providers/task_edit_controller.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 class TaskDetailsSection extends StatelessWidget {
   final TaskEditController controller;
@@ -18,7 +19,11 @@ class TaskDetailsSection extends StatelessWidget {
     final isExpanded = controller.isDetailsExpanded.watch(context);
     final description = controller.description.watch(context);
 
-    // Helper for expandable item
+    final colors = context.colors;
+    final textSecondary = colors.textSecondary;
+    final textHint = colors.textSecondary.withValues(alpha: 0.5);
+    final textInput = colors.textPrimary;
+
     Widget buildOptionItem({
       required IconData icon,
       required String label,
@@ -38,7 +43,7 @@ class TaskDetailsSection extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 18,
-                  color: isActive ? Colors.blueAccent : Colors.white60,
+                  color: isActive ? Colors.blueAccent : textSecondary,
                 ),
               ),
               const SizedBox(width: 20),
@@ -46,7 +51,7 @@ class TaskDetailsSection extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: isActive ? Colors.blueAccent : Colors.white60,
+                    color: isActive ? Colors.blueAccent : textSecondary,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
@@ -58,7 +63,7 @@ class TaskDetailsSection extends StatelessWidget {
                       ? FontAwesomeIcons.chevronDown
                       : FontAwesomeIcons.chevronRight,
                   size: 12,
-                  color: Colors.white24,
+                  color: textHint,
                 ),
             ],
           ),
@@ -92,14 +97,11 @@ class TaskDetailsSection extends StatelessWidget {
                       },
                       maxLines: null,
                       minLines: 1,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: textInput, fontSize: 16),
+                      decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Tapez les détails ici...',
-                        hintStyle: TextStyle(color: Colors.white24),
+                        hintStyle: TextStyle(color: textHint),
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),

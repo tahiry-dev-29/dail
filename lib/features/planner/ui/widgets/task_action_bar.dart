@@ -16,6 +16,11 @@ class TaskActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDone = controller.isDone.watch(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // For the action button, we keep blue accent but maybe adjust opacity if needed
+    // or keep it consistent.
+    final buttonBg = Colors.blueAccent.withValues(alpha: isDark ? 0.2 : 0.1);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -29,7 +34,7 @@ class TaskActionBar extends StatelessWidget {
         child: GlassContainer(
           borderRadius: 30,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          color: Colors.blueAccent.withValues(alpha: 0.2),
+          color: buttonBg,
           child: Text(
             isDone ? 'Mark uncompleted' : 'Mark completed',
             style: const TextStyle(

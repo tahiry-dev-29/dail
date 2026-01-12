@@ -9,6 +9,7 @@ class Task {
   final DateTime? date;
   final DateTime? deadline;
   final bool isFavorite;
+  final bool isIgnored;
   final List<SubTask> subtasks;
 
   const Task({
@@ -20,6 +21,7 @@ class Task {
     this.date,
     this.deadline,
     this.isFavorite = false,
+    this.isIgnored = false,
     this.subtasks = const [],
   });
 
@@ -32,6 +34,7 @@ class Task {
     DateTime? date,
     DateTime? deadline,
     bool? isFavorite,
+    bool? isIgnored,
     List<SubTask>? subtasks,
   }) {
     return Task(
@@ -43,6 +46,7 @@ class Task {
       date: date ?? this.date,
       deadline: deadline ?? this.deadline,
       isFavorite: isFavorite ?? this.isFavorite,
+      isIgnored: isIgnored ?? this.isIgnored,
       subtasks: subtasks ?? this.subtasks,
     );
   }

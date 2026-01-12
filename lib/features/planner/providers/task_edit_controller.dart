@@ -106,6 +106,16 @@ class TaskEditController {
     subtasks.value = subtasks.value.where((s) => s.id != id).toList();
   }
 
+  void reorderSubtasks(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final items = [...subtasks.value];
+    final item = items.removeAt(oldIndex);
+    items.insert(newIndex, item);
+    subtasks.value = items;
+  }
+
   void promoteSubtask(String id, WidgetRef ref) {
     final subtask = subtasks.value.firstWhere((s) => s.id == id);
     deleteSubtask(id);

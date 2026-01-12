@@ -81,6 +81,16 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textSecondary = isDark ? Colors.white54 : Colors.black54;
+    final surface = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.05);
+    final hintColor = isDark
+        ? Colors.white.withValues(alpha: 0.5)
+        : Colors.black.withValues(alpha: 0.5);
+
     return GlassContainer(
       borderRadius: 24,
       padding: const EdgeInsets.all(20),
@@ -88,25 +98,24 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             'Nouvelle Tâche',
             style: TextStyle(
-              color: Colors.white,
+              color: textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
-
           // Task Name
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
               hintText: 'Nom de la tâche',
-              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+              hintStyle: TextStyle(color: hintColor),
               filled: true,
-              fillColor: Colors.white.withValues(alpha: 0.1),
+              fillColor: surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -114,14 +123,13 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
             ),
           ),
           const SizedBox(height: 12),
-
           // Time Picker
           GestureDetector(
             onTap: _pickTime,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -134,21 +142,20 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                   const SizedBox(width: 12),
                   Text(
                     _selectedTime.format(context),
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: textPrimary),
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 12),
-
           // Deadline Picker
           GestureDetector(
             onTap: _pickDeadline,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -165,8 +172,8 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                         : 'Ajouter une deadline',
                     style: TextStyle(
                       color: _selectedDeadline != null
-                          ? Colors.white
-                          : Colors.white54,
+                          ? textPrimary
+                          : textSecondary,
                     ),
                   ),
                 ],
@@ -174,14 +181,13 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
             ),
           ),
           const SizedBox(height: 12),
-
           // Favorite Toggle
           GestureDetector(
             onTap: () => setState(() => _isFavorite = !_isFavorite),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -190,14 +196,14 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                     _isFavorite
                         ? FontAwesomeIcons.solidStar
                         : FontAwesomeIcons.star,
-                    color: _isFavorite ? Colors.amber : Colors.white54,
+                    color: _isFavorite ? Colors.amber : textSecondary,
                     size: 16,
                   ),
                   const SizedBox(width: 12),
                   Text(
                     _isFavorite ? 'Favori' : 'Marquer comme favori',
                     style: TextStyle(
-                      color: _isFavorite ? Colors.amber : Colors.white54,
+                      color: _isFavorite ? Colors.amber : textSecondary,
                     ),
                   ),
                 ],
@@ -205,7 +211,6 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
             ),
           ),
           const SizedBox(height: 20),
-
           // Submit Button
           ElevatedButton(
             onPressed: _submit,

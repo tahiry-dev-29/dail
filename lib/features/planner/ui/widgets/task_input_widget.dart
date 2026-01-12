@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import '../../providers/task_input_provider.dart';
 import 'task_input_actions.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 class TaskInputWidget extends ConsumerWidget {
   final Function({
@@ -15,8 +16,6 @@ class TaskInputWidget extends ConsumerWidget {
   onSave;
   final VoidCallback? onCancel;
   final String hintText;
-
-  // Initial values grouped for the provider family
   final Map<String, dynamic> initialValues;
 
   const TaskInputWidget({
@@ -29,21 +28,25 @@ class TaskInputWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Controller handled by Riverpod autoDispose
     final state = ref.watch(taskInputProvider(initialValues));
+
+    final colors = context.colors;
+    // We can use glass surface or a specific input surface
+    final surface = colors.isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.6); // Lighter for light mode input
+    final borderColor = colors.border;
 
     return TapRegion(
       onTapOutside: (_) {
-        if (onCancel != null) {
-          onCancel!();
-        }
+        if (onCancel != null) onCancel!();
       },
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          border: Border.all(color: borderColor),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -52,8 +55,9 @@ class TaskInputWidget extends ConsumerWidget {
               state: state,
               hintText: hintText,
               onSave: () => _handleSave(state),
+              colors: colors,
             ),
-            _TaskDescriptionField(state: state),
+            _TaskDescriptionField(state: state, colors: colors),
             const SizedBox(height: 12),
             TaskInputActions(state: state),
           ],
@@ -79,30 +83,34 @@ class TaskInputWidget extends ConsumerWidget {
   }
 }
 
-// Micro-component for Name Input
 class _TaskNameRow extends StatelessWidget {
   final TaskInputState state;
   final String hintText;
   final VoidCallback onSave;
+  final AdaptiveColors colors;
 
   const _TaskNameRow({
     required this.state,
     required this.hintText,
     required this.onSave,
+    required this.colors,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = colors.textPrimary;
+    final hintColor = colors.textSecondary;
+
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: state.nameController,
             focusNode: state.focusNode,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
+            style: TextStyle(color: textPrimary, fontSize: 15),
             decoration: InputDecoration(
               hintText: hintText,
-              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+              hintStyle: TextStyle(color: hintColor),
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
@@ -112,10 +120,10 @@ class _TaskNameRow extends StatelessWidget {
         ),
         GestureDetector(
           onTap: onSave,
-          child: const Text(
+          child: Text(
             'Save',
             style: TextStyle(
-              color: Colors.blueAccent,
+              color: colors.accent,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -126,15 +134,16 @@ class _TaskNameRow extends StatelessWidget {
   }
 }
 
-// Micro-component for Description
 class _TaskDescriptionField extends StatelessWidget {
   final TaskInputState state;
-  const _TaskDescriptionField({required this.state});
+  final AdaptiveColors colors;
+  const _TaskDescriptionField({required this.state, required this.colors});
 
   @override
   Widget build(BuildContext context) {
-    // Only this micro-widget rebuilds when isDescriptionExpanded changes
     final isExpanded = state.isDescriptionExpanded.watch(context);
+    final textSecondary = colors.textSecondary;
+    final hintColor = colors.textSecondary.withValues(alpha: 0.7);
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 200),
@@ -145,14 +154,12 @@ class _TaskDescriptionField extends StatelessWidget {
                 constraints: const BoxConstraints(maxHeight: 120),
                 child: TextField(
                   controller: state.descController,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style: TextStyle(color: textSecondary, fontSize: 13),
                   maxLines: null,
                   minLines: 1,
                   decoration: InputDecoration(
                     hintText: 'Ajouter une description...',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
+                    hintStyle: TextStyle(color: hintColor),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,

@@ -49,12 +49,16 @@ class TaskDateTimePickers extends StatelessWidget {
     }
   }
 
-  Widget _buildOptionItem({
+  Widget _buildOptionItem(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
     bool isActive = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inactiveColor = isDark ? Colors.white60 : Colors.black54;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: InkWell(
@@ -67,7 +71,7 @@ class TaskDateTimePickers extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 18,
-                color: isActive ? Colors.blueAccent : Colors.white60,
+                color: isActive ? Colors.blueAccent : inactiveColor,
               ),
             ),
             const SizedBox(width: 20),
@@ -75,7 +79,7 @@ class TaskDateTimePickers extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isActive ? Colors.blueAccent : Colors.white60,
+                  color: isActive ? Colors.blueAccent : inactiveColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -95,6 +99,7 @@ class TaskDateTimePickers extends StatelessWidget {
     return Column(
       children: [
         _buildOptionItem(
+          context,
           icon: FontAwesomeIcons.bullseye,
           label: deadline != null
               ? DateFormat('dd MMM, HH:mm').format(deadline)
@@ -103,6 +108,7 @@ class TaskDateTimePickers extends StatelessWidget {
           onTap: () => _pickDeadline(context),
         ),
         _buildOptionItem(
+          context,
           icon: FontAwesomeIcons.clock,
           label: time,
           isActive: true,

@@ -13,30 +13,32 @@ class TaskTitleInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initial value for controller
-    // We don't watch 'name' signal here for the TextField value itself
-    // to avoid rebuilding the TextField while typing if not needed,
-    // but we use TextEditingController initialized with signal value.
-    // However, to keep it simple and consistent:
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final hintColor = isDark ? Colors.white24 : Colors.black26;
+
+    // Use a key to ensure we don't lose focus/cursor state unnecessarily,
+    // although controller logic here mimics previous state.
+    // We recreate controller only if needed, but text field handles its own state mostly.
 
     return TextField(
       controller: TextEditingController(text: controller.name.peek())
         ..selection = TextSelection.fromPosition(
           TextPosition(offset: controller.name.peek().length),
-        ), // Cursor at end
+        ),
       onChanged: (val) {
         controller.updateName(val);
         onSave();
       },
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: textColor,
         fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: InputBorder.none,
         hintText: 'Task Title',
-        hintStyle: TextStyle(color: Colors.white24),
+        hintStyle: TextStyle(color: hintColor),
       ),
     );
   }

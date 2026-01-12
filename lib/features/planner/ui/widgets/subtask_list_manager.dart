@@ -6,6 +6,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 
 import '../../providers/task_edit_controller.dart';
 import 'task_input_widget.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 class SubtaskListManager extends ConsumerWidget {
   final TaskEditController controller;
@@ -19,11 +20,17 @@ class SubtaskListManager extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Signals
     final subtasks = controller.subtasks.watch(context);
     final isExpanded = controller.isSubtasksExpanded.watch(context);
     final isAdding = controller.isAddingSubtask.watch(context);
     final editingId = controller.editingSubtaskId.watch(context);
+
+    final colors = context.colors;
+    final textSecondary = colors.textSecondary;
+    final textHint = colors.textSecondary.withValues(alpha: 0.5);
+    final textMuted = colors.textSecondary.withValues(alpha: 0.7);
+    final textNorm = colors.textPrimary;
+    final accent = colors.accent;
 
     Widget buildOptionItem() {
       return Padding(
@@ -38,9 +45,7 @@ class SubtaskListManager extends ConsumerWidget {
                 child: Icon(
                   FontAwesomeIcons.codeBranch,
                   size: 18,
-                  color: subtasks.isNotEmpty
-                      ? Colors.blueAccent
-                      : Colors.white60,
+                  color: subtasks.isNotEmpty ? accent : textSecondary,
                 ),
               ),
               const SizedBox(width: 20),
@@ -48,9 +53,7 @@ class SubtaskListManager extends ConsumerWidget {
                 child: Text(
                   'Add subtasks',
                   style: TextStyle(
-                    color: subtasks.isNotEmpty
-                        ? Colors.blueAccent
-                        : Colors.white60,
+                    color: subtasks.isNotEmpty ? accent : textSecondary,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
@@ -61,7 +64,7 @@ class SubtaskListManager extends ConsumerWidget {
                     ? FontAwesomeIcons.chevronDown
                     : FontAwesomeIcons.chevronRight,
                 size: 12,
-                color: Colors.white24,
+                color: textHint,
               ),
             ],
           ),
@@ -69,9 +72,10 @@ class SubtaskListManager extends ConsumerWidget {
       );
     }
 
-    Widget buildSubtaskItem(dynamic st) {
+    Widget buildSubtaskItem(dynamic st, int index) {
       if (editingId == st.id) {
         return Padding(
+          key: ValueKey(st.id), // Important for ReorderableListView
           padding: const EdgeInsets.only(left: 44, bottom: 12),
           child: TaskInputWidget(
             initialValues: {
@@ -105,119 +109,126 @@ class SubtaskListManager extends ConsumerWidget {
         );
       }
 
-      return Padding(
-        padding: const EdgeInsets.only(left: 44, bottom: 12),
-        child: Row(
-          children: [
-            GestureDetector(
-              onTap: () {
-                controller.toggleSubtaskDone(st.id);
-                onSave();
-              },
-              child: Icon(
-                st.isDone
-                    ? FontAwesomeIcons.solidCircleCheck
-                    : FontAwesomeIcons.circle,
-                size: 16,
-                color: st.isDone ? Colors.blueAccent : Colors.white24,
+      return ReorderableDragStartListener(
+        key: ValueKey(st.id),
+        index: index,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 44, bottom: 12),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  controller.toggleSubtaskDone(st.id);
+                  onSave();
+                },
+                child: Icon(
+                  st.isDone
+                      ? FontAwesomeIcons.solidCircleCheck
+                      : FontAwesomeIcons.circle,
+                  size: 16,
+                  color: st.isDone ? accent : textHint,
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => controller.setEditingSubtask(st.id),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      st.name,
-                      style: TextStyle(
-                        color: st.isDone ? Colors.white38 : Colors.white70,
-                        decoration: st.isDone
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
-                    ),
-                    if (st.time != '00:00' || st.deadline != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          '${st.time}${st.deadline != null ? " • ${DateFormat("dd/MM").format(st.deadline!)}" : ""}',
-                          style: const TextStyle(
-                            color: Colors.white38,
-                            fontSize: 10,
-                          ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => controller.setEditingSubtask(st.id),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        st.name,
+                        style: TextStyle(
+                          color: st.isDone ? textMuted : textNorm,
+                          decoration: st.isDone
+                              ? TextDecoration.lineThrough
+                              : null,
                         ),
                       ),
-                  ],
-                ),
-              ),
-            ),
-            if (st.isFavorite)
-              const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(
-                  FontAwesomeIcons.solidStar,
-                  size: 10,
-                  color: Colors.amber,
-                ),
-              ),
-            PopupMenuButton<String>(
-              icon: const Icon(
-                Icons.more_vert,
-                size: 14,
-                color: Colors.white38,
-              ),
-              padding: EdgeInsets.zero,
-              offset: const Offset(0, 20),
-              onSelected: (value) {
-                if (value == 'promote') {
-                  controller.promoteSubtask(st.id, ref);
-                  onSave();
-                } else if (value == 'delete') {
-                  controller.deleteSubtask(st.id);
-                  onSave();
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'promote',
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.arrowUpRightFromSquare,
-                        size: 12,
-                        color: Colors.white70,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        'Convert to main task',
-                        style: TextStyle(fontSize: 13),
-                      ),
+                      if (st.time != '00:00' || st.deadline != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            '${st.time}${st.deadline != null ? " • ${DateFormat("dd/MM").format(st.deadline!)}" : ""}',
+                            style: TextStyle(color: textMuted, fontSize: 10),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.trash,
-                        size: 12,
-                        color: Colors.redAccent,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        'Delete',
-                        style: TextStyle(fontSize: 13, color: Colors.redAccent),
-                      ),
-                    ],
+              ),
+              if (st.isFavorite)
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: Icon(
+                    FontAwesomeIcons.solidStar,
+                    size: 10,
+                    color: Colors.amber,
                   ),
                 ),
-              ],
-            ),
-          ],
+              // Drag Handle (Optional, but ReorderableDragStartListener covers the whole item usually, or we wrap specific part)
+              // Here we wrap the whole item. But we also have a popup menu.
+              // ReorderableDragStartListener intercepts checks.
+              // To avoid conflict with tap, we need to ensure long press triggers drag.
+              // ReorderableListView default is long press.
+              // Tap on row triggers edit.
+              // Pop menu on right.
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, size: 14, color: textMuted),
+                padding: EdgeInsets.zero,
+                offset: const Offset(0, 20),
+                onSelected: (value) {
+                  if (value == 'promote') {
+                    controller.promoteSubtask(st.id, ref);
+                    onSave();
+                  } else if (value == 'delete') {
+                    controller.deleteSubtask(st.id);
+                    onSave();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'promote',
+                    child: Row(
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.arrowUpRightFromSquare,
+                          size: 12,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Convert to main task',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.trash,
+                          size: 12,
+                          color: Colors.redAccent,
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Delete',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -233,7 +244,17 @@ class SubtaskListManager extends ConsumerWidget {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ...subtasks.map((st) => buildSubtaskItem(st)),
+                    if (subtasks.isNotEmpty)
+                      ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: subtasks.length,
+                        onReorder: controller.reorderSubtasks,
+                        itemBuilder: (context, index) {
+                          return buildSubtaskItem(subtasks[index], index);
+                        },
+                      ),
+
                     Padding(
                       padding: const EdgeInsets.only(left: 44, bottom: 24),
                       child: isAdding
@@ -260,17 +281,10 @@ class SubtaskListManager extends ConsumerWidget {
                             )
                           : TextButton.icon(
                               onPressed: controller.toggleAddingSubtask,
-                              icon: const Icon(
-                                Icons.add,
-                                size: 16,
-                                color: Colors.blueAccent,
-                              ),
-                              label: const Text(
+                              icon: Icon(Icons.add, size: 16, color: accent),
+                              label: Text(
                                 'Ajouter une ligne',
-                                style: TextStyle(
-                                  color: Colors.blueAccent,
-                                  fontSize: 13,
-                                ),
+                                style: TextStyle(color: accent, fontSize: 13),
                               ),
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
