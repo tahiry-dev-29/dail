@@ -43,20 +43,23 @@ class DailyOsApp extends StatelessWidget {
     // Watch Theme Mode Signal
     final mode = themeModeSignal.watch(context);
     final accent = accentColorSignal.watch(context);
+    final fontFamily = fontSignal.watch(context);
 
     // Convert to ThemeMode enum
-    final themeMode = switch (mode) {
-      1 => ThemeMode.dark,
-      2 => ThemeMode.light,
-      _ => ThemeMode.system,
-    };
+    ThemeMode getThemeMode() {
+      return switch (mode) {
+        1 => ThemeMode.dark,
+        2 => ThemeMode.light,
+        _ => ThemeMode.system,
+      };
+    }
 
     return MaterialApp(
-      title: 'DailyOS AI',
+      title: 'DailyOS',
       debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      theme: AppThemeEngine.lightTheme(accent),
-      darkTheme: AppThemeEngine.darkTheme(accent),
+      themeMode: getThemeMode(),
+      theme: AppThemeEngine.lightTheme(accent, fontFamily),
+      darkTheme: AppThemeEngine.darkTheme(accent, fontFamily),
       home: const MainLayout(),
     );
   }
@@ -86,22 +89,7 @@ class MainLayout extends StatelessWidget {
         child: GlassScaffold(
           body: Stack(
             children: [
-              Column(
-                children: [
-                  if (current != AppTabs.aiChat.index) const AtomicHeader(),
-                  Expanded(
-                    child: IndexedStack(
-                      index: current,
-                      children: const [
-                        HomeScreen(),
-                        PlannerScreen(),
-                        CalendarScreen(),
-                        AiChatPage(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              _PageSwitcher(current: current),
               const Positioned(
                 bottom: 0,
                 left: 0,
@@ -117,6 +105,68 @@ class MainLayout extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _PageSwitcher extends StatefulWidget {
+  final int current;
+  const _PageSwitcher({required this.current});
+
+  @override
+  State<_PageSwitcher> createState() => _PageSwitcherState();
+}
+
+class _PageSwitcherState extends State<_PageSwitcher> {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: widget.current);
+  }
+
+  @override
+  void didUpdateWidget(_PageSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.current != _pageController.page?.round()) {
+      _pageController.animateToPage(
+        widget.current,
+        duration: getAdaptedDuration(const Duration(milliseconds: 400)),
+        curve: Curves.easeOutCubic,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (widget.current != AppTabs.aiChat.index) const AtomicHeader(),
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              if (index != currentTab.value) {
+                switchTab(index);
+              }
+            },
+            physics: const BouncingScrollPhysics(),
+            children: const [
+              HomeScreen(),
+              PlannerScreen(),
+              CalendarScreen(),
+              AiChatPage(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

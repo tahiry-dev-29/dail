@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:daily_os/core/theme/adaptive_colors.dart'; // Import AdaptiveColors
-import 'package:daily_os/shared/widgets/glass_container.dart'; // Reuse GlassContainer for consistency
+import 'package:daily_os/core/theme/adaptive_colors.dart';
+import 'package:daily_os/shared/widgets/glass_container.dart';
 import '../../features/home/logic/home_signals.dart';
+import '../../../../core/utils/app_icons.dart';
 
 class AtomicNavBar extends StatelessWidget {
   const AtomicNavBar({super.key});
@@ -18,9 +18,6 @@ class AtomicNavBar extends StatelessWidget {
       child: GlassContainer(
         borderRadius: 28,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        // Force the container height by constraint in parent or SizedBox here?
-        // GlassContainer wraps child size.
-        // We'll wrap the Row in a Container with height 70.
         child: Container(
           height: 70,
           alignment: Alignment.center,
@@ -28,28 +25,28 @@ class AtomicNavBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _NavButton(
-                icon: FontAwesomeIcons.house,
+                icon: AppIcons.home(context),
                 label: 'Home',
                 isActive: current == AppTabs.home.index,
                 onTap: () => switchTab(AppTabs.home.index),
                 colors: colors,
               ),
               _NavButton(
-                icon: FontAwesomeIcons.barsStaggered,
+                icon: AppIcons.planner(context),
                 label: 'Planner',
                 isActive: current == AppTabs.planner.index,
                 onTap: () => switchTab(AppTabs.planner.index),
                 colors: colors,
               ),
               _NavButton(
-                icon: FontAwesomeIcons.calendarDays,
+                icon: AppIcons.calendar(context),
                 label: 'Mois',
                 isActive: current == AppTabs.calendar.index,
                 onTap: () => switchTab(AppTabs.calendar.index),
                 colors: colors,
               ),
               _NavButton(
-                icon: FontAwesomeIcons.wandMagicSparkles,
+                icon: AppIcons.assistant(context),
                 label: 'Assistant',
                 isActive: current == AppTabs.aiChat.index,
                 onTap: () => switchTab(AppTabs.aiChat.index),
@@ -80,15 +77,13 @@ class _NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Active Color: Neon Accent (Primary)
-    // Inactive Color: TextSecondary (Slate-500)
     final color = isActive ? colors.accent : colors.textSecondary;
 
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque, // Hit target
+      behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 60, // Ensure decent touch target
+        width: 60,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

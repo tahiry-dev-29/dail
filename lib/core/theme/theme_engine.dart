@@ -32,7 +32,9 @@ class AppThemeEngine {
   // THEME DATA GENERATORS
   // ===========================================================================
 
-  static ThemeData lightTheme(Color accent) {
+  static ThemeData lightTheme(Color accent, String fontFamily) {
+    final textTheme = _getTextTheme(fontFamily, ThemeData.light().textTheme);
+
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: _lightScaffold,
@@ -40,13 +42,12 @@ class AppThemeEngine {
       colorScheme: ColorScheme.light(
         primary: accent,
         secondary: AppColors.aiColor,
-        surface: lightGlass, // Use the glass color as surface base
+        surface: lightGlass,
         onSurface: lightTextPrimary,
         outline: lightGlassBorder,
       ),
       useMaterial3: true,
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme).apply(
-        // Switched to Outfit (Modern/Clean)
+      textTheme: textTheme.apply(
         bodyColor: lightTextPrimary,
         displayColor: lightTextPrimary,
       ),
@@ -67,7 +68,9 @@ class AppThemeEngine {
     );
   }
 
-  static ThemeData darkTheme(Color accent) {
+  static ThemeData darkTheme(Color accent, String fontFamily) {
+    final textTheme = _getTextTheme(fontFamily, ThemeData.dark().textTheme);
+
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: _darkScaffold,
@@ -75,13 +78,12 @@ class AppThemeEngine {
       colorScheme: ColorScheme.dark(
         primary: accent,
         secondary: AppColors.aiColor,
-        surface: darkGlass, // Use the glass color as surface base
+        surface: darkGlass,
         onSurface: darkTextPrimary,
         outline: darkGlassBorder,
       ),
       useMaterial3: true,
-      textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).apply(
-        // Switched to Outfit
+      textTheme: textTheme.apply(
         bodyColor: darkTextPrimary,
         displayColor: darkTextPrimary,
       ),
@@ -100,5 +102,19 @@ class AppThemeEngine {
         color: Colors.white.withValues(alpha: 0.1),
       ),
     );
+  }
+
+  static TextTheme _getTextTheme(String fontFamily, TextTheme base) {
+    switch (fontFamily) {
+      case 'Roboto':
+        return GoogleFonts.robotoTextTheme(base);
+      case 'Inter':
+        return GoogleFonts.interTextTheme(base);
+      case 'System':
+        return base;
+      case 'Outfit':
+      default:
+        return GoogleFonts.outfitTextTheme(base);
+    }
   }
 }
