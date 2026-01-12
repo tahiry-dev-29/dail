@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
+import '../../core/theme/adaptive_colors.dart';
 
 class GlassContainer extends StatelessWidget {
   final Widget child;
@@ -9,19 +9,23 @@ class GlassContainer extends StatelessWidget {
   final EdgeInsetsGeometry? margin;
   final double blur;
   final Color? color;
+  final Color? borderColor;
 
   const GlassContainer({
     super.key,
     required this.child,
-    this.borderRadius = 20.0,
+    this.borderRadius = 24.0, // CSS Ref: rounded-3xl (1.5rem = 24px)
     this.padding,
     this.margin,
-    this.blur = 40.0,
+    this.blur = 24.0, // CSS Ref: backdrop-filter: blur(24px)
     this.color,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Container(
       margin: margin,
       child: ClipRRect(
@@ -31,14 +35,14 @@ class GlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: color ?? AppColors.glass,
+              color: color ?? colors.surface,
               borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(color: AppColors.glassBorder, width: 1.0),
+              border: Border.all(color: borderColor ?? colors.border, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 32,
-                  offset: const Offset(0, 8),
+                  color: colors.shadow,
+                  blurRadius: 32, // CSS Ref: 32px
+                  offset: const Offset(0, 8), // CSS Ref: 8px
                 ),
               ],
             ),

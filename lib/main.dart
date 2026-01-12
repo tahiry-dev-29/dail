@@ -6,14 +6,16 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'core/theme/app_colors.dart';
+import 'core/theme/theme_engine.dart';
 import 'core/utils/glass_scaffold.dart';
-// Removed ChatOverlay import
 import 'features/ai_chat/ui/ai_chat_page.dart';
 import 'features/calendar/ui/calendar_screen.dart';
 import 'features/home/logic/home_signals.dart';
+import 'features/home/providers/dashboard_provider.dart'; // Import Dashboard Provider
 import 'features/home/ui/home_screen.dart';
 import 'features/planner/ui/planner_screen.dart';
 import 'features/planner/ui/widgets/add_task_inline.dart';
+import 'features/settings/providers/theme_provider.dart';
 import 'shared/widgets/atomic_header.dart';
 import 'shared/widgets/atomic_nav_bar.dart';
 import 'shared/widgets/safe_back_handler.dart';
@@ -21,6 +23,8 @@ import 'shared/widgets/safe_back_handler.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting();
+  await loadThemeSettings(); // Load theme
+  await initDashboardOrder(); // Load dashboard order
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -36,22 +40,23 @@ class DailyOsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Watch Theme Mode Signal
+    final mode = themeModeSignal.watch(context);
+    final accent = accentColorSignal.watch(context);
+
+    // Convert to ThemeMode enum
+    final themeMode = switch (mode) {
+      1 => ThemeMode.dark,
+      2 => ThemeMode.light,
+      _ => ThemeMode.system,
+    };
+
     return MaterialApp(
       title: 'DailyOS AI',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: Colors.black,
-        colorScheme: const ColorScheme.dark(
-          primary: AppColors.accent,
-          secondary: AppColors.aiColor,
-        ),
-        textTheme: ThemeData.dark().textTheme.apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-        useMaterial3: true,
-      ),
+      themeMode: themeMode,
+      theme: AppThemeEngine.lightTheme(accent),
+      darkTheme: AppThemeEngine.darkTheme(accent),
       home: const MainLayout(),
     );
   }
@@ -66,13 +71,10 @@ class MainLayout extends StatelessWidget {
 
     return SafeBackHandler(
       onBack: () {
-        // If add task is visible, hide it
         if (isAddTaskVisible.value) {
           isAddTaskVisible.value = false;
           return;
         }
-
-        // If not on Home tab, go to Home
         if (current != 0) {
           switchTab(0);
           return;
@@ -84,7 +86,6 @@ class MainLayout extends StatelessWidget {
         child: GlassScaffold(
           body: Stack(
             children: [
-              // Main Content Layer
               Column(
                 children: [
                   if (current != AppTabs.aiChat.index) const AtomicHeader(),
@@ -95,22 +96,18 @@ class MainLayout extends StatelessWidget {
                         HomeScreen(),
                         PlannerScreen(),
                         CalendarScreen(),
-                        AiChatPage(), // New Page
+                        AiChatPage(),
                       ],
                     ),
                   ),
                 ],
               ),
-
-              // Dock (Bottom)
               const Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
                 child: AtomicNavBar(),
               ),
-
-              // Floating Add Task Button (+ button)
               const Positioned(
                 bottom: 100,
                 right: 16,
@@ -124,7 +121,6 @@ class MainLayout extends StatelessWidget {
   }
 }
 
-/// Floating + button to show add task input
 class FloatingAddTaskButton extends StatelessWidget {
   const FloatingAddTaskButton({super.key});
 
@@ -133,7 +129,6 @@ class FloatingAddTaskButton extends StatelessWidget {
     final isVisible = isAddTaskVisible.watch(context);
     final current = currentTab.watch(context);
 
-    // Hide if add task is visible or not on Planner
     if (isVisible || current != AppTabs.planner.index) {
       return const SizedBox.shrink();
     }
