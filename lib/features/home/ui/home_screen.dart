@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../providers/dashboard_provider.dart';
+import '../logic/home_signals.dart'; // Import for AppTabs and switchTab
 import 'widgets/gemini_assistant_card.dart';
 import 'widgets/active_timer_card.dart';
 import 'widgets/progress_stats_card.dart';
@@ -63,6 +64,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   key: ValueKey('container_${card.name}'),
                   padding: const EdgeInsets.only(bottom: 16),
                   child: GestureDetector(
+                    // Navigate on tap
+                    onTap: () {
+                      if (showIcons) return; // Don't navigate in edit mode
+                      switch (card) {
+                        case DashboardCard.geminiAssistant:
+                          switchTab(AppTabs.aiChat.index);
+                          break;
+                        case DashboardCard.activeTimer: // Now Clock
+                          switchTab(AppTabs.calendar.index);
+                          break;
+                        case DashboardCard.progressStats:
+                          switchTab(AppTabs.planner.index);
+                          break;
+                        case DashboardCard.monthlyStats:
+                          switchTab(AppTabs.calendar.index);
+                          break;
+                      }
+                    },
                     // Toggle on long press on any card
                     onLongPress: _toggleEditMode,
                     child: Row(

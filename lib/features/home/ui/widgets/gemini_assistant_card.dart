@@ -35,13 +35,17 @@ class GeminiAssistantCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                'GEMINI ASSISTANT',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
-                  color: colors.textSecondary.withValues(alpha: 0.7),
+              Flexible(
+                child: Text(
+                  'GEMINI ASSISTANT',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: colors.textSecondary.withValues(alpha: 0.7),
+                  ),
                 ),
               ),
             ],
@@ -59,23 +63,27 @@ class GeminiAssistantCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           // CTA
-          Row(
-            children: [
-              Text(
-                'Appuyez pour discuter',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                Text(
+                  'Appuyez pour discuter',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  FontAwesomeIcons.arrowRight,
+                  size: 12,
                   color: colors.textSecondary,
                 ),
-              ),
-              const SizedBox(width: 6),
-              Icon(
-                FontAwesomeIcons.arrowRight,
-                size: 12,
-                color: colors.textSecondary,
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
