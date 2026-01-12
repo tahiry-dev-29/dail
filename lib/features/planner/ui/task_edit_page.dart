@@ -38,8 +38,7 @@ class TaskEditPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  // List Category (Static for now)
-                  _ListCategoryLabel(),
+                  // List Category (Static for now
                   const SizedBox(height: 16),
 
                   // Inputs
@@ -58,31 +57,6 @@ class TaskEditPage extends ConsumerWidget {
           TaskActionBar(controller: controller, onSave: onSave),
         ],
       ),
-    );
-  }
-}
-
-// Micro-helper for Category Label (too small for own file)
-class _ListCategoryLabel extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          'Diary Ecommerce',
-          style: TextStyle(
-            color: Colors.blueAccent.withValues(alpha: 0.8),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Icon(
-          Icons.arrow_drop_down,
-          color: Colors.blueAccent.withValues(alpha: 0.8),
-          size: 18,
-        ),
-      ],
     );
   }
 }

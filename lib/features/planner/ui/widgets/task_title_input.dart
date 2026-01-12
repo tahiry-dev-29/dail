@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../providers/task_edit_controller.dart';
 
+import '../../../../core/theme/adaptive_colors.dart';
+
 class TaskTitleInput extends StatelessWidget {
   final TaskEditController controller;
   final VoidCallback onSave;
@@ -13,9 +15,7 @@ class TaskTitleInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87;
-    final hintColor = isDark ? Colors.white24 : Colors.black26;
+    final colors = context.colors;
 
     // Use a key to ensure we don't lose focus/cursor state unnecessarily,
     // although controller logic here mimics previous state.
@@ -31,14 +31,16 @@ class TaskTitleInput extends StatelessWidget {
         onSave();
       },
       style: TextStyle(
-        color: textColor,
+        color: colors.textPrimary,
         fontSize: 24,
         fontWeight: FontWeight.bold,
       ),
       decoration: InputDecoration(
         border: InputBorder.none,
         hintText: 'Task Title',
-        hintStyle: TextStyle(color: hintColor),
+        hintStyle: TextStyle(
+          color: colors.textSecondary.withValues(alpha: 0.5),
+        ),
       ),
     );
   }

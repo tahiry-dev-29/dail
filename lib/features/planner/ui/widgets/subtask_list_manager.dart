@@ -8,6 +8,8 @@ import '../../providers/task_edit_controller.dart';
 import 'task_input_widget.dart';
 import '../../../../core/theme/adaptive_colors.dart';
 
+import '../../../../features/settings/providers/theme_provider.dart';
+
 class SubtaskListManager extends ConsumerWidget {
   final TaskEditController controller;
   final VoidCallback onSave;
@@ -72,11 +74,11 @@ class SubtaskListManager extends ConsumerWidget {
       );
     }
 
-    Widget buildSubtaskItem(dynamic st, int index) {
+    Widget buildSubtaskItem(dynamic st, int index, double leftPadding) {
       if (editingId == st.id) {
         return Padding(
           key: ValueKey(st.id), // Important for ReorderableListView
-          padding: const EdgeInsets.only(left: 44, bottom: 12),
+          padding: EdgeInsets.only(left: leftPadding, bottom: 12),
           child: TaskInputWidget(
             initialValues: {
               'name': st.name,
@@ -113,7 +115,7 @@ class SubtaskListManager extends ConsumerWidget {
         key: ValueKey(st.id),
         index: index,
         child: Padding(
-          padding: const EdgeInsets.only(left: 44, bottom: 12),
+          padding: EdgeInsets.only(left: leftPadding, bottom: 12),
           child: Row(
             children: [
               GestureDetector(
@@ -233,71 +235,94 @@ class SubtaskListManager extends ConsumerWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildOptionItem(),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          child: isExpanded
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (subtasks.isNotEmpty)
-                      ReorderableListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: subtasks.length,
-                        onReorder: controller.reorderSubtasks,
-                        itemBuilder: (context, index) {
-                          return buildSubtaskItem(subtasks[index], index);
-                        },
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isSmall = constraints.maxWidth < 600;
+        final leftPadding = isSmall ? 12.0 : 44.0;
 
-                    Padding(
-                      padding: const EdgeInsets.only(left: 44, bottom: 24),
-                      child: isAdding
-                          ? TaskInputWidget(
-                              onSave:
-                                  ({
-                                    required name,
-                                    required description,
-                                    required time,
-                                    deadline,
-                                    required isFavorite,
-                                  }) {
-                                    controller.addSubtask(
-                                      name: name,
-                                      description: description,
-                                      time: time,
-                                      deadline: deadline,
-                                      isFavorite: isFavorite,
-                                    );
-                                    onSave();
-                                  },
-                              onCancel: controller.toggleAddingSubtask,
-                              hintText: 'Nom de la sous-tâche',
-                            )
-                          : TextButton.icon(
-                              onPressed: controller.toggleAddingSubtask,
-                              icon: Icon(Icons.add, size: 16, color: accent),
-                              label: Text(
-                                'Ajouter une ligne',
-                                style: TextStyle(color: accent, fontSize: 13),
-                              ),
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                            ),
-                    ),
-                  ],
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildOptionItem(),
+            AnimatedSize(
+              duration: getAdaptedDuration(const Duration(milliseconds: 250)),
+              curve: Curves.easeInOut,
+              child: isExpanded
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (subtasks.isNotEmpty)
+                          ReorderableListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: subtasks.length,
+                            onReorder: controller.reorderSubtasks,
+                            itemBuilder: (context, index) {
+                              return buildSubtaskItem(
+                                subtasks[index],
+                                index,
+                                leftPadding,
+                              );
+                            },
+                          ),
+
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: leftPadding,
+                            bottom: 24,
+                            right: isSmall ? 12 : 0,
+                          ),
+                          child: isAdding
+                              ? TaskInputWidget(
+                                  onSave:
+                                      ({
+                                        required name,
+                                        required description,
+                                        required time,
+                                        deadline,
+                                        required isFavorite,
+                                      }) {
+                                        controller.addSubtask(
+                                          name: name,
+                                          description: description,
+                                          time: time,
+                                          deadline: deadline,
+                                          isFavorite: isFavorite,
+                                        );
+                                        onSave();
+                                      },
+                                  onCancel: controller.toggleAddingSubtask,
+                                  hintText: 'Nom de la sous-tâche',
+                                )
+                              : TextButton.icon(
+                                  onPressed: controller.toggleAddingSubtask,
+                                  icon: Icon(
+                                    Icons.add,
+                                    size: 16,
+                                    color: accent,
+                                  ),
+                                  label: Text(
+                                    'Ajouter une ligne',
+                                    style: TextStyle(
+                                      color: accent,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        );
+      },
     );
   }
 }

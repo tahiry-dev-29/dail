@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../providers/task_provider.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 class AddTaskModal extends ConsumerStatefulWidget {
   const AddTaskModal({super.key});
@@ -81,15 +82,14 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? Colors.white : Colors.black87;
-    final textSecondary = isDark ? Colors.white54 : Colors.black54;
-    final surface = isDark
+    final colors = context.colors;
+    final textPrimary = colors.textPrimary;
+    final textSecondary = colors.textSecondary;
+    final accent = colors.accent;
+    final surface = colors.isDark
         ? Colors.white.withValues(alpha: 0.1)
         : Colors.black.withValues(alpha: 0.05);
-    final hintColor = isDark
-        ? Colors.white.withValues(alpha: 0.5)
-        : Colors.black.withValues(alpha: 0.5);
+    final hintColor = colors.textSecondary.withValues(alpha: 0.5);
 
     return GlassContainer(
       borderRadius: 24,
@@ -99,7 +99,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Nouvelle Tâche',
+            'Nouvelle Tache',
             style: TextStyle(
               color: textPrimary,
               fontSize: 18,
@@ -112,7 +112,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
             controller: _nameController,
             style: TextStyle(color: textPrimary),
             decoration: InputDecoration(
-              hintText: 'Nom de la tâche',
+              hintText: 'Nom de la tache',
               hintStyle: TextStyle(color: hintColor),
               filled: true,
               fillColor: surface,
@@ -134,11 +134,7 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    FontAwesomeIcons.clock,
-                    color: Colors.blueAccent,
-                    size: 16,
-                  ),
+                  Icon(FontAwesomeIcons.clock, color: accent, size: 16),
                   const SizedBox(width: 12),
                   Text(
                     _selectedTime.format(context),
@@ -160,9 +156,9 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     FontAwesomeIcons.calendarCheck,
-                    color: Colors.orangeAccent,
+                    color: accent.withValues(alpha: 0.7),
                     size: 16,
                   ),
                   const SizedBox(width: 12),
@@ -194,16 +190,16 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
                 children: [
                   Icon(
                     _isFavorite
-                        ? FontAwesomeIcons.solidStar
-                        : FontAwesomeIcons.star,
-                    color: _isFavorite ? Colors.amber : textSecondary,
+                        ? FontAwesomeIcons.solidHeart
+                        : FontAwesomeIcons.heart,
+                    color: _isFavorite ? Colors.redAccent : textSecondary,
                     size: 16,
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    _isFavorite ? 'Favori' : 'Marquer comme favori',
+                    _isFavorite ? 'Coup de cœur !' : 'Coup de cœur ?',
                     style: TextStyle(
-                      color: _isFavorite ? Colors.amber : textSecondary,
+                      color: _isFavorite ? Colors.redAccent : textSecondary,
                     ),
                   ),
                 ],
@@ -215,13 +211,20 @@ class _AddTaskModalState extends ConsumerState<AddTaskModal> {
           ElevatedButton(
             onPressed: _submit,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: accent,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              elevation: 0,
             ),
-            child: const Text('Ajouter', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Ajouter',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

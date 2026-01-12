@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import '../../providers/task_edit_controller.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 
 class TaskDateTimePickers extends StatelessWidget {
   final TaskEditController controller;
@@ -56,8 +57,9 @@ class TaskDateTimePickers extends StatelessWidget {
     required VoidCallback onTap,
     bool isActive = false,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inactiveColor = isDark ? Colors.white60 : Colors.black54;
+    final colors = context.colors;
+    final accent = colors.accent;
+    final inactiveColor = colors.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
@@ -71,7 +73,7 @@ class TaskDateTimePickers extends StatelessWidget {
               child: Icon(
                 icon,
                 size: 18,
-                color: isActive ? Colors.blueAccent : inactiveColor,
+                color: isActive ? accent : inactiveColor,
               ),
             ),
             const SizedBox(width: 20),
@@ -79,7 +81,7 @@ class TaskDateTimePickers extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isActive ? Colors.blueAccent : inactiveColor,
+                  color: isActive ? accent : inactiveColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),

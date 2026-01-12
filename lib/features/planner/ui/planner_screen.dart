@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:intl/intl.dart';
-import '../providers/task_provider.dart';
-import 'widgets/task_list_item.dart';
-import 'widgets/add_task_inline.dart';
-import 'widgets/empty_task_state.dart';
-import '../../../shared/widgets/glass_container.dart';
-import '../../calendar/providers/calendar_provider.dart';
-import '../../../shared/utils/toast_service.dart';
 
 import 'package:daily_os/core/theme/adaptive_colors.dart';
+import 'package:daily_os/features/planner/providers/task_selectors.dart';
+import 'package:daily_os/features/planner/providers/task_provider.dart';
+import 'package:daily_os/features/calendar/providers/calendar_provider.dart';
+import 'package:daily_os/shared/widgets/glass_container.dart';
+
+import 'widgets/task_list_item.dart';
+import 'widgets/active_tasks_list.dart';
+import 'widgets/add_task_inline.dart';
+import 'widgets/empty_task_state.dart';
 
 // Signal for completed section expansion (local UI state)
 final isCompletedExpanded = signal(false);
@@ -46,32 +48,41 @@ class PlannerScreen extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Timeline',
-                    style: TextStyle(
-                      color: context.colors.textPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Timeline',
+                        style: TextStyle(
+                          color: context.colors.textPrimary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    DateFormat('d MMMM yyyy', 'fr_FR').format(selectedDate),
-                    style: TextStyle(
-                      color: context.colors.textSecondary,
-                      fontSize: 12,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        DateFormat('d MMMM yyyy', 'fr_FR').format(selectedDate),
+                        style: TextStyle(
+                          color: context.colors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 12),
               // Refresh Button
               GestureDetector(
                 onTap: () => _onRefresh(ref),
                 child: GlassContainer(
                   borderRadius: 50,
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Icon(
                     FontAwesomeIcons.arrowsRotate,
                     color: context.colors.textSecondary,
@@ -93,108 +104,8 @@ class PlannerScreen extends ConsumerWidget {
                 ? ListView(children: const [EmptyTaskState()])
                 : CustomScrollView(
                     slivers: [
-                      // Active Tasks (Reorderable)
-                      SliverReorderableList(
-                        itemCount: activeTasks.length,
-                        onReorder: (oldIndex, newIndex) {
-                          ref
-                              .read(taskProvider.notifier)
-                              .reorderTasks(oldIndex, newIndex);
-                        },
-                        itemBuilder: (context, index) {
-                          final task = activeTasks[index];
-                          // Backgrounds for swipes
-                          final nestBg = Container(
-                            alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.only(left: 20),
-                            color: Colors.transparent,
-                            child: Icon(
-                              FontAwesomeIcons.indent,
-                              color: context.colors.accent,
-                              size: 20,
-                            ),
-                          );
-                          final doneBg = Container(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            color: Colors.transparent,
-                            child: const Icon(
-                              FontAwesomeIcons.check,
-                              color: Colors.green,
-                              size: 20,
-                            ),
-                          );
-
-                          return ReorderableDragStartListener(
-                            key: Key(task.id),
-                            index: index,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0,
-                                vertical: 4.0,
-                              ),
-                              child: Dismissible(
-                                key: Key('dismiss_${task.id}'),
-                                // StartToEnd -> Nest (Right Swipe)
-                                // EndToStart -> Done (Left Swipe)
-                                direction: DismissDirection.horizontal,
-                                dismissThresholds: const {
-                                  DismissDirection.startToEnd: 0.2,
-                                  DismissDirection.endToStart: 0.2,
-                                },
-                                background: nestBg,
-                                secondaryBackground: doneBg,
-                                confirmDismiss: (direction) async {
-                                  if (direction ==
-                                      DismissDirection.startToEnd) {
-                                    // Right Swipe -> Nest (Demote)
-                                    if (index == 0) {
-                                      ToastService.warning(
-                                        context,
-                                        'Impossible de nester la première tâche',
-                                      );
-                                      return false;
-                                    }
-                                    ref
-                                        .read(taskProvider.notifier)
-                                        .demoteTask(
-                                          task.id,
-                                          targetParentId:
-                                              activeTasks[index - 1].id,
-                                        );
-                                    ToastService.success(
-                                      context,
-                                      '📂 "${task.name}" imbriquée sous "${activeTasks[index - 1].name}"',
-                                    );
-                                    return true; // Visual dismiss, moves to subtask
-                                  } else if (direction ==
-                                      DismissDirection.endToStart) {
-                                    // Left Swipe -> Done
-                                    ref
-                                        .read(taskProvider.notifier)
-                                        .toggleTask(task.id);
-                                    ToastService.success(
-                                      context,
-                                      '✨ "${task.name}" terminée !',
-                                    );
-                                    return true;
-                                  }
-                                  return false;
-                                },
-                                child: TaskListItem(
-                                  task: task,
-                                  onToggle: () => ref
-                                      .read(taskProvider.notifier)
-                                      .toggleTask(task.id),
-                                  onDelete: () => ref
-                                      .read(taskProvider.notifier)
-                                      .deleteTask(task.id),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      // Active Tasks (Extracted Micro-component)
+                      const ActiveTasksList(),
 
                       // Completed Header
                       if (completedTasks.isNotEmpty)
@@ -299,12 +210,6 @@ class PlannerScreen extends ConsumerWidget {
                               index,
                             ) {
                               final task = ignoredTasks[index];
-                              // Ignored tasks look like completed/standard tasks but maybe dimmed?
-                              // For now using standard TaskListItem but you can un-ignore by swiping/tapping.
-                              // BUT since it's a SliverList here, no swipe. Only tap to 'toggle' (which usually means complete).
-                              // Let's assume toggle task still works (marks done -> moves to done).
-                              // Or maybe un-ignore?
-                              // User said: "Afficher comme le Termiees".
                               return TaskListItem(
                                 task: task,
                                 onToggle: () => ref

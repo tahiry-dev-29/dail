@@ -8,6 +8,7 @@ import '../../data/task_model.dart';
 import '../../providers/task_provider.dart';
 import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../shared/utils/toast_service.dart';
+import '../../../../core/utils/app_icons.dart';
 
 class TaskListItem extends ConsumerWidget {
   final Task task;
@@ -79,6 +80,8 @@ class TaskListItem extends ConsumerWidget {
                       // Task Name
                       Text(
                         task.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: textPrimary,
                           fontSize: 15,
@@ -92,8 +95,11 @@ class TaskListItem extends ConsumerWidget {
 
                       const SizedBox(height: 8),
 
-                      // Bottom Row: Time + Indicators + Actions
-                      Row(
+                      // Bottom Row: Time + Indicators
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           // Time Badge
                           _TimeBadge(
@@ -104,64 +110,60 @@ class TaskListItem extends ConsumerWidget {
                           ),
 
                           // Deadline Badge
-                          if (task.deadline != null) ...[
-                            const SizedBox(width: 6),
+                          if (task.deadline != null)
                             _DeadlineBadge(deadline: task.deadline!),
-                          ],
 
                           // Indicators
-                          if (task.description.isNotEmpty) ...[
-                            const SizedBox(width: 8),
+                          if (task.description.isNotEmpty)
                             Icon(
                               FontAwesomeIcons.alignLeft,
                               size: 10,
-                              color: mutedIcon.withOpacity(0.5),
+                              color: mutedIcon.withValues(alpha: 0.5),
                             ),
-                          ],
-                          if (task.subtasks.isNotEmpty) ...[
-                            const SizedBox(width: 6),
+                          if (task.subtasks.isNotEmpty)
                             _SubtaskIndicator(
                               done: task.subtasks.where((s) => s.isDone).length,
                               total: task.subtasks.length,
                               color: mutedIcon,
                             ),
-                          ],
-
-                          const Spacer(),
-
-                          // Action Icons (Right side)
-                          _ActionIcon(
-                            icon: task.isFavorite
-                                ? FontAwesomeIcons.solidStar
-                                : FontAwesomeIcons.star,
-                            color: task.isFavorite
-                                ? Colors.amber
-                                : mutedIcon.withOpacity(0.4),
-                            onTap: () {
-                              ref
-                                  .read(taskProvider.notifier)
-                                  .toggleFavorite(task.id);
-                              if (!task.isFavorite) {
-                                ToastService.success(
-                                  context,
-                                  '⭐ Favori ajouté',
-                                );
-                              }
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _ActionIcon(
-                            icon: FontAwesomeIcons.trash,
-                            color: mutedIcon.withOpacity(0.4),
-                            onTap: () {
-                              onDelete();
-                              ToastService.error(context, '🗑️ Supprimée');
-                            },
-                          ),
                         ],
                       ),
                     ],
                   ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Right: Actions
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _ActionIcon(
+                      icon: AppIcons.favorite(
+                        context,
+                        task.id == task.id ? task.isFavorite : false,
+                      ), // Dummy equality to avoid lint if needed, but AppIcons.favorite is fine
+                      color: task.isFavorite
+                          ? Colors.redAccent
+                          : mutedIcon.withValues(alpha: 0.4),
+                      onTap: () {
+                        ref.read(taskProvider.notifier).toggleFavorite(task.id);
+                        if (!task.isFavorite) {
+                          ToastService.success(context, '❤️ Coup de cœur !');
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 4),
+                    _ActionIcon(
+                      icon: AppIcons.delete(context),
+                      color: mutedIcon.withValues(alpha: 0.4),
+                      onTap: () {
+                        onDelete();
+                        ToastService.error(context, '🗑️ Supprimée');
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -216,6 +218,11 @@ class _CheckCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final warningColor = colors.isDark
+        ? Colors.redAccent.withValues(alpha: 0.8)
+        : Colors.red;
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -228,26 +235,26 @@ class _CheckCircle extends StatelessWidget {
             color: isDone
                 ? accent
                 : (isIgnored
-                      ? Colors.red.withOpacity(0.6)
-                      : mutedIcon.withOpacity(0.3)),
+                      ? warningColor.withValues(alpha: 0.6)
+                      : mutedIcon.withValues(alpha: 0.3)),
             width: 2,
           ),
           color: isDone ? accent : Colors.transparent,
         ),
         child: isDone
-            ? const Center(
+            ? Center(
                 child: Icon(
-                  FontAwesomeIcons.check,
+                  AppIcons.check(context),
                   size: 10,
                   color: Colors.white,
                 ),
               )
             : (isIgnored
-                  ? const Center(
+                  ? Center(
                       child: Icon(
-                        FontAwesomeIcons.xmark,
+                        AppIcons.xmark(context),
                         size: 10,
-                        color: Colors.red,
+                        color: warningColor,
                       ),
                     )
                   : null),
@@ -269,12 +276,16 @@ class _TimeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isOverdue ? Colors.red : accent;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final warningColor = isDark
+        ? Colors.redAccent.withValues(alpha: 0.8)
+        : Colors.red;
+    final color = isOverdue ? warningColor : accent;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -297,21 +308,24 @@ class _DeadlineBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final orangeColor = isDark ? Colors.orangeAccent : Colors.orange;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.12),
+        color: orangeColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(FontAwesomeIcons.clock, size: 9, color: Colors.orange),
+          Icon(FontAwesomeIcons.clock, size: 9, color: orangeColor),
           const SizedBox(width: 4),
           Text(
             DateFormat('HH:mm').format(deadline),
-            style: const TextStyle(
-              color: Colors.orange,
+            style: TextStyle(
+              color: orangeColor,
               fontSize: 10,
               fontWeight: FontWeight.w600,
             ),
@@ -341,14 +355,14 @@ class _SubtaskIndicator extends StatelessWidget {
         Icon(
           FontAwesomeIcons.listCheck,
           size: 10,
-          color: color.withOpacity(0.5),
+          color: color.withValues(alpha: 0.5),
         ),
         const SizedBox(width: 3),
         Text(
           '$done/$total',
           style: TextStyle(
             fontSize: 10,
-            color: color.withOpacity(0.6),
+            color: color.withValues(alpha: 0.6),
             fontWeight: FontWeight.w500,
           ),
         ),

@@ -4,6 +4,8 @@ import 'package:signals_flutter/signals_flutter.dart';
 import '../../providers/task_edit_controller.dart';
 import '../../../../core/theme/adaptive_colors.dart';
 
+import '../../../../features/settings/providers/theme_provider.dart';
+
 class TaskDetailsSection extends StatelessWidget {
   final TaskEditController controller;
   final VoidCallback onSave;
@@ -23,6 +25,7 @@ class TaskDetailsSection extends StatelessWidget {
     final textSecondary = colors.textSecondary;
     final textHint = colors.textSecondary.withValues(alpha: 0.5);
     final textInput = colors.textPrimary;
+    final accent = colors.accent;
 
     Widget buildOptionItem({
       required IconData icon,
@@ -43,7 +46,7 @@ class TaskDetailsSection extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: 18,
-                  color: isActive ? Colors.blueAccent : textSecondary,
+                  color: isActive ? accent : textSecondary,
                 ),
               ),
               const SizedBox(width: 20),
@@ -51,7 +54,7 @@ class TaskDetailsSection extends StatelessWidget {
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: isActive ? Colors.blueAccent : textSecondary,
+                    color: isActive ? accent : textSecondary,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                   ),
@@ -82,7 +85,7 @@ class TaskDetailsSection extends StatelessWidget {
           onTap: controller.toggleDetails,
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 250),
+          duration: getAdaptedDuration(const Duration(milliseconds: 250)),
           curve: Curves.easeInOut,
           child: isExpanded
               ? Padding(

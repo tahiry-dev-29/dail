@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../providers/task_edit_controller.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
+import '../../../../core/theme/adaptive_colors.dart';
+
 class TaskEditHeader extends StatelessWidget {
   final TaskEditController controller;
   final VoidCallback onSave;
@@ -16,8 +18,7 @@ class TaskEditHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     // Watch signals
     final fav = controller.isFavorite.watch(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = isDark ? Colors.white : Colors.black87;
+    final colors = context.colors;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -25,7 +26,7 @@ class TaskEditHeader extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.arrow_back, color: iconColor),
+            icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           ),
           const Spacer(),
           IconButton(
@@ -34,13 +35,13 @@ class TaskEditHeader extends StatelessWidget {
               onSave();
             },
             icon: Icon(
-              fav ? Icons.star : Icons.star_border,
-              color: fav ? Colors.amber : iconColor,
+              fav ? Icons.favorite : Icons.favorite_border,
+              color: fav ? Colors.redAccent : colors.textPrimary,
             ),
           ),
           IconButton(
             onPressed: () {},
-            icon: Icon(Icons.more_vert, color: iconColor),
+            icon: Icon(Icons.more_vert, color: colors.textSecondary),
           ),
         ],
       ),
