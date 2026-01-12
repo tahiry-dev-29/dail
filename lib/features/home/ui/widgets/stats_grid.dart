@@ -53,11 +53,17 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textMuted = isDark
+        ? Colors.white.withValues(alpha: 0.5)
+        : Colors.black54;
+
     return GlassContainer(
       borderRadius: 24,
       padding: const EdgeInsets.all(16),
       child: SizedBox(
-        height: 100, // Fixed height for visual consistency
+        height: 100,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,18 +74,15 @@ class _StatCard extends StatelessWidget {
               children: [
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   label.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.5),
-                    fontSize: 10,
-                  ),
+                  style: TextStyle(color: textMuted, fontSize: 10),
                 ),
               ],
             ),

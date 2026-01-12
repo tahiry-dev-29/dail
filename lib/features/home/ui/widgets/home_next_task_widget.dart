@@ -10,8 +10,12 @@ class HomeNextTaskWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the time signal from homeState
     final timeStr = homeState.timeString.watch(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textMuted = isDark
+        ? Colors.white.withValues(alpha: 0.4)
+        : Colors.black54;
 
     return GlassContainer(
       borderRadius: 25,
@@ -21,7 +25,7 @@ class HomeNextTaskWidget extends StatelessWidget {
           Text(
             "EN COURS MAINTENANT",
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.4),
+              color: textMuted,
               fontSize: 10,
               letterSpacing: 1.5,
               fontWeight: FontWeight.bold,
@@ -30,8 +34,8 @@ class HomeNextTaskWidget extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             currentTaskName,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),

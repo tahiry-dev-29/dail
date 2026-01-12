@@ -11,6 +11,8 @@ class CalendarScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentMonth = calendarState.selectedDate.watch(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerColor = isDark ? Colors.white60 : Colors.black54;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -35,8 +37,8 @@ class CalendarScreen extends StatelessWidget {
                             child: Center(
                               child: Text(
                                 day,
-                                style: const TextStyle(
-                                  color: Colors.white60,
+                                style: TextStyle(
+                                  color: headerColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -50,7 +52,6 @@ class CalendarScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 100),
           ],
         ),

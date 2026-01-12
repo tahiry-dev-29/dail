@@ -16,6 +16,12 @@ class CalendarDayTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textNorm = isDark ? Colors.white70 : Colors.black87;
+    final todayBg = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.05);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -23,9 +29,7 @@ class CalendarDayTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? Colors.blueAccent
-              : (isToday
-                    ? Colors.white.withValues(alpha: 0.1)
-                    : Colors.transparent),
+              : (isToday ? todayBg : Colors.transparent),
           shape: BoxShape.circle,
           border: isToday && !isSelected
               ? Border.all(color: Colors.blueAccent, width: 2)
@@ -35,7 +39,7 @@ class CalendarDayTile extends StatelessWidget {
           child: Text(
             "$day",
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white70,
+              color: isSelected ? Colors.white : textNorm,
               fontWeight: isSelected || isToday
                   ? FontWeight.bold
                   : FontWeight.normal,

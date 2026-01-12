@@ -8,6 +8,14 @@ class AiChatPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textHint = isDark ? Colors.white38 : Colors.black38;
+    final dividerColor = isDark ? Colors.white12 : Colors.black12;
+    final textFieldBg = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.05);
+
     return Column(
       children: [
         // Chat Header (Custom for Page)
@@ -30,18 +38,18 @@ class AiChatPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Gemini Assistant",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
                   ),
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.circle, size: 8, color: Colors.green),
                       SizedBox(width: 6),
@@ -57,17 +65,18 @@ class AiChatPage extends StatelessWidget {
           ),
         ),
 
-        const Divider(color: Colors.white12, height: 1),
+        Divider(color: dividerColor, height: 1),
 
         // Chat History
         Expanded(
           child: ListView(
             padding: const EdgeInsets.all(24),
-            children: const [
+            children: [
               _ChatBubble(
                 message:
                     "Bonjour ! Je suis ton assistant DailyOS. Je peux créer, modifier ou déplacer tes tâches.",
                 isAi: true,
+                isDark: isDark,
               ),
             ],
           ),
@@ -84,15 +93,15 @@ class AiChatPage extends StatelessWidget {
           child: GlassContainer(
             borderRadius: 30,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            color: Colors.white.withValues(alpha: 0.05),
+            color: textFieldBg,
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: TextField(
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: textPrimary),
                     decoration: InputDecoration(
                       hintText: "Demandez à Gemini...",
-                      hintStyle: TextStyle(color: Colors.white38),
+                      hintStyle: TextStyle(color: textHint),
                       border: InputBorder.none,
                     ),
                   ),
@@ -117,11 +126,21 @@ class AiChatPage extends StatelessWidget {
 class _ChatBubble extends StatelessWidget {
   final String message;
   final bool isAi;
+  final bool isDark;
 
-  const _ChatBubble({required this.message, required this.isAi});
+  const _ChatBubble({
+    required this.message,
+    required this.isAi,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final aiBg = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.05);
+    final text = isDark || !isAi ? Colors.white : Colors.black87;
+
     return Align(
       alignment: isAi ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -129,7 +148,7 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: isAi ? Colors.white.withValues(alpha: 0.1) : AppColors.accent,
+          color: isAi ? aiBg : AppColors.accent,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
@@ -139,11 +158,7 @@ class _ChatBubble extends StatelessWidget {
         ),
         child: Text(
           message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            height: 1.4,
-          ),
+          style: TextStyle(color: text, fontSize: 15, height: 1.4),
         ),
       ),
     );

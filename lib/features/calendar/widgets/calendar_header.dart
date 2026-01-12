@@ -9,17 +9,20 @@ class CalendarHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final contentColor = isDark ? Colors.white : Colors.black87;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
           onPressed: () => calendarState.prevMonth(),
-          icon: const Icon(Icons.chevron_left, color: Colors.white),
+          icon: Icon(Icons.chevron_left, color: contentColor),
         ),
         Text(
           DateFormat('MMMM yyyy').format(currentMonth).toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: contentColor,
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -27,7 +30,7 @@ class CalendarHeader extends StatelessWidget {
         ),
         IconButton(
           onPressed: () => calendarState.nextMonth(),
-          icon: const Icon(Icons.chevron_right, color: Colors.white),
+          icon: Icon(Icons.chevron_right, color: contentColor),
         ),
       ],
     );

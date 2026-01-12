@@ -9,30 +9,37 @@ class AiInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? Colors.white : Colors.black87;
+    final textMuted = isDark
+        ? Colors.white.withValues(alpha: 0.4)
+        : Colors.black54;
+
     return GestureDetector(
       onTap: () => isChatOpen.value = !isChatOpen.value,
       child: Stack(
         children: [
-          // Glow effect
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.purple.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.purple.withValues(alpha: 0.3),
-                    blurRadius: 60,
-                    spreadRadius: 20,
-                  ),
-                ],
+          // Glow effect only if dark mode or desired
+          if (isDark)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.purple.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.purple.withValues(alpha: 0.3),
+                      blurRadius: 60,
+                      spreadRadius: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
 
           GlassContainer(
             padding: const EdgeInsets.all(20),
@@ -70,17 +77,17 @@ class AiInsightCard extends StatelessWidget {
                       const Text(
                         'GEMINI ASSISTANT',
                         style: TextStyle(
-                          color: Color(0xFFD8B4FE), // purple-300
+                          color: Color(0xFFD8B4FE),
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.0,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
+                      Text(
                         '"Bonjour ! J\'ai analysé ton planning. Tu as une journée chargée. Veux-tu déplacer ta séance de sport ?"',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: textPrimary,
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -89,7 +96,7 @@ class AiInsightCard extends StatelessWidget {
                       Text(
                         'Appuyez pour discuter...',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
+                          color: textMuted,
                           fontSize: 10,
                           fontStyle: FontStyle.italic,
                         ),
