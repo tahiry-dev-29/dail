@@ -130,32 +130,37 @@ class _MonthBar extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: value),
-          duration: getAdaptedDuration(const Duration(milliseconds: 1000)),
-          curve: Curves.easeOutBack,
-          builder: (context, val, _) {
-            final h = val <= 0 ? 4.0 : (70 * val);
-            return Container(
-              width: barWidth,
-              height: h,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? colors.accent
-                    : colors.textSecondary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: colors.accent.withValues(alpha: 0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
-              ),
-            );
-          },
+        Expanded(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: value),
+              duration: getAdaptedDuration(const Duration(milliseconds: 1000)),
+              curve: Curves.easeOutBack,
+              builder: (context, val, _) {
+                final h = val <= 0 ? 4.0 : (70 * val);
+                return Container(
+                  width: barWidth,
+                  height: h,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colors.accent
+                        : colors.textSecondary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: colors.accent.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
         ),
         const SizedBox(height: 12),
         Text(

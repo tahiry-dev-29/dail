@@ -15,3 +15,4 @@ void switchTab(int index) {
 final isSettingsOpen = signal<bool>(false);
 final isChatOpen = signal<bool>(false);
 final triggerConfetti = signal<int>(0); // Increment to trigger
+final isNavBarVisible = signal<bool>(true);

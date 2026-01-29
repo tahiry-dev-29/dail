@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/glass_container.dart';
+import '../../home/logic/home_signals.dart';
 
 class AiChatPage extends StatelessWidget {
   const AiChatPage({super.key});
@@ -83,38 +85,40 @@ class AiChatPage extends StatelessWidget {
         ),
 
         // Input Area
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            0,
-            16,
-            110,
-          ), // Bottom padding for nav bar
-          child: GlassContainer(
-            borderRadius: 30,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            color: textFieldBg,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: TextStyle(color: textPrimary),
-                    decoration: InputDecoration(
-                      hintText: "Demandez à Gemini...",
-                      hintStyle: TextStyle(color: textHint),
-                      border: InputBorder.none,
+        Watch(
+          (context) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              isNavBarVisible.value ? 110 : 20,
+            ), // Dynamic bottom padding
+            child: GlassContainer(
+              borderRadius: 30,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              color: textFieldBg,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      style: TextStyle(color: textPrimary),
+                      decoration: InputDecoration(
+                        hintText: "Demandez à Gemini...",
+                        hintStyle: TextStyle(color: textHint),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(
-                    FontAwesomeIcons.paperPlane,
-                    color: AppColors.aiColor,
-                    size: 18,
+                  IconButton(
+                    icon: const Icon(
+                      FontAwesomeIcons.paperPlane,
+                      color: AppColors.aiColor,
+                      size: 18,
+                    ),
+                    onPressed: () {},
                   ),
-                  onPressed: () {},
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

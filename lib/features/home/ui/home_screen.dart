@@ -107,7 +107,11 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          Watch(
+            (context) => SliverToBoxAdapter(
+              child: SizedBox(height: isNavBarVisible.value ? 100 : 20),
+            ),
+          ),
         ],
       ),
     );
