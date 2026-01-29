@@ -5,33 +5,8 @@ import '../data/subtask_model.dart';
 class TaskNotifier extends Notifier<List<Task>> {
   @override
   List<Task> build() {
-    // Initial mock data
-    final today = DateTime.now();
-    return [
-      Task(
-        id: '1',
-        name: 'Morning Routine',
-        time: '07:00',
-        isDone: true,
-        date: today,
-      ),
-      Task(
-        id: '2',
-        name: 'Deep Work',
-        time: '09:00',
-        isDone: false,
-        isFavorite: true,
-        date: today,
-      ),
-      Task(
-        id: '3',
-        name: 'Gym',
-        time: '18:00',
-        isDone: false,
-        date: today,
-        deadline: DateTime(today.year, today.month, today.day, 19, 0),
-      ),
-    ];
+    // Initial data cleared as requested
+    return [];
   }
 
   void addTask({

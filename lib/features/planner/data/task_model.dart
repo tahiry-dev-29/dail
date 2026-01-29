@@ -25,6 +25,29 @@ class Task {
     this.subtasks = const [],
   });
 
+  bool get isOverdue {
+    if (date == null) return false;
+
+    final now = DateTime.now();
+    final taskDate = DateTime(date!.year, date!.month, date!.day);
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (taskDate.isBefore(today)) return true;
+
+    if (taskDate.isAtSameMomentAs(today)) {
+      try {
+        final parts = time.split(':');
+        if (parts.length == 2) {
+          final hour = int.parse(parts[0]);
+          final minute = int.parse(parts[1]);
+          final taskTime = DateTime(now.year, now.month, now.day, hour, minute);
+          return taskTime.isBefore(now);
+        }
+      } catch (_) {}
+    }
+    return false;
+  }
+
   Task copyWith({
     String? id,
     String? name,

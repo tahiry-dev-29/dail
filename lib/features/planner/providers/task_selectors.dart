@@ -7,12 +7,24 @@ import '../../calendar/providers/calendar_provider.dart';
 
 // Computed Provider: Tasks filtered by selected date (Performance optimized)
 final filteredTasksProvider = Provider<List<Task>>((ref) {
+  // 2026 Bridge Fix: Avoid circular initialization by skipping the first call
+  // which is triggered immediately upon subscription.
+  bool initialized = false;
+  final sub = calendarState.selectedDate.subscribe((_) {
+    if (initialized) {
+      // Delay invalidation to ensure it happens outside the build phase
+      Future.microtask(() => ref.invalidateSelf());
+    }
+  });
+  ref.onDispose(sub);
+  initialized = true;
+
   final allTasks = ref.watch(taskProvider);
   final selectedDate = calendarState.selectedDate.value;
 
   return allTasks.where((t) {
     if (t.date == null) return false;
-    return DateUtils.isSameDay(t.date, selectedDate);
+    return DateUtils.isSameDay(t.date!, selectedDate);
   }).toList();
 });
 

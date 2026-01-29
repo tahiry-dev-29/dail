@@ -8,6 +8,8 @@ import '../../features/settings/ui/settings_page.dart';
 import '../../features/settings/providers/theme_provider.dart';
 import '../../features/planner/providers/task_selectors.dart';
 import '../../core/theme/adaptive_colors.dart';
+import 'package:signals_flutter/signals_flutter.dart';
+import '../../features/calendar/providers/calendar_provider.dart';
 import 'glass_container.dart';
 
 class AtomicHeader extends ConsumerWidget {
@@ -15,8 +17,8 @@ class AtomicHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final now = DateTime.now();
-    final dateStr = DateFormat('d MMMM', 'fr_FR').format(now);
+    final selectedDate = calendarState.selectedDate.watch(context);
+    final dateStr = DateFormat('d MMMM', 'fr_FR').format(selectedDate);
     final colors = context.colors;
     final progress = ref.watch(taskProgressProvider);
 

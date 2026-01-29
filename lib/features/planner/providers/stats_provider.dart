@@ -19,7 +19,7 @@ final monthlyTaskStatsProvider = Provider<MonthlyStats>((ref) {
       return t.date!.year == monthDate.year && t.date!.month == monthDate.month;
     }).length;
 
-    if (monthTasks > maxCount) maxCount = monthTasks;
+    if (monthTasks > maxCount) maxCount = monthTasks.toInt();
     totalCount += monthTasks;
 
     // Format label (e.g., JAN, FEV)

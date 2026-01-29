@@ -8,6 +8,7 @@ import 'package:daily_os/core/theme/adaptive_colors.dart';
 import 'package:daily_os/features/planner/providers/task_selectors.dart';
 import 'package:daily_os/features/planner/providers/task_provider.dart';
 import 'package:daily_os/features/calendar/providers/calendar_provider.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:daily_os/shared/widgets/glass_container.dart';
 
 import 'widgets/task_list_item.dart';
@@ -236,7 +237,7 @@ class PlannerScreen extends ConsumerWidget {
         const AddTaskInline(),
 
         // Safe area padding for bottom nav
-        const SizedBox(height: 90),
+        Watch((context) => SizedBox(height: isNavBarVisible.value ? 90 : 20)),
       ],
     );
   }
