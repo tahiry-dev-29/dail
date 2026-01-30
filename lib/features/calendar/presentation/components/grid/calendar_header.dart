@@ -1,3 +1,4 @@
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +19,11 @@ class CalendarHeader extends StatelessWidget {
       children: [
         IconButton(
           onPressed: () => calendarState.prevMonth(),
-          icon: Icon(Icons.chevron_left, color: contentColor),
+          icon: Icon(
+            AppIcons.chevronLeft(context),
+            color: contentColor,
+            size: 16,
+          ),
         ),
         Text(
           DateFormat('MMMM yyyy').format(currentMonth).toUpperCase(),
@@ -31,7 +36,11 @@ class CalendarHeader extends StatelessWidget {
         ),
         IconButton(
           onPressed: () => calendarState.nextMonth(),
-          icon: Icon(Icons.chevron_right, color: contentColor),
+          icon: Icon(
+            AppIcons.chevronRight(context),
+            color: contentColor,
+            size: 16,
+          ),
         ),
       ],
     );

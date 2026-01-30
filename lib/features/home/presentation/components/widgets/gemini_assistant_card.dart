@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 
 class GeminiAssistantCard extends StatelessWidget {
   const GeminiAssistantCard({super.key});
@@ -27,10 +27,10 @@ class GeminiAssistantCard extends StatelessWidget {
                   color: Colors.blue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
-                    FontAwesomeIcons.wandMagicSparkles,
-                    color: Colors.blueAccent,
+                    AppIcons.assistant(context),
+                    color: Colors.white,
                     size: 14,
                   ),
                 ),
@@ -75,7 +75,7 @@ class GeminiAssistantCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Icon(
-                  FontAwesomeIcons.arrowRight,
+                  AppIcons.arrowRight(context),
                   size: 12,
                   color: colors.textSecondary,
                 ),

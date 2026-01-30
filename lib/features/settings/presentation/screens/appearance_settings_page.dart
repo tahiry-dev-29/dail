@@ -1,16 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:signals_flutter/signals_flutter.dart';
-
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/settings/logic/theme_provider.dart';
-
 import 'package:daily_os/features/settings/presentation/components/appearance/animation_settings.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/choice_selector.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/color_picker.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/header.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/section_title.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/theme_mode_selector.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class AppearanceSettingsPage extends ConsumerWidget {
   const AppearanceSettingsPage({super.key});
@@ -59,7 +57,12 @@ class AppearanceSettingsPage extends ConsumerWidget {
                 ChoiceSelector(
                   title: 'Style d\'icônes',
                   value: iconStyle,
-                  items: const ['fontAwesome', 'material', 'system'],
+                  items: const [
+                    'fontAwesome',
+                    'material',
+                    'cupertino',
+                    'system',
+                  ],
                   onChanged: (val) => setIconStyle(val),
                   isIcon: true,
                 ),

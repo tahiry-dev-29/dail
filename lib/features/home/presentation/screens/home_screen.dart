@@ -1,13 +1,13 @@
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/features/home/logic/dashboard_provider.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/home/presentation/components/widgets/active_timer_card.dart';
+import 'package:daily_os/features/home/presentation/components/widgets/gemini_assistant_card.dart';
+import 'package:daily_os/features/home/presentation/components/widgets/monthly_stats_card.dart';
+import 'package:daily_os/features/home/presentation/components/widgets/progress_stats_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-
-import 'package:daily_os/features/home/logic/dashboard_provider.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
-import 'package:daily_os/features/home/presentation/components/widgets/gemini_assistant_card.dart';
-import 'package:daily_os/features/home/presentation/components/widgets/active_timer_card.dart';
-import 'package:daily_os/features/home/presentation/components/widgets/progress_stats_card.dart';
-import 'package:daily_os/features/home/presentation/components/widgets/monthly_stats_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -94,9 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             index: index,
                             child: Container(
                               padding: const EdgeInsets.only(left: 16),
-                              child: const Icon(
-                                Icons.drag_indicator_rounded,
+                              child: Icon(
+                                AppIcons.dragHandle(context),
                                 color: Colors.grey,
+                                size: 18,
                               ),
                             ),
                           ),

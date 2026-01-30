@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:flutter/material.dart';
 
 class ThemeModeSelector extends StatelessWidget {
   final int currentMode;
@@ -22,7 +22,7 @@ class ThemeModeSelector extends StatelessWidget {
       child: Row(
         children: [
           ModeButton(
-            icon: FontAwesomeIcons.mobile,
+            icon: AppIcons.mobile(context),
             label: 'Système',
             isSelected: currentMode == 0,
             onTap: () => setThemeMode(0),
@@ -31,7 +31,7 @@ class ThemeModeSelector extends StatelessWidget {
             isDark: isDark,
           ),
           ModeButton(
-            icon: FontAwesomeIcons.moon,
+            icon: AppIcons.moon(context),
             label: 'Sombre',
             isSelected: currentMode == 1,
             onTap: () => setThemeMode(1),
@@ -40,7 +40,7 @@ class ThemeModeSelector extends StatelessWidget {
             isDark: isDark,
           ),
           ModeButton(
-            icon: FontAwesomeIcons.sun,
+            icon: AppIcons.sun(context),
             label: 'Clair',
             isSelected: currentMode == 2,
             onTap: () => setThemeMode(2),

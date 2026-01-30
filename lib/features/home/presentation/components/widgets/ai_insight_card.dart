@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:flutter/material.dart';
 
 class AiInsightCard extends StatelessWidget {
   const AiInsightCard({super.key});
@@ -57,11 +57,11 @@ class AiInsightCard extends StatelessWidget {
                       end: Alignment.topRight,
                     ),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Icon(
-                      FontAwesomeIcons.wandMagicSparkles,
-                      color: Colors.white,
-                      size: 14,
+                      AppIcons.assistant(context),
+                      size: 12,
+                      color: colors.accent,
                     ),
                   ),
                 ),

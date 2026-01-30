@@ -1,7 +1,6 @@
+import 'package:daily_os/features/notifications/domain/entities/notification_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:daily_os/features/notifications/domain/entities/notification_entity.dart';
 
 class NotificationsNotifier extends Notifier<List<NotificationEntity>> {
   @override
@@ -9,47 +8,43 @@ class NotificationsNotifier extends Notifier<List<NotificationEntity>> {
     return [
       const NotificationEntity(
         id: '1',
-        icon: FontAwesomeIcons.wandMagicSparkles,
+        icon: Icons.auto_awesome,
         iconColor: Colors.blueAccent,
         title: 'AI Optimization',
-        description:
-            "I've reorganized your afternoon schedule to align with your energy levels.",
-        time: '2m',
-        isNew: true,
-        hasBorder: true,
+        description: 'Your schedule has been optimized for maximum focus.',
+        time: 'Just now',
       ),
       const NotificationEntity(
         id: '2',
-        icon: FontAwesomeIcons.clock,
+        icon: Icons.access_time,
         iconColor: Colors.pinkAccent,
         title: 'Deep Work Session',
         description: 'Starting in 15 minutes. Prepare your environment.',
-        time: '15m',
-        isNew: true,
+        time: '10 min ago',
       ),
       const NotificationEntity(
         id: '3',
-        icon: FontAwesomeIcons.trophy,
+        icon: Icons.emoji_events,
         iconColor: Colors.amber,
         title: 'Milestone Unlocked',
         description: "You've completed 5 tasks today! Keep up the momentum.",
-        time: '1h',
+        time: '1 hr ago',
       ),
       const NotificationEntity(
         id: '4',
-        icon: FontAwesomeIcons.calendarDays,
+        icon: Icons.calendar_today,
         iconColor: Colors.pinkAccent,
         title: 'Design Review',
         description: 'Upcoming event tomorrow at 10:00 AM.',
-        time: '3h',
+        time: '2 hrs ago',
       ),
       const NotificationEntity(
         id: '5',
-        icon: FontAwesomeIcons.chartLine,
+        icon: Icons.show_chart,
         iconColor: Colors.purpleAccent,
         title: 'Pattern Detected',
         description: 'You are 20% more productive on Tuesday mornings.',
-        time: '5h',
+        time: '1 day ago',
       ),
     ];
   }

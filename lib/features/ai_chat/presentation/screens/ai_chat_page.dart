@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:signals_flutter/signals_flutter.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class AiChatPage extends StatelessWidget {
   const AiChatPage({super.key});
@@ -29,8 +29,8 @@ class AiChatPage extends StatelessWidget {
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  FontAwesomeIcons.robot,
+                child: Icon(
+                  AppIcons.robot(context),
                   size: 16,
                   color: Colors.white,
                 ),
@@ -48,11 +48,18 @@ class AiChatPage extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.circle, size: 8, color: Colors.green),
+                      Icon(
+                        AppIcons.solidCircle(context),
+                        size: 8,
+                        color: Colors.green,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         "Online",
-                        style: context.caption.copyWith(color: Colors.green),
+                        style: context.caption.copyWith(
+                          color: Colors.green,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -109,8 +116,8 @@ class AiChatPage extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      FontAwesomeIcons.paperPlane,
+                    icon: Icon(
+                      AppIcons.send(context),
                       color: AppColors.aiColor,
                       size: 18,
                     ),

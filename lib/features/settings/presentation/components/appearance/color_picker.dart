@@ -1,8 +1,8 @@
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
 
 class ColorPicker extends ConsumerWidget {
   final Color selectedColor;
@@ -41,8 +41,8 @@ class ColorPicker extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white24, width: 2),
               ),
-              child: const Icon(
-                FontAwesomeIcons.plus,
+              child: Icon(
+                AppIcons.add(context),
                 color: Colors.white70,
                 size: 16,
               ),
@@ -152,7 +152,7 @@ class ColorChip extends StatelessWidget {
               : null,
         ),
         child: isSelected
-            ? const Icon(Icons.check, color: Colors.white, size: 20)
+            ? Icon(AppIcons.check(context), color: Colors.white, size: 20)
             : null,
       ),
     );

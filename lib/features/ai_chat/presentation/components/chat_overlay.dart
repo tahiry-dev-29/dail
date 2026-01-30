@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:signals_flutter/signals_flutter.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class ChatOverlay extends StatelessWidget {
   const ChatOverlay({super.key});
@@ -41,8 +41,8 @@ class ChatOverlay extends StatelessWidget {
                             ),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            FontAwesomeIcons.robot,
+                          child: Icon(
+                            AppIcons.robot(context),
                             size: 12,
                             color: Colors.white,
                           ),
@@ -60,8 +60,8 @@ class ChatOverlay extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                const Icon(
-                                  Icons.circle,
+                                Icon(
+                                  AppIcons.solidCircle(context),
                                   size: 6,
                                   color: Colors.green,
                                 ),
@@ -79,7 +79,11 @@ class ChatOverlay extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
+                      icon: Icon(
+                        AppIcons.close(context),
+                        color: Colors.white,
+                        size: 18,
+                      ),
                       onPressed: () => isChatOpen.value = false,
                     ),
                   ],
@@ -114,7 +118,11 @@ class ChatOverlay extends StatelessWidget {
                       ),
                       IconButton(
                         onPressed: () {},
-                        icon: const Icon(Icons.send, color: AppColors.blue500),
+                        icon: Icon(
+                          AppIcons.send(context),
+                          color: AppColors.blue500,
+                          size: 18,
+                        ),
                       ),
                     ],
                   ),

@@ -1,8 +1,10 @@
+import 'package:daily_os/design_system/atoms/action_icon.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/presentation/screens/notification_settings_page.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SettingsHeader extends StatelessWidget {
   const SettingsHeader({super.key});
@@ -16,20 +18,15 @@ class SettingsHeader extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Row(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                FontAwesomeIcons.chevronLeft,
-                size: 14,
-                color: colors.textSecondary,
-              ),
+          GlassCard(
+            borderRadius: 50,
+            padding: EdgeInsets.zero,
+            child: ActionIcon(
+              icon: AppIcons.chevronLeft(context),
+              onTap: () => Navigator.pop(context),
+              color: colors.textPrimary,
+              size: 16,
+              padding: const EdgeInsets.all(16),
             ),
           ),
           const SizedBox(width: 16),
@@ -68,25 +65,20 @@ class SettingsHeader extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotificationSettingsPage(),
+          GlassCard(
+            borderRadius: 50,
+            padding: EdgeInsets.zero,
+            child: ActionIcon(
+              icon: AppIcons.bell(context),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const NotificationSettingsPage(),
+                ),
               ),
-            ),
-            child: Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: colors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                FontAwesomeIcons.bell,
-                size: 18,
-                color: colors.textSecondary,
-              ),
+              color: colors.textPrimary,
+              size: 20,
+              padding: const EdgeInsets.all(14),
             ),
           ),
           const SizedBox(width: 12),

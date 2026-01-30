@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 
 class StatsGrid extends StatelessWidget {
   final int doneCount;
@@ -20,7 +20,7 @@ class StatsGrid extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            icon: FontAwesomeIcons.circleCheck,
+            icon: AppIcons.circleCheck(context),
             iconColor: Colors.greenAccent,
             value: doneCount.toString(),
             label: 'Terminées',
@@ -29,7 +29,7 @@ class StatsGrid extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            icon: FontAwesomeIcons.clock,
+            icon: AppIcons.clock(context),
             iconColor: Colors.orangeAccent,
             value: remainingCount.toString(),
             label: 'Restantes',

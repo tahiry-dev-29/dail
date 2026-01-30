@@ -1,9 +1,9 @@
-import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/logic/settings_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class NotificationSettingsPage extends StatelessWidget {
@@ -36,7 +36,7 @@ class NotificationSettingsPage extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      FontAwesomeIcons.chevronLeft,
+                      AppIcons.chevronLeft(context),
                       size: 14,
                       color: colors.textSecondary,
                     ),
@@ -56,7 +56,7 @@ class NotificationSettingsPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
                 _SettingsTile(
-                  icon: FontAwesomeIcons.volumeHigh,
+                  icon: AppIcons.volume(context),
                   iconColor: Colors.blueAccent,
                   title: 'Sons',
                   subtitle: 'Sons de notification',
@@ -64,7 +64,7 @@ class NotificationSettingsPage extends StatelessWidget {
                   onChanged: (v) => notificationSoundsEnabled.value = v,
                 ),
                 _SettingsTile(
-                  icon: FontAwesomeIcons.bell,
+                  icon: AppIcons.bell(context),
                   iconColor: Colors.orangeAccent,
                   title: 'Alertes',
                   subtitle: 'Afficher les alertes push',
@@ -72,7 +72,7 @@ class NotificationSettingsPage extends StatelessWidget {
                   onChanged: (v) => notificationAlertsEnabled.value = v,
                 ),
                 _SettingsTile(
-                  icon: FontAwesomeIcons.clock,
+                  icon: AppIcons.clock(context),
                   iconColor: Colors.greenAccent,
                   title: 'Rappels',
                   subtitle: 'Rappels avant les tâches',

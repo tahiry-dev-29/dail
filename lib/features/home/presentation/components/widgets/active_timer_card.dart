@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ActiveTimerCard extends StatelessWidget {
@@ -50,7 +51,7 @@ class ActiveTimerCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.calendar_today,
+                          AppIcons.calendar(context),
                           size: 12,
                           color: colors.accent,
                         ),
