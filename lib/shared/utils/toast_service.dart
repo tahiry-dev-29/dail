@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../features/settings/providers/theme_provider.dart';
+import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
 
 class ToastService {
   static void show(

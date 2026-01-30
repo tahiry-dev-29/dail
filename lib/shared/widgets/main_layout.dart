@@ -1,19 +1,18 @@
+import 'package:daily_os/core/utils/glass_scaffold.dart';
+import 'package:daily_os/features/ai_chat/presentation/screens/ai_chat_page.dart';
+import 'package:daily_os/features/calendar/presentation/screens/calendar_screen.dart';
+import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
+import 'package:daily_os/features/home/presentation/screens/home_screen.dart';
+import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
+import 'package:daily_os/features/planner/presentation/screens/planner_dashboard_screen.dart';
+import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
+import 'package:daily_os/shared/widgets/atomic_header.dart';
+import 'package:daily_os/shared/widgets/atomic_nav_bar.dart';
+import 'package:daily_os/shared/widgets/floating_add_task_button.dart';
+import 'package:daily_os/shared/widgets/safe_back_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-
-import '../../core/utils/glass_scaffold.dart';
-import '../../features/ai_chat/ui/ai_chat_page.dart';
-import '../../features/calendar/ui/calendar_screen.dart';
-import '../../features/home/logic/home_signals.dart';
-import '../../features/home/ui/home_screen.dart';
-import '../../features/planner/ui/planner_screen.dart';
-import '../../features/planner/ui/widgets/add_task_inline.dart';
-import '../../features/settings/providers/theme_provider.dart';
-import 'atomic_header.dart';
-import 'atomic_nav_bar.dart';
-import 'floating_add_task_button.dart';
-import 'safe_back_handler.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({super.key});
@@ -57,7 +56,7 @@ class MainLayout extends StatelessWidget {
                 right: 0,
                 child: Watch(
                   (context) => AnimatedSlide(
-                    offset: isNavBarVisible.value
+                    offset: (isNavBarVisible.value && !isAddTaskVisible.value)
                         ? Offset.zero
                         : const Offset(0, 1.2),
                     duration: getAdaptedDuration(
@@ -141,7 +140,7 @@ class _PageSwitcherState extends State<_PageSwitcher> {
             physics: const BouncingScrollPhysics(),
             children: const [
               HomeScreen(),
-              PlannerScreen(),
+              PlannerDashboardScreen(),
               CalendarScreen(),
               AiChatPage(),
             ],

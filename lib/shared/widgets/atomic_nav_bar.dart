@@ -1,9 +1,9 @@
+import 'package:daily_os/core/utils/app_icons.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:daily_os/core/theme/adaptive_colors.dart';
-import 'package:daily_os/shared/widgets/glass_container.dart';
-import '../../features/home/logic/home_signals.dart';
-import '../../../../core/utils/app_icons.dart';
 
 class AtomicNavBar extends StatelessWidget {
   const AtomicNavBar({super.key});
@@ -15,7 +15,7 @@ class AtomicNavBar extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-      child: GlassContainer(
+      child: GlassCard(
         borderRadius: 28,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Container(
@@ -79,25 +79,28 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isActive ? colors.accent : colors.textSecondary;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 60,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                color: color,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: 60,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20, color: color),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                  color: color,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

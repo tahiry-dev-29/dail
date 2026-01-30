@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../core/theme/adaptive_colors.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 
-class GlassContainer extends StatelessWidget {
+class GlassCard extends StatelessWidget {
   final Widget child;
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
@@ -11,7 +11,7 @@ class GlassContainer extends StatelessWidget {
   final Color? color;
   final Color? borderColor;
 
-  const GlassContainer({
+  const GlassCard({
     super.key,
     required this.child,
     this.borderRadius = 24.0, // CSS Ref: rounded-3xl (1.5rem = 24px)
