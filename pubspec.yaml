@@ -43,6 +43,11 @@ dependencies:
   shared_preferences: ^2.5.4
   intl: ^0.20.2
   calendar_view: ^1.4.0
+  # Knowledge Base dependencies (using isar_community for Dart 3.10+ compatibility)
+  isar_community: ^3.3.0
+  isar_community_flutter_libs: ^3.3.0
+  path_provider: ^2.1.2
+  uuid: ^4.3.3
 
 dev_dependencies:
   flutter_test:
@@ -54,6 +59,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  # Knowledge Base code generation
+  isar_community_generator: ^3.3.0
+  build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
