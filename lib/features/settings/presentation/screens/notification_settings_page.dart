@@ -1,7 +1,7 @@
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/presentation/providers/settings_provider.dart';
+import 'package:daily_os/features/settings/logic/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart';
 
 class ThemeModeSelector extends StatelessWidget {
   final int currentMode;

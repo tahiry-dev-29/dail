@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart';
 import 'package:daily_os/shared/widgets/main_layout.dart';
 
 class DailyOsApp extends StatelessWidget {

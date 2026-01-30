@@ -4,7 +4,7 @@ import 'package:daily_os/features/settings/presentation/components/pro_toggle_ca
 import 'package:daily_os/features/settings/presentation/components/settings_header.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_item.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_section.dart';
-import 'package:daily_os/features/settings/presentation/providers/settings_provider.dart';
+import 'package:daily_os/features/settings/logic/settings_provider.dart';
 import 'package:daily_os/features/settings/presentation/screens/appearance_settings_page.dart';
 import 'package:daily_os/features/settings/presentation/screens/notification_settings_page.dart';
 import 'package:flutter/material.dart';

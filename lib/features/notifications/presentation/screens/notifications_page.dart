@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/notifications/domain/entities/notification_entity.dart';
-import 'package:daily_os/features/notifications/presentation/providers/notifications_provider.dart';
+import 'package:daily_os/features/notifications/logic/notifications_provider.dart';
 import 'package:daily_os/features/notifications/presentation/components/notification_header.dart';
 import 'package:daily_os/features/notifications/presentation/components/notification_card.dart';
 import 'package:daily_os/features/notifications/presentation/components/notification_section_title.dart';

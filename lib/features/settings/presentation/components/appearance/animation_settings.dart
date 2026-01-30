@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
-import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 

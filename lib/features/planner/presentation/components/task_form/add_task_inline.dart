@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:daily_os/features/planner/logic/task_input_provider.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
 

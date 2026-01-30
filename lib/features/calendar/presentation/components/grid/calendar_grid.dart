@@ -1,6 +1,6 @@
 import 'package:daily_os/features/calendar/presentation/components/grid/calendar_day_tile.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
-import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 

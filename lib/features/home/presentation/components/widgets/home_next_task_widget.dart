@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/features/home/presentation/providers/home_state.dart';
+import 'package:daily_os/features/home/logic/home_state.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class HomeNextTaskWidget extends StatelessWidget {

@@ -1,6 +1,6 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:daily_os/features/notifications/presentation/screens/notifications_page.dart';
 import 'package:daily_os/features/settings/presentation/screens/settings_page.dart';
 import 'package:flutter/material.dart';

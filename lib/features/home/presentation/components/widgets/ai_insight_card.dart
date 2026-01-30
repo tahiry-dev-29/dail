@@ -4,7 +4,7 @@ import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
 
 class AiInsightCard extends StatelessWidget {
   const AiInsightCard({super.key});

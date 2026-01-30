@@ -1,5 +1,5 @@
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

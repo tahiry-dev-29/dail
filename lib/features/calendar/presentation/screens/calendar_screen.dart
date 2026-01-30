@@ -2,7 +2,7 @@ import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/calendar/presentation/components/grid/calendar_grid.dart';
 import 'package:daily_os/features/calendar/presentation/components/grid/calendar_header.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 

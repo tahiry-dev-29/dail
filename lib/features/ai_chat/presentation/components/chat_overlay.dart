@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 
 class ChatOverlay extends StatelessWidget {

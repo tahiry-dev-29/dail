@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
-import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart';
 
 import 'package:daily_os/features/settings/presentation/components/appearance/animation_settings.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/choice_selector.dart';

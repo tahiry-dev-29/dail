@@ -12,8 +12,8 @@ import 'package:daily_os/features/planner/presentation/components/task_list/task
 import 'package:daily_os/features/planner/presentation/components/task_list/active_tasks_list.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
 import 'package:daily_os/features/planner/logic/task_input_provider.dart';
-import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
-import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
+import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 
 // Signals for local UI state
 final isCompletedExpanded = signal(false);
