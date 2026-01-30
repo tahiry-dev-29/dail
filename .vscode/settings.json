@@ -1,0 +1,24 @@
+{
+    "dart.completeFunctionCalls": true,
+    "dart.showTodos": true,
+    "dart.updateImportsOnRename": true,
+    "dart.autoImportCompletions": true,
+    "dart.previewFlutterUiGuides": true,
+    "dart.flutterHotReloadOnSave": "all",
+    "dart.openDevTools": "flutter",
+    "dart.lineLength": 80,
+    "dart.importStrategy": "package", // <-- ICI (et utilise "package")
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "[dart]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        }
+    }
+}
