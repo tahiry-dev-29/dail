@@ -1,13 +1,14 @@
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 
 // ============================================================================
 // DRAFT SIGNAL - Persists task input data even when widget closes
 // ============================================================================
 final taskDraftSignal = signal<Map<String, dynamic>>({});
 final parentTaskSignal = signal<TaskEntity?>(null);
+final isAddTaskVisible = signal(false);
 
 /// Save current form state to draft
 void saveDraft({

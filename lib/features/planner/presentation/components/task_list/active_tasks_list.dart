@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:signals_flutter/signals_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/task_tile.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
-import 'package:daily_os/features/planner/logic/task_input_provider.dart';
-import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ActiveTasksList extends ConsumerWidget {
   final List<TaskEntity> activeTasks;
@@ -18,8 +17,6 @@ class ActiveTasksList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final isVisible = isAddTaskVisible.watch(context);
-    final parentTask = parentTaskSignal.watch(context);
 
     return SliverReorderableList(
       itemCount: activeTasks.length,
@@ -40,10 +37,18 @@ class ActiveTasksList extends ConsumerWidget {
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(left: 20),
           color: Colors.transparent,
-          child: const Icon(
-            FontAwesomeIcons.check,
-            color: Colors.green,
-            size: 20,
+          child: Row(
+            children: [
+              Icon(AppIcons.check(context), color: Colors.green, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                'Terminée',
+                style: context.bodyMedium.copyWith(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         );
 
@@ -51,7 +56,20 @@ class ActiveTasksList extends ConsumerWidget {
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
           color: Colors.transparent,
-          child: Icon(FontAwesomeIcons.plus, color: colors.accent, size: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                'Sous-tâche',
+                style: context.bodyMedium.copyWith(
+                  color: colors.accent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(AppIcons.add(context), color: colors.accent, size: 20),
+            ],
+          ),
         );
 
         return ReorderableDragStartListener(
@@ -62,8 +80,8 @@ class ActiveTasksList extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24.0,
-                  vertical: 4.0,
+                  horizontal: 16.0,
+                  vertical: 2.0,
                 ),
                 child: Dismissible(
                   key: Key('dismiss_${task.id}'),
@@ -107,11 +125,6 @@ class ActiveTasksList extends ConsumerWidget {
                   ),
                 ),
               ),
-              if (isVisible && parentTask?.id == task.id)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8.0),
-                  child: AddTaskInline(),
-                ),
             ],
           ),
         );

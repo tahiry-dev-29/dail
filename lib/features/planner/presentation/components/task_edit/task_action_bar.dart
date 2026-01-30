@@ -1,4 +1,5 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -27,11 +28,11 @@ class TaskActionBar extends StatelessWidget {
           child: GlassCard(
             borderRadius: 30,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            color: Colors.blueAccent,
-            child: const Text(
+            color: context.colors.accent,
+            child: Text(
               'Save',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.white, // Keep white on accent for contrast
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
 import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:daily_os/features/planner/logic/task_list_provider.dart';
@@ -7,9 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-// Note: This component is being phased out in favor of QuickAddTaskOverlay
-class AddTaskInline extends ConsumerWidget {
-  const AddTaskInline({super.key});
+class QuickAddTaskOverlay extends ConsumerWidget {
+  const QuickAddTaskOverlay({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,7 +29,6 @@ class AddTaskInline extends ConsumerWidget {
       required bool isFavorite,
     }) {
       if (parentTask != null) {
-        // Adding a subtask
         ref
             .read(taskListProvider.notifier)
             .addSubtask(
@@ -40,7 +40,6 @@ class AddTaskInline extends ConsumerWidget {
               isFavorite: isFavorite,
             );
       } else {
-        // Adding a regular task
         ref
             .read(taskListProvider.notifier)
             .addTask(
@@ -53,9 +52,9 @@ class AddTaskInline extends ConsumerWidget {
             );
       }
 
-      // Clear draft on successful save
       clearDraft();
       isAddTaskVisible.value = false;
+      parentTaskSignal.value = null;
 
       ToastService.success(
         context,
@@ -63,21 +62,45 @@ class AddTaskInline extends ConsumerWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: TaskInputWidget(
-        onSave: onSave,
-        onCancel: () {
-          isAddTaskVisible.value = false;
-          parentTaskSignal.value = null;
-        },
-        initialValues: {
-          'name': parentTask != null ? '' : null, // Clear if switching context
-        },
-        hintText: parentTask != null
-            ? 'Sous-tâche pour "${parentTask.name}"...'
-            : 'Ajouter une tâche...',
-      ),
+    return Stack(
+      children: [
+        // Blurred Backdrop
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () {
+              isAddTaskVisible.value = false;
+              parentTaskSignal.value = null;
+            },
+            behavior: HitTestBehavior.opaque,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+              child: Container(color: Colors.black.withValues(alpha: 0.2)),
+            ),
+          ),
+        ),
+
+        // Input Area
+        Align(
+          alignment: .bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              left: 16,
+              right: 16,
+            ),
+            child: TaskInputWidget(
+              onSave: onSave,
+              onCancel: () {
+                isAddTaskVisible.value = false;
+                parentTaskSignal.value = null;
+              },
+              hintText: parentTask != null
+                  ? 'Sous-tâche pour "${parentTask.name}"...'
+                  : 'Que faut-il faire ?',
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

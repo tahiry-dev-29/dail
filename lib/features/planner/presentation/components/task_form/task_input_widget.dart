@@ -1,8 +1,9 @@
+import 'package:daily_os/design_system/atoms/action_icon.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskInputWidget extends ConsumerWidget {
@@ -111,22 +112,35 @@ class _TaskNameRow extends StatelessWidget {
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
-              counterStyle: TextStyle(
-                color: colors.textSecondary.withValues(alpha: 0.3),
-                fontSize: 10,
+              counterText: '',
+              suffix: ValueListenableBuilder(
+                valueListenable: state.nameController,
+                builder: (context, value, child) {
+                  return Text(
+                    '${value.text.length}/100',
+                    style: TextStyle(
+                      color: colors.textSecondary.withValues(alpha: 0.3),
+                      fontSize: 10,
+                    ),
+                  );
+                },
               ),
             ),
             onSubmitted: (_) => onSave(),
           ),
         ),
-        GestureDetector(
-          onTap: onSave,
-          child: Text(
-            'Save',
-            style: TextStyle(
-              color: colors.accent,
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+        const SizedBox(width: 16),
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onSave,
+            child: Text(
+              'Save',
+              style: TextStyle(
+                color: colors.accent,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
             ),
           ),
         ),
@@ -164,9 +178,18 @@ class _TaskDescriptionField extends StatelessWidget {
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
-                    counterStyle: TextStyle(
-                      color: colors.textSecondary.withValues(alpha: 0.3),
-                      fontSize: 10,
+                    counterText: '',
+                    suffix: ValueListenableBuilder(
+                      valueListenable: state.descController,
+                      builder: (context, value, child) {
+                        return Text(
+                          '${value.text.length}/1000',
+                          style: TextStyle(
+                            color: colors.textSecondary.withValues(alpha: 0.3),
+                            fontSize: 10,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   maxLength: 1000,
@@ -198,19 +221,18 @@ class _TaskInputActions extends StatelessWidget {
     return Row(
       children: [
         // Toggle Description
-        _ActionButton(
-          icon: FontAwesomeIcons.alignLeft,
-          isActive: isDescExpanded,
+        ActionIcon(
+          icon: AppIcons.description(context),
           onTap: () => state.isDescriptionExpanded.value = !isDescExpanded,
-          colors: colors,
+          color: isDescExpanded
+              ? colors.accent
+              : colors.textSecondary.withValues(alpha: 0.5),
+          size: 16,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 4),
         // Time Picker
-        _ActionButton(
-          icon: FontAwesomeIcons.clock,
-          // Highlight if time is set
-          isActive: hasTime,
-          activeColor: colors.accent,
+        ActionIcon(
+          icon: AppIcons.clock(context),
           onTap: () async {
             final tod = await showTimePicker(
               context: context,
@@ -220,15 +242,16 @@ class _TaskInputActions extends StatelessWidget {
               state.time.value = tod.format(context);
             }
           },
-          colors: colors,
+          color: hasTime
+              ? colors.accent
+              : colors.textSecondary.withValues(alpha: 0.5),
+          size: 16,
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 4),
 
         // Deadline Picker
-        _ActionButton(
-          icon: FontAwesomeIcons.flag,
-          isActive: hasDeadline,
-          activeColor: Colors.orangeAccent,
+        ActionIcon(
+          icon: AppIcons.priority(context),
           onTap: () async {
             final date = await showDatePicker(
               context: context,
@@ -260,51 +283,23 @@ class _TaskInputActions extends StatelessWidget {
               }
             }
           },
-          colors: colors,
+          color: hasDeadline
+              ? Colors.orangeAccent
+              : colors.textSecondary.withValues(alpha: 0.5),
+          size: 16,
         ),
         const Spacer(),
 
         // Toggle Favorite
-        _ActionButton(
-          icon: isFavorite
-              ? FontAwesomeIcons.solidHeart
-              : FontAwesomeIcons.heart,
-          isActive: isFavorite,
-          activeColor: Colors.redAccent,
+        ActionIcon(
+          icon: AppIcons.favorite(context, isFavorite),
           onTap: () => state.isFavorite.value = !isFavorite,
-          colors: colors,
+          color: isFavorite
+              ? Colors.redAccent
+              : colors.textSecondary.withValues(alpha: 0.5),
+          size: 16,
         ),
       ],
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final bool isActive;
-  final VoidCallback onTap;
-  final AdaptiveColors colors;
-  final Color? activeColor;
-
-  const _ActionButton({
-    required this.icon,
-    required this.isActive,
-    required this.onTap,
-    required this.colors,
-    this.activeColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Icon(
-        icon,
-        size: 16,
-        color: isActive
-            ? (activeColor ?? colors.accent)
-            : colors.textSecondary.withValues(alpha: 0.5),
-      ),
     );
   }
 }

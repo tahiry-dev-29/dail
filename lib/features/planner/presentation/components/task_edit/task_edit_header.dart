@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:daily_os/design_system/atoms/action_icon.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:signals_flutter/signals_flutter.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskEditHeader extends StatelessWidget {
   final TaskEditController controller;
@@ -22,70 +24,72 @@ class TaskEditHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Back button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: GlassCard(
-              borderRadius: 50,
-              padding: const EdgeInsets.all(12),
-              child: const Icon(
-                FontAwesomeIcons.arrowLeft,
-                size: 16,
-                color: Colors.white,
-              ),
+          GlassCard(
+            borderRadius: 50,
+            padding: EdgeInsets.zero,
+            child: ActionIcon(
+              icon: AppIcons.arrowLeft(context),
+              onTap: () => Navigator.pop(context),
+              color: context.colors.textPrimary,
+              size: 18, // Slightly larger icon
+              padding: const EdgeInsets.all(16), // Increased hit area
             ),
           ),
 
           Row(
             children: [
               // Favorite toggle
-              GestureDetector(
-                onTap: () => controller.toggleFavorite(),
-                child: Builder(
-                  builder: (context) {
-                    final isFav = controller.isFavorite.watch(context);
-                    return GlassCard(
-                      borderRadius: 50,
-                      padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        isFav
-                            ? FontAwesomeIcons.solidHeart
-                            : FontAwesomeIcons.heart,
-                        size: 16,
-                        color: isFav ? Colors.redAccent : Colors.white60,
-                      ),
-                    );
-                  },
-                ),
+              Builder(
+                builder: (context) {
+                  final isFav = controller.isFavorite.watch(context);
+                  return GlassCard(
+                    borderRadius: 50,
+                    padding: EdgeInsets.zero,
+                    child: ActionIcon(
+                      icon: AppIcons.favorite(context, isFav),
+                      onTap: () => controller.toggleFavorite(),
+                      color: isFav
+                          ? Colors.redAccent
+                          : context.colors.textSecondary,
+                      size: 18, // Slightly larger icon
+                      padding: const EdgeInsets.all(16), // Increased hit area
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 12),
               // Personnalise widgets button
-              GestureDetector(
-                onTap: () {
-                  // TODO: Open widget customization
-                },
-                child: GlassCard(
-                  borderRadius: 20,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.wandMagicSparkles,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Personnalise widgets',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    // TODO: Open widget customization
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: GlassCard(
+                    borderRadius: 20,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          AppIcons.assistant(context),
+                          size: 14,
+                          color: context.colors.textPrimary,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          'Personnalise widgets',
+                          style: TextStyle(
+                            color: context.colors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

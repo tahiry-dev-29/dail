@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:signals_flutter/signals_flutter.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskDetailsSection extends StatelessWidget {
   final TaskEditController controller;
@@ -27,22 +30,14 @@ class TaskDetailsSection extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: Row(
             children: [
-              const Text(
-                'DESCRIPTION',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white54,
-                  letterSpacing: 1.2,
-                ),
-              ),
+              Text('DESCRIPTION', style: context.caption),
               const Spacer(),
               Icon(
                 isExpanded
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                size: 16,
-                color: Colors.white30,
+                    ? AppIcons.chevronUp(context)
+                    : AppIcons.chevronDown(context),
+                size: 14,
+                color: context.colors.textMuted,
               ),
             ],
           ),
@@ -61,20 +56,16 @@ class TaskDetailsSection extends StatelessWidget {
                       text: desc,
                     )..selection = TextSelection.collapsed(offset: desc.length),
                     onChanged: (val) => controller.description.value = val,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
+                    style: context.bodyMedium,
                     maxLines: 4,
                     maxLength: 1000,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Add details, notes, or links...',
-                      hintStyle: TextStyle(color: Colors.white30),
+                      hintStyle: TextStyle(color: context.colors.textMuted),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,
                       counterStyle: TextStyle(
-                        color: Colors.white24,
+                        color: context.colors.textMuted,
                         fontSize: 10,
                       ),
                     ),

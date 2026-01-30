@@ -1,7 +1,7 @@
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/picker_card.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -28,7 +28,7 @@ class TaskDateTimePickers extends StatelessWidget {
           PickerCard(
             label: 'TIME',
             value: time.isEmpty ? 'Set time' : time,
-            icon: FontAwesomeIcons.clock,
+            icon: AppIcons.clock(context),
             color: Colors.blueAccent,
             onTap: () async {
               final tod = await showTimePicker(
@@ -49,7 +49,7 @@ class TaskDateTimePickers extends StatelessWidget {
             value: deadline == null
                 ? 'No deadline'
                 : DateFormat('MMM d, HH:mm').format(deadline),
-            icon: FontAwesomeIcons.flag,
+            icon: AppIcons.calendar(context),
             color: Colors.orangeAccent,
             onTap: () => _handleDeadlineSelection(context),
           ),

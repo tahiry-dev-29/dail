@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:flutter/material.dart';
 
 class TaskTitleInput extends StatelessWidget {
   final TaskEditController controller;
@@ -23,16 +25,12 @@ class TaskTitleInput extends StatelessWidget {
           offset: controller.name.peek().length,
         ),
       onChanged: (val) => controller.name.value = val,
-      style: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-      decoration: const InputDecoration(
+      style: context.h1,
+      decoration: InputDecoration(
         hintText: 'Task Name',
-        hintStyle: TextStyle(color: Colors.white30),
+        hintStyle: TextStyle(color: context.colors.textMuted),
         border: InputBorder.none,
-        counterStyle: TextStyle(color: Colors.white30, fontSize: 10),
+        counterStyle: TextStyle(color: context.colors.textMuted, fontSize: 10),
       ),
       maxLines: null,
       maxLength: 100,
