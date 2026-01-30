@@ -1,5 +1,5 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_edit_controller.dart';
+import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:flutter/material.dart';
 
 class TaskActionBar extends StatelessWidget {

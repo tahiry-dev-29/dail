@@ -1,7 +1,7 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_edit_controller.dart';
+import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

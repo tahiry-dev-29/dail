@@ -4,10 +4,10 @@ import 'package:signals_flutter/signals_flutter.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/task_tile.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
-import 'package:daily_os/features/planner/providers/task_input_provider.dart';
+import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
 
 class ActiveTasksList extends ConsumerWidget {

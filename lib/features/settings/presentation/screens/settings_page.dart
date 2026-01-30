@@ -1,4 +1,4 @@
-import 'package:daily_os/core/utils/glass_scaffold.dart';
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/presentation/components/pro_toggle_card.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_header.dart';

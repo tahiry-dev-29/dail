@@ -1,4 +1,4 @@
-import 'package:daily_os/core/utils/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/presentation/providers/home_signals.dart';

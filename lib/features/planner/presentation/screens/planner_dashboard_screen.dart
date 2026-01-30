@@ -7,11 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/task_tile.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/active_tasks_list.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
-import 'package:daily_os/features/planner/providers/task_input_provider.dart';
+import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:daily_os/features/home/presentation/providers/home_signals.dart';
 import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
 

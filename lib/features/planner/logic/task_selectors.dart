@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/services/task_ia_service.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
 
 // Computed Provider: Tasks filtered by selected date (Performance optimized)

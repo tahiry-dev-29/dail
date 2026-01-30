@@ -1,6 +1,6 @@
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 

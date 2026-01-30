@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:daily_os/core/utils/glass_scaffold.dart';
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_edit_controller.dart';
+import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_edit_header.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_title_input.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_details_section.dart';

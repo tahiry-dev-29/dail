@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_edit_controller.dart';
+import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 
 class TaskTitleInput extends StatelessWidget {
   final TaskEditController controller;

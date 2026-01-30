@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 
 class StatsChart extends ConsumerWidget {
   const StatsChart({super.key});

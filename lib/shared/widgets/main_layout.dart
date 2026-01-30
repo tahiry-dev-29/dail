@@ -1,4 +1,4 @@
-import 'package:daily_os/core/utils/glass_scaffold.dart';
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/ai_chat/presentation/screens/ai_chat_page.dart';
 import 'package:daily_os/features/calendar/presentation/screens/calendar_screen.dart';
 import 'package:daily_os/features/home/presentation/providers/home_signals.dart';

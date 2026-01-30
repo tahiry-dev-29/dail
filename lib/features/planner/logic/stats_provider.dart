@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:daily_os/features/planner/data/stats_model.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/planner/logic/task_list_provider.dart';
 
 // Provider for Monthly Stats (Real Data Aggregation)
 final monthlyTaskStatsProvider = Provider<MonthlyStats>((ref) {

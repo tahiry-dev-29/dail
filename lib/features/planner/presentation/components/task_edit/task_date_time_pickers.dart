@@ -1,5 +1,5 @@
 import 'package:daily_os/design_system/molecules/cards/picker_card.dart';
-import 'package:daily_os/features/planner/presentation/providers/task_edit_controller.dart';
+import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';

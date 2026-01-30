@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:daily_os/features/planner/providers/task_selectors.dart';
+import 'package:daily_os/features/planner/logic/task_selectors.dart';
 import 'package:daily_os/features/settings/presentation/providers/theme_provider.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
