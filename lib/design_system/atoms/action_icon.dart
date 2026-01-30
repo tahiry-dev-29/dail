@@ -16,7 +16,7 @@ class ActionIcon extends StatelessWidget {
     required this.onTap,
     required this.color,
     this.size = 14,
-    this.padding = const EdgeInsets.symmetric(horizontal: 6),
+    this.padding = const EdgeInsets.all(12),
   });
 
   @override
@@ -25,6 +25,7 @@ class ActionIcon extends StatelessWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
+        behavior: HitTestBehavior.opaque,
         child: Padding(
           padding: padding,
           child: Icon(icon, size: size, color: color),

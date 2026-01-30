@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:daily_os/design_system/molecules/buttons/primary_circle_button.dart';
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/logic/home_signals.dart';
-import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
+import 'package:daily_os/features/planner/logic/task_input_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FloatingAddTaskButton extends StatelessWidget {
   const FloatingAddTaskButton({super.key});
@@ -17,9 +17,12 @@ class FloatingAddTaskButton extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return PrimaryCircleButton(
-      icon: FontAwesomeIcons.plus,
-      onTap: () => isAddTaskVisible.value = true,
+    return FloatingActionButton(
+      onPressed: () => isAddTaskVisible.value = true,
+      backgroundColor: context.colors.accent,
+      foregroundColor: Colors.white,
+      elevation: 8,
+      child: Icon(AppIcons.add(context)),
     );
   }
 }

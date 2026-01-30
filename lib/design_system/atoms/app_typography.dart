@@ -3,39 +3,32 @@ import 'package:flutter/material.dart';
 
 class AppTypography {
   static TextStyle get h1 => const TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w900,
+    fontSize: 26,
+    fontWeight: .w700,
     fontFamily: 'Outfit',
+    letterSpacing: -0.5,
   );
 
   static TextStyle get h2 => const TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w800,
+    fontSize: 22,
+    fontWeight: .w600,
     fontFamily: 'Outfit',
+    letterSpacing: -0.3,
   );
 
-  static TextStyle get bodyLarge => const TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    fontFamily: 'Outfit',
-  );
+  static TextStyle get bodyLarge =>
+      const TextStyle(fontSize: 16, fontWeight: .w500, fontFamily: 'Outfit');
 
-  static TextStyle get bodyMedium => const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    fontFamily: 'Outfit',
-  );
+  static TextStyle get bodyMedium =>
+      const TextStyle(fontSize: 14, fontWeight: .w400, fontFamily: 'Outfit');
 
-  static TextStyle get bodySmall => const TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-    fontFamily: 'Outfit',
-  );
+  static TextStyle get bodySmall =>
+      const TextStyle(fontSize: 12, fontWeight: .w400, fontFamily: 'Outfit');
 
   static TextStyle get caption => const TextStyle(
-    fontSize: 10,
-    fontWeight: FontWeight.w800,
-    letterSpacing: 1.2,
+    fontSize: 11,
+    fontWeight: .w700,
+    letterSpacing: 1.1,
     fontFamily: 'Outfit',
   );
 }

@@ -3,7 +3,7 @@ import 'package:daily_os/features/ai_chat/presentation/screens/ai_chat_page.dart
 import 'package:daily_os/features/calendar/presentation/screens/calendar_screen.dart';
 import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:daily_os/features/home/presentation/screens/home_screen.dart';
-import 'package:daily_os/features/planner/presentation/components/task_form/add_task_inline.dart';
+import 'package:daily_os/features/planner/logic/task_input_provider.dart';
 import 'package:daily_os/features/planner/presentation/screens/planner_dashboard_screen.dart';
 import 'package:daily_os/features/settings/logic/theme_provider.dart';
 import 'package:daily_os/shared/widgets/atomic_header.dart';

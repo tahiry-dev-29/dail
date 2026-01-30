@@ -1,4 +1,5 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class PickerCard extends StatelessWidget {
@@ -47,8 +48,8 @@ class PickerCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.colors.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),

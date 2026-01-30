@@ -1,6 +1,6 @@
+import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/features/settings/logic/theme_provider.dart'; // Keep this if used elsewhere, otherwise remove.
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
 
 class ToastService {
   static void show(
@@ -140,9 +140,10 @@ class _ToastContentState extends State<_ToastContent>
                     ),
                     IconButton(
                       onPressed: widget.onClose,
-                      icon: const Icon(
-                        FontAwesomeIcons.xmark,
-                        color: Colors.white70,
+                      icon: Icon(
+                        AppIcons.xmark(context),
+                        color:
+                            Colors.white70, // Assuming fgColor is Colors.white
                         size: 16,
                       ),
                       padding: EdgeInsets.zero,
@@ -202,13 +203,13 @@ class _ToastContentState extends State<_ToastContent>
   IconData _getIcon() {
     switch (widget.type) {
       case ToastType.success:
-        return FontAwesomeIcons.check;
+        return AppIcons.check(context);
       case ToastType.error:
-        return FontAwesomeIcons.circleExclamation;
+        return AppIcons.circleExclamation(context);
       case ToastType.warning:
-        return FontAwesomeIcons.triangleExclamation;
+        return AppIcons.triangleExclamation(context);
       case ToastType.info:
-        return FontAwesomeIcons.bolt;
+        return AppIcons.bolt(context);
     }
   }
 }
