@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/task_model.dart';
-import '../services/task_ia_service.dart';
-import 'task_provider.dart';
-import '../../calendar/providers/calendar_provider.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/services/task_ia_service.dart';
+import 'package:daily_os/features/planner/presentation/providers/task_list_provider.dart';
+import 'package:daily_os/features/calendar/presentation/providers/calendar_provider.dart';
 
 // Computed Provider: Tasks filtered by selected date (Performance optimized)
-final filteredTasksProvider = Provider<List<Task>>((ref) {
+final filteredTasksProvider = Provider<List<TaskEntity>>((ref) {
   // 2026 Bridge Fix: Avoid circular initialization by skipping the first call
   // which is triggered immediately upon subscription.
   bool initialized = false;
@@ -19,7 +19,8 @@ final filteredTasksProvider = Provider<List<Task>>((ref) {
   ref.onDispose(sub);
   initialized = true;
 
-  final allTasks = ref.watch(taskProvider);
+  final allTasksAsync = ref.watch(taskListProvider);
+  final allTasks = allTasksAsync.value ?? [];
   final selectedDate = calendarState.selectedDate.value;
 
   return allTasks.where((t) {
@@ -29,7 +30,7 @@ final filteredTasksProvider = Provider<List<Task>>((ref) {
 });
 
 // Computed: Active tasks only
-final activeTasksProvider = Provider<List<Task>>((ref) {
+final activeTasksProvider = Provider<List<TaskEntity>>((ref) {
   final tasks = ref.watch(filteredTasksProvider);
   final now = DateTime.now();
 
@@ -41,11 +42,11 @@ final activeTasksProvider = Provider<List<Task>>((ref) {
 });
 
 // Computed: Ignored tasks only
-final ignoredTasksProvider = Provider<List<Task>>((ref) {
+final ignoredTasksProvider = Provider<List<TaskEntity>>((ref) {
   final tasks = ref.watch(filteredTasksProvider);
   final now = DateTime.now();
 
-  final List<Task> ignored = [];
+  final List<TaskEntity> ignored = [];
 
   for (final t in tasks) {
     if (t.isDone) continue;
@@ -66,7 +67,7 @@ final ignoredTasksProvider = Provider<List<Task>>((ref) {
 });
 
 // Computed: Completed tasks only
-final completedTasksProvider = Provider<List<Task>>((ref) {
+final completedTasksProvider = Provider<List<TaskEntity>>((ref) {
   return ref.watch(filteredTasksProvider).where((t) => t.isDone).toList();
 });
 

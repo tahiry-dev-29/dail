@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 
 // ============================================================================
 // DRAFT SIGNAL - Persists task input data even when widget closes
 // ============================================================================
 final taskDraftSignal = signal<Map<String, dynamic>>({});
+final parentTaskSignal = signal<TaskEntity?>(null);
 
 /// Save current form state to draft
 void saveDraft({
   required String name,
   required String description,
-  required String time,
+  required String? time,
   required DateTime? deadline,
   required bool isFavorite,
 }) {
@@ -27,6 +29,7 @@ void saveDraft({
 /// Clear draft after successful save
 void clearDraft() {
   taskDraftSignal.value = {};
+  parentTaskSignal.value = null;
 }
 
 /// Check if there's an active draft
@@ -44,8 +47,7 @@ final taskInputProvider = Provider.autoDispose
         if (draft['name']?.toString().isNotEmpty == true) 'name': draft['name'],
         if (draft['description']?.toString().isNotEmpty == true)
           'description': draft['description'],
-        if (draft['time'] != null && draft['time'] != '00:00')
-          'time': draft['time'],
+        if (draft['time'] != null) 'time': draft['time'],
         if (draft['deadline'] != null) 'deadline': draft['deadline'],
         if (draft['isFavorite'] == true) 'isFavorite': draft['isFavorite'],
       };
@@ -79,14 +81,14 @@ class TaskInputState {
   // UI Signals
   final isDescriptionExpanded = signal(false);
   final isFavorite = signal(false);
-  final time = signal('00:00');
+  final time = signal<String?>(null);
   final deadline = signal<DateTime?>(null);
 
   TaskInputState(Map<String, dynamic> data) {
     nameController.text = data['name'] ?? '';
     descController.text = data['description'] ?? '';
     isFavorite.value = data['isFavorite'] ?? false;
-    time.value = data['time'] ?? '00:00';
+    time.value = data['time'];
     deadline.value = data['deadline'];
 
     if (descController.text.isNotEmpty) isDescriptionExpanded.value = true;
@@ -108,6 +110,29 @@ class TaskInputState {
       deadline: deadline.peek(),
       isFavorite: isFavorite.peek(),
     );
+  }
+
+  /// Reset form state and clear draft
+  void reset() {
+    // Stop listening to prevent saving empty draft during reset
+    nameController.removeListener(_onContentChanged);
+    descController.removeListener(_onContentChanged);
+
+    nameController.clear();
+    descController.clear();
+    isFavorite.value = false;
+    time.value = null;
+    deadline.value = null;
+    isDescriptionExpanded.value = false;
+
+    clearDraft();
+
+    // Re-attach listeners
+    nameController.addListener(_onContentChanged);
+    descController.addListener(_onContentChanged);
+
+    // Keep focus on name input for rapid entry
+    focusNode.requestFocus();
   }
 
   void dispose() {

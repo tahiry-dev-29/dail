@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../data/task_model.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 
 class TaskIaService {
   /// Checks if a task is overdue (IA Auto-Ignore Logic)
   /// A task is overdue if:
   /// 1. Its date is in the past (before today)
   /// 2. Its date is today AND its time has already passed
-  static bool isTaskOverdue(Task t, DateTime now) {
+  static bool isTaskOverdue(TaskEntity t, DateTime now) {
     // Skip already handled states
     if (t.isDone || t.isIgnored) return false;
 
