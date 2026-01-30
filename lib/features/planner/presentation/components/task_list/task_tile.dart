@@ -1,3 +1,4 @@
+import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
@@ -128,7 +129,7 @@ class TaskTile extends StatelessWidget {
                           const Spacer(),
 
                           // Action Icons (Right side)
-                          _ActionIcon(
+                          ActionIcon(
                             icon: task.isFavorite
                                 ? FontAwesomeIcons.solidHeart
                                 : FontAwesomeIcons.heart,
@@ -136,15 +137,17 @@ class TaskTile extends StatelessWidget {
                                 ? Colors.redAccent
                                 : mutedIcon.withValues(alpha: 0.4),
                             onTap: onFavorite ?? () {},
+                            padding: const EdgeInsets.all(4),
                           ),
                           const SizedBox(width: 8),
-                          _ActionIcon(
+                          ActionIcon(
                             icon: FontAwesomeIcons.trash,
                             color: mutedIcon.withValues(alpha: 0.4),
                             onTap: () {
                               onDelete();
                               ToastService.error(context, '🗑️ Supprimée');
                             },
+                            padding: const EdgeInsets.all(4),
                           ),
                         ],
                       ),
@@ -327,33 +330,6 @@ class _SubtaskIndicator extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ActionIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionIcon({
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Icon(icon, color: color, size: 14),
-        ),
-      ),
     );
   }
 }

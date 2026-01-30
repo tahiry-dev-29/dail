@@ -1,7 +1,8 @@
+import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -98,7 +99,9 @@ class SubtaskListManager extends ConsumerWidget {
                             child: child,
                           );
                         },
-                        children: subtasks.map((st) {
+                        children: subtasks.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final st = entry.value;
                           final isEditing = editingId == st.id;
 
                           if (isEditing) {
@@ -145,7 +148,7 @@ class SubtaskListManager extends ConsumerWidget {
 
                           return ReorderableDragStartListener(
                             key: ValueKey(st.id),
-                            index: subtasks.indexOf(st),
+                            index: index,
                             child: MouseRegion(
                               cursor: SystemMouseCursors.grab,
                               child: Padding(
@@ -213,7 +216,7 @@ class SubtaskListManager extends ConsumerWidget {
                                           ),
                                         ),
                                       // Direct Action Icons
-                                      _ActionIcon(
+                                      ActionIcon(
                                         icon:
                                             FontAwesomeIcons.arrowUpFromBracket,
                                         onTap: () {
@@ -222,13 +225,13 @@ class SubtaskListManager extends ConsumerWidget {
                                         },
                                         color: Colors.blueAccent,
                                       ),
-                                      _ActionIcon(
+                                      ActionIcon(
                                         icon: FontAwesomeIcons.eye,
                                         onTap: () =>
                                             controller.setEditingSubtask(st.id),
                                         color: Colors.white30,
                                       ),
-                                      _ActionIcon(
+                                      ActionIcon(
                                         icon: FontAwesomeIcons.trash,
                                         onTap: () {
                                           controller.deleteSubtask(st.id);
@@ -292,32 +295,6 @@ class SubtaskListManager extends ConsumerWidget {
         ),
         const SizedBox(height: 48),
       ],
-    );
-  }
-}
-
-class _ActionIcon extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color color;
-
-  const _ActionIcon({
-    required this.icon,
-    required this.onTap,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: Icon(icon, size: 14, color: color),
-        ),
-      ),
     );
   }
 }
