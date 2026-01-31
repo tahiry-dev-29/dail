@@ -13,6 +13,8 @@ class FolderEntity {
   final bool isDeleted; // Soft delete for trash
   final List<FolderEntity> children;
   final List<PageEntity> pages;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const FolderEntity({
     required this.id,
@@ -26,6 +28,8 @@ class FolderEntity {
     this.isDeleted = false,
     this.children = const [],
     this.pages = const [],
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   /// Check if this is a root folder
@@ -49,6 +53,8 @@ class FolderEntity {
     bool? isDeleted,
     List<FolderEntity>? children,
     List<PageEntity>? pages,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return FolderEntity(
       id: id ?? this.id,
@@ -62,6 +68,8 @@ class FolderEntity {
       isDeleted: isDeleted ?? this.isDeleted,
       children: children ?? this.children,
       pages: pages ?? this.pages,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 }

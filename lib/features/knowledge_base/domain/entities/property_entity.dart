@@ -17,7 +17,7 @@ enum PriorityLevel { none, low, medium, high, urgent }
 /// Property entity - Dynamic metadata for pages
 ///
 /// Value types by PropertyType:
-/// - tags: List<String>
+/// - tags: `List<String>`
 /// - date: DateTime
 /// - priority: PriorityLevel
 /// - status: String
@@ -25,7 +25,7 @@ enum PriorityLevel { none, low, medium, high, urgent }
 /// - text: String
 /// - checkbox: bool
 /// - select: String
-/// - multiSelect: List<String>
+/// - multiSelect: `List<String>`
 class PropertyEntity {
   final String id;
   final String pageId;
