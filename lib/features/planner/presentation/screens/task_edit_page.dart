@@ -9,30 +9,35 @@ import 'package:daily_os/features/planner/presentation/components/task_edit/task
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_edit_header.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_title_input.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TaskEditPage extends ConsumerWidget {
+class TaskEditPage extends StatefulWidget {
   final TaskEntity task;
 
   const TaskEditPage({super.key, required this.task});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Initialize Controller (AutoDispose handles lifecycle)
-    final controller = ref.watch(taskEditControllerProvider(task));
+  State<TaskEditPage> createState() => _TaskEditPageState();
+}
 
-    // 2. Define Save Action
-    void onSave() => controller.save(ref);
+class _TaskEditPageState extends State<TaskEditPage> {
+  late final TaskEditController controller;
 
+  @override
+  void initState() {
+    super.initState();
+    controller = TaskEditController(widget.task);
+  }
+
+  void onSave() => controller.save();
+
+  @override
+  Widget build(BuildContext context) {
     return GlassScaffold(
       body: CustomScrollView(
         slivers: [
-          // Header (Sliver version if compatible, or SliverToBoxAdapter)
           SliverToBoxAdapter(
             child: TaskEditHeader(controller: controller, onSave: onSave),
           ),
-
-          // Body Content
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             sliver: SliverToBoxAdapter(
@@ -40,7 +45,6 @@ class TaskEditPage extends ConsumerWidget {
                 crossAxisAlignment: .start,
                 children: [
                   const SizedBox(height: 12),
-                  // List Category
                   Row(
                     children: [
                       Text(
@@ -60,11 +64,8 @@ class TaskEditPage extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-
-                  // Inputs
                   TaskTitleInput(controller: controller, onSave: onSave),
                   const SizedBox(height: 24),
-
                   TaskDetailsSection(controller: controller, onSave: onSave),
                   TaskDateTimePickers(controller: controller, onSave: onSave),
                   SubtaskListManager(controller: controller, onSave: onSave),
@@ -72,8 +73,6 @@ class TaskEditPage extends ConsumerWidget {
               ),
             ),
           ),
-
-          // Bottom Bar (Fixed at bottom via another mechanism or simply last sliver)
           SliverFillRemaining(
             hasScrollBody: false,
             fillOverscroll: true,

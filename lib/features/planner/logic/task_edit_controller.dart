@@ -1,7 +1,6 @@
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/logic/task_list_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_os/features/planner/logic/planner_signals.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskEditController {
@@ -25,7 +24,6 @@ class TaskEditController {
   // ---------------------------------------------------------------------------
   final Signal<bool> isAddingSubtask = Signal(false);
   final Signal<String?> editingSubtaskId = Signal(null);
-  // On initialise à false, on ouvrira si besoin dans le constructeur
   final Signal<bool> isDescriptionExpanded = Signal(false);
   final Signal<bool> isSubtasksExpanded = Signal(false);
 
@@ -90,10 +88,7 @@ class TaskEditController {
       isDone: false,
     );
 
-    // La magie de ListSignal : pas besoin de cloner la liste
     subtasks.add(newSubtask);
-
-    // Reset UI state
     isAddingSubtask.value = false;
   }
 
@@ -109,7 +104,6 @@ class TaskEditController {
     if (index == -1) return;
 
     final current = subtasks[index];
-    // Modification directe via l'index (optimisé par ListSignal)
     subtasks[index] = current.copyWith(
       name: name ?? current.name,
       description: description ?? current.description,
@@ -141,28 +135,26 @@ class TaskEditController {
   }
 
   /// Promeut une sous-tâche en tâche principale
-  void promoteSubtask(String id, WidgetRef ref) {
+  void promoteSubtask(String id) {
     final index = subtasks.indexWhere((s) => s.id == id);
     if (index == -1) return;
 
     final subtask = subtasks[index];
     deleteSubtask(id); // Retire de la liste locale
 
-    // Ajoute à la liste globale via le provider parent
-    ref
-        .read(taskListProvider.notifier)
-        .addTask(
-          name: subtask.name,
-          description: subtask.description,
-          time: subtask.time,
-          date: initialTask.date ?? DateTime.now(), // Garde la date du parent
-          deadline: subtask.deadline,
-          isFavorite: subtask.isFavorite,
-        );
+    // Ajoute à la liste globale via le controller global
+    plannerController.addTask(
+      name: subtask.name,
+      description: subtask.description,
+      time: subtask.time,
+      date: initialTask.date ?? DateTime.now(),
+      deadline: subtask.deadline,
+      isFavorite: subtask.isFavorite,
+    );
   }
 
   /// Sauvegarde finale
-  void save(WidgetRef ref) {
+  void save() {
     final updatedTask = initialTask.copyWith(
       name: name.value,
       description: description.value,
@@ -170,15 +162,9 @@ class TaskEditController {
       deadline: deadline.value,
       isFavorite: isFavorite.value,
       isDone: isDone.value,
-      subtasks: subtasks.toList(), // Conversion ListSignal -> List
+      subtasks: subtasks.toList(),
     );
 
-    ref.read(taskListProvider.notifier).updateTask(updatedTask);
+    plannerController.updateTask(updatedTask);
   }
 }
-
-// Le Provider unique
-final taskEditControllerProvider = Provider.autoDispose
-    .family<TaskEditController, TaskEntity>((ref, task) {
-      return TaskEditController(task);
-    });

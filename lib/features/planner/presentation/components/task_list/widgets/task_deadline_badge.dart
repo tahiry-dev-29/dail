@@ -1,4 +1,3 @@
-import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -18,14 +17,14 @@ class TaskDeadlineBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: .min,
         children: [
-          Icon(AppIcons.clock(context), size: 9, color: Colors.orange),
+          const Icon(Icons.timer_outlined, size: 11, color: Colors.orange),
           const SizedBox(width: 4),
           Text(
             DateFormat('HH:mm').format(deadline),
             style: const TextStyle(
               color: Colors.orange,
-              fontSize: 10,
-              fontWeight: .w600,
+              fontSize: 11,
+              fontWeight: .w700,
             ),
           ),
         ],

@@ -5,10 +5,7 @@ import 'package:daily_os/features/knowledge_base/data/datasources/local/property
 import 'package:daily_os/features/knowledge_base/data/datasources/local/workspace_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/workspace_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/repositories/knowledge_repository_impl.dart';
-import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/folder_entity.dart';
-import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
-import 'package:daily_os/features/knowledge_base/domain/entities/property_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/workspace_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -96,7 +93,7 @@ void main() {
 
     test('createFolder should call save on datasource', () async {
       when(mockFolderDatasource.save(any)).thenAnswer((_) async {
-        return null;
+        return;
       });
 
       await repository.createFolder(tFolderEntity);
@@ -118,7 +115,7 @@ void main() {
   group('KnowledgeRepositoryImpl - Pages', () {
     test('softDeletePage should call softDelete on datasource', () async {
       when(mockPageDatasource.softDelete('page1')).thenAnswer((_) async {
-        return null;
+        return;
       });
 
       await repository.deletePage('page1');
@@ -132,7 +129,7 @@ void main() {
       when(mockBlockDatasource.reorder('page1', ['b1', 'b2'])).thenAnswer((
         _,
       ) async {
-        return null;
+        return;
       });
 
       await repository.reorderBlocks('page1', ['b1', 'b2']);
@@ -144,7 +141,7 @@ void main() {
   group('KnowledgeRepositoryImpl - Trash', () {
     test('restorePage should call restore on datasource', () async {
       when(mockPageDatasource.restore('page1')).thenAnswer((_) async {
-        return null;
+        return;
       });
 
       await repository.restorePage('page1');

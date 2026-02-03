@@ -1,4 +1,3 @@
-import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -48,18 +47,18 @@ class TaskCheckCircle extends StatelessWidget {
                 : null,
           ),
           child: isDone
-              ? Center(
+              ? const Center(
                   child: Icon(
-                    AppIcons.check(context),
-                    size: 11,
+                    Icons.check_rounded,
+                    size: 14,
                     color: Colors.white,
                   ),
                 )
               : (isIgnored
-                    ? Center(
+                    ? const Center(
                         child: Icon(
-                          AppIcons.xmark(context),
-                          size: 10,
+                          Icons.close_rounded,
+                          size: 12,
                           color: Colors.red,
                         ),
                       )

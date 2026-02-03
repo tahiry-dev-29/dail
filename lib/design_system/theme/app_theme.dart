@@ -13,18 +13,18 @@ class AppTheme {
 
   // Modern Glass Colors
   // Light Mode: "Icy/Ceramic" look (White with variable opacity)
-  static Color get lightGlass => Colors.white.withValues(alpha: 0.65);
-  static Color get lightGlassBorder => Colors.white.withValues(alpha: 0.6);
+  static Color get lightGlass => Colors.white.withValues(alpha: 0.7);
+  static Color get lightGlassBorder => Colors.white.withValues(alpha: 0.5);
 
   // Dark Mode: "Deep Space" look (White/Black tint with low opacity)
   static Color get darkGlass => const Color(0xFF0F172A).withValues(alpha: 0.6);
-  static Color get darkGlassBorder => Colors.white.withValues(alpha: 0.1);
+  static Color get darkGlassBorder => Colors.white.withValues(alpha: 0.12);
 
   // Text Colors - Modern High Contrast
   static const Color lightTextPrimary = Color(0xFF0F172A); // Slate-900
   static const Color lightTextSecondary = Color(0xFF64748B); // Slate-500
-  static const Color darkTextPrimary = Colors.white;
-  static const Color darkTextSecondary = Colors.white70;
+  static const Color darkTextPrimary = Color(0xFFF8FAFC); // Slate-50
+  static const Color darkTextSecondary = Color(0xFFCBD5E1); // Slate-300
 
   // ===========================================================================
   // THEME DATA GENERATORS
@@ -43,8 +43,17 @@ class AppTheme {
         surface: lightGlass,
         onSurface: lightTextPrimary,
         outline: lightGlassBorder,
+        error: const Color(0xFFEF4444), // red-500
       ),
       useMaterial3: true,
+      cardTheme: CardThemeData(
+        color: lightGlass,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: lightGlassBorder),
+        ),
+      ),
       textTheme: textTheme.apply(
         bodyColor: lightTextPrimary,
         displayColor: lightTextPrimary,
@@ -79,8 +88,17 @@ class AppTheme {
         surface: darkGlass,
         onSurface: darkTextPrimary,
         outline: darkGlassBorder,
+        error: const Color(0xFFF87171), // red-400
       ),
       useMaterial3: true,
+      cardTheme: CardThemeData(
+        color: darkGlass,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: darkGlassBorder),
+        ),
+      ),
       textTheme: textTheme.apply(
         bodyColor: darkTextPrimary,
         displayColor: darkTextPrimary,

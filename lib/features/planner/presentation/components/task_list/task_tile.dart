@@ -1,5 +1,4 @@
 import 'package:daily_os/design_system/atoms/action_icon.dart';
-import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
@@ -80,6 +79,7 @@ class TaskTile extends StatelessWidget {
                           color: task.isDone
                               ? colors.textSecondary.withValues(alpha: 0.5)
                               : colors.textPrimary,
+                          fontWeight: .w600,
                         ),
                       ),
                       if (task.description.isNotEmpty)
@@ -93,13 +93,13 @@ class TaskTile extends StatelessWidget {
                               ),
                             ),
                             maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            overflow: .ellipsis,
                           ),
                         ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
-                        spacing: 6,
-                        runSpacing: 4,
+                        spacing: 8,
+                        runSpacing: 6,
                         crossAxisAlignment: .center,
                         children: [
                           if (task.time.isNotEmpty && task.time != '00:00')
@@ -126,24 +126,24 @@ class TaskTile extends StatelessWidget {
                   children: [
                     ActionIcon(
                       icon: task.isFavorite
-                          ? AppIcons.favorite(context, true)
-                          : AppIcons.favorite(context, false),
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
                       onTap: onFavorite ?? () {},
                       color: task.isFavorite
-                          ? Colors.redAccent
+                          ? Colors.orangeAccent
                           : colors.textSecondary.withValues(alpha: 0.3),
-                      size: 16,
+                      size: 18,
                       padding: const EdgeInsets.all(8),
                     ),
                     const SizedBox(height: 4),
                     ActionIcon(
-                      icon: AppIcons.delete(context),
+                      icon: Icons.delete_outline_rounded,
                       onTap: () {
                         onDelete();
                         ToastService.error(context, '🗑️ Supprimée');
                       },
                       color: colors.textSecondary.withValues(alpha: 0.2),
-                      size: 14,
+                      size: 16,
                       padding: const EdgeInsets.all(8),
                     ),
                   ],

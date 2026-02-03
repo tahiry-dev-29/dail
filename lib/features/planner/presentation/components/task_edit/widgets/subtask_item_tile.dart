@@ -7,10 +7,9 @@ import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class SubtaskItemTile extends ConsumerWidget {
+class SubtaskItemTile extends StatelessWidget {
   final SubTaskEntity st;
   final bool isEditing;
   final TaskEditController controller;
@@ -27,7 +26,7 @@ class SubtaskItemTile extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (isEditing) {
       return Padding(
         key: ValueKey('edit_${st.id}'),
@@ -129,7 +128,7 @@ class SubtaskItemTile extends ConsumerWidget {
                 ActionIcon(
                   icon: AppIcons.promote(context),
                   onTap: () {
-                    controller.promoteSubtask(st.id, ref);
+                    controller.promoteSubtask(st.id);
                     onSave();
                   },
                   color: Colors.blueAccent,

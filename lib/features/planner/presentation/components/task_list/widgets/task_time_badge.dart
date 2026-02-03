@@ -17,18 +17,19 @@ class TaskTimeBadge extends StatelessWidget {
     final color = isOverdue ? Colors.red : accent;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Text(
         time,
         style: TextStyle(
           color: color,
           fontSize: 11,
-          fontWeight: .w700,
-          fontFamily: 'monospace',
+          fontWeight: .bold,
+          letterSpacing: 0.3,
         ),
       ),
     );
