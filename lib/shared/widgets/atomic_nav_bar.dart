@@ -46,6 +46,13 @@ class AtomicNavBar extends StatelessWidget {
                 colors: colors,
               ),
               _NavButton(
+                icon: Icons.book_outlined,
+                label: 'Docs',
+                isActive: current == AppTabs.knowledge.index,
+                onTap: () => switchTab(AppTabs.knowledge.index),
+                colors: colors,
+              ),
+              _NavButton(
                 icon: AppIcons.assistant(context),
                 label: 'Assistant',
                 isActive: current == AppTabs.aiChat.index,

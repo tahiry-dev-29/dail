@@ -25,6 +25,13 @@ class PageLocalDatasource {
   Future<void> save(PageDTO page) async {
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
+      final existing = await isar.pageDTOs
+          .filter()
+          .uidEqualTo(page.uid)
+          .findFirst();
+      if (existing != null) {
+        page.id = existing.id;
+      }
       page.updatedAt = DateTime.now();
       await isar.pageDTOs.put(page);
     });

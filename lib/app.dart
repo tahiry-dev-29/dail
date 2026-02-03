@@ -1,19 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:signals_flutter/signals_flutter.dart';
+import 'package:daily_os/core/router/app_router.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/logic/theme_provider.dart';
-import 'package:daily_os/shared/widgets/main_layout.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class DailyOsApp extends StatelessWidget {
+class DailyOsApp extends ConsumerWidget {
   const DailyOsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Watch Theme Mode Signal
     final mode = themeModeSignal.watch(context);
     final accent = accentColorSignal.watch(context);
     final fontFamily = fontSignal.watch(context);
+    final router = ref.watch(appRouterProvider);
 
     // Convert to ThemeMode enum
     ThemeMode getThemeMode() {
@@ -24,7 +26,7 @@ class DailyOsApp extends StatelessWidget {
       };
     }
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'DailyOS',
       debugShowCheckedModeBanner: false,
       themeMode: getThemeMode(),
@@ -36,7 +38,7 @@ class DailyOsApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('en', ''), Locale('fr', '')],
-      home: const MainLayout(),
+      routerConfig: router,
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 final currentTab = signal<int>(0);
 
 // Tab names for clarity
-enum AppTabs { home, planner, calendar, aiChat }
+enum AppTabs { home, planner, calendar, knowledge, aiChat }
 
 // Function to switch tabs
 void switchTab(int index) {

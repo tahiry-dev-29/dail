@@ -1,6 +1,7 @@
 import 'package:daily_os/features/knowledge_base/data/datasources/local/block_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/folder_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/page_local_datasource.dart';
+import 'package:daily_os/features/knowledge_base/data/datasources/local/property_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/workspace_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/folder_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/page_dto.dart';
@@ -19,6 +20,7 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   final FolderLocalDatasource _folderDatasource;
   final PageLocalDatasource _pageDatasource;
   final BlockLocalDatasource _blockDatasource;
+  final PropertyLocalDatasource _propertyDatasource;
   final Uuid _uuid;
 
   KnowledgeRepositoryImpl({
@@ -26,11 +28,13 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
     FolderLocalDatasource? folderDatasource,
     PageLocalDatasource? pageDatasource,
     BlockLocalDatasource? blockDatasource,
+    PropertyLocalDatasource? propertyDatasource,
     Uuid? uuid,
   }) : _workspaceDatasource = workspaceDatasource ?? WorkspaceLocalDatasource(),
        _folderDatasource = folderDatasource ?? FolderLocalDatasource(),
        _pageDatasource = pageDatasource ?? PageLocalDatasource(),
        _blockDatasource = blockDatasource ?? BlockLocalDatasource(),
+       _propertyDatasource = propertyDatasource ?? PropertyLocalDatasource(),
        _uuid = uuid ?? const Uuid();
 
   // ============ Workspace Operations ============
@@ -166,6 +170,7 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   @override
   Future<void> permanentlyDeletePage(String id) async {
     await _blockDatasource.deleteAllForPage(id);
+    await _propertyDatasource.deleteAllForPage(id);
     await _pageDatasource.permanentlyDelete(id);
   }
 
@@ -203,27 +208,27 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
     await _blockDatasource.reorder(pageId, blockIds);
   }
 
-  // ============ Property Operations (TODO) ============
+  // ============ Property Operations ============
 
   @override
   Future<List<PropertyEntity>> getProperties(String pageId) async {
-    // TODO: Implement when PropertyLocalDatasource is created
-    return [];
+    final dtos = await _propertyDatasource.getByPage(pageId);
+    return dtos.map((dto) => dto.toEntity()).toList();
   }
 
   @override
   Future<void> addProperty(PropertyEntity property) async {
-    // TODO: Implement
+    await _propertyDatasource.save(property.toDTO());
   }
 
   @override
   Future<void> updateProperty(PropertyEntity property) async {
-    // TODO: Implement
+    await _propertyDatasource.save(property.toDTO());
   }
 
   @override
   Future<void> deleteProperty(String id) async {
-    // TODO: Implement
+    await _propertyDatasource.delete(id);
   }
 
   // ============ Trash Operations ============

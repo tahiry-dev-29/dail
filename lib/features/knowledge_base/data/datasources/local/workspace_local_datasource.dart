@@ -20,6 +20,13 @@ class WorkspaceLocalDatasource {
   Future<void> save(WorkspaceDTO workspace) async {
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
+      final existing = await isar.workspaceDTOs
+          .filter()
+          .uidEqualTo(workspace.uid)
+          .findFirst();
+      if (existing != null) {
+        workspace.id = existing.id;
+      }
       await isar.workspaceDTOs.put(workspace);
     });
   }

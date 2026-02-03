@@ -47,6 +47,14 @@ class FolderLocalDatasource {
   Future<void> save(FolderDTO folder) async {
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
+      // Check for existing to prevent unique constraint violation
+      final existing = await isar.folderDTOs
+          .filter()
+          .uidEqualTo(folder.uid)
+          .findFirst();
+      if (existing != null) {
+        folder.id = existing.id;
+      }
       folder.updatedAt = DateTime.now();
       await isar.folderDTOs.put(folder);
     });

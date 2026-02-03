@@ -24,6 +24,13 @@ class BlockLocalDatasource {
   Future<void> save(BlockDTO block) async {
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
+      final existing = await isar.blockDTOs
+          .filter()
+          .uidEqualTo(block.uid)
+          .findFirst();
+      if (existing != null) {
+        block.id = existing.id;
+      }
       await isar.blockDTOs.put(block);
     });
   }
@@ -32,6 +39,15 @@ class BlockLocalDatasource {
   Future<void> saveAll(List<BlockDTO> blocks) async {
     final isar = await IsarService.instance;
     await isar.writeTxn(() async {
+      for (final block in blocks) {
+        final existing = await isar.blockDTOs
+            .filter()
+            .uidEqualTo(block.uid)
+            .findFirst();
+        if (existing != null) {
+          block.id = existing.id;
+        }
+      }
       await isar.blockDTOs.putAll(blocks);
     });
   }
