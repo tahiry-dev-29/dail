@@ -1,7 +1,8 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/settings_provider.dart';
+import 'package:daily_os/features/settings/presentation/state/settings_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -10,8 +11,9 @@ class ProToggleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsVM = sl<SettingsViewModel>();
     final colors = context.colors;
-    final isPro = isDailyOsProEnabled.watch(context);
+    final isPro = settingsVM.isDailyOsProEnabled.watch(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -69,7 +71,7 @@ class ProToggleCard extends StatelessWidget {
           ),
           Switch(
             value: isPro,
-            onChanged: (v) => isDailyOsProEnabled.value = v,
+            onChanged: (v) => settingsVM.togglePro(v),
             activeTrackColor: colors.accent,
           ),
         ],

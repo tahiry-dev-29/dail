@@ -1,8 +1,9 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/settings_provider.dart';
+import 'package:daily_os/features/settings/presentation/state/settings_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -11,10 +12,11 @@ class NotificationSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sounds = notificationSoundsEnabled.watch(context);
-    final alerts = notificationAlertsEnabled.watch(context);
-    final reminders = notificationRemindersEnabled.watch(context);
-    final minutes = reminderMinutesBefore.watch(context);
+    final settingsVM = sl<SettingsViewModel>();
+    final sounds = settingsVM.notificationSoundsEnabled.watch(context);
+    final alerts = settingsVM.notificationAlertsEnabled.watch(context);
+    final reminders = settingsVM.notificationRemindersEnabled.watch(context);
+    final minutes = settingsVM.reminderMinutesBefore.watch(context);
 
     final colors = context.colors;
 
@@ -61,7 +63,7 @@ class NotificationSettingsPage extends StatelessWidget {
                   title: 'Sons',
                   subtitle: 'Sons de notification',
                   value: sounds,
-                  onChanged: (v) => notificationSoundsEnabled.value = v,
+                  onChanged: (v) => settingsVM.toggleNotificationSounds(v),
                 ),
                 _SettingsTile(
                   icon: AppIcons.bell(context),
@@ -69,7 +71,7 @@ class NotificationSettingsPage extends StatelessWidget {
                   title: 'Alertes',
                   subtitle: 'Afficher les alertes push',
                   value: alerts,
-                  onChanged: (v) => notificationAlertsEnabled.value = v,
+                  onChanged: (v) => settingsVM.toggleNotificationAlerts(v),
                 ),
                 _SettingsTile(
                   icon: AppIcons.clock(context),
@@ -77,7 +79,7 @@ class NotificationSettingsPage extends StatelessWidget {
                   title: 'Rappels',
                   subtitle: 'Rappels avant les tâches',
                   value: reminders,
-                  onChanged: (v) => notificationRemindersEnabled.value = v,
+                  onChanged: (v) => settingsVM.toggleNotificationReminders(v),
                 ),
                 const SizedBox(height: 24),
                 // Reminder time selector
@@ -105,7 +107,7 @@ class NotificationSettingsPage extends StatelessWidget {
                               (m) => _TimeChip(
                                 minutes: m,
                                 isSelected: minutes == m,
-                                onTap: () => reminderMinutesBefore.value = m,
+                                onTap: () => settingsVM.setReminderMinutes(m),
                               ),
                             )
                             .toList(),

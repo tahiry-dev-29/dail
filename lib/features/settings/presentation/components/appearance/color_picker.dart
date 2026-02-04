@@ -1,17 +1,18 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ColorPicker extends ConsumerWidget {
+class ColorPicker extends StatelessWidget {
   final Color selectedColor;
 
   const ColorPicker({required this.selectedColor, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = ref.watch(allAccentColors);
+  Widget build(BuildContext context) {
+    final themeVM = sl<ThemeViewModel>();
+    final colors = themeVM.getAllAccentColors();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -27,12 +28,12 @@ class ColorPicker extends ConsumerWidget {
             (color) => ColorChip(
               color: color,
               isSelected: selectedColor.toARGB32() == color.toARGB32(),
-              onTap: () => setAccentColor(color),
+              onTap: () => themeVM.setAccentColor(color),
             ),
           ),
           // Plus button for custom color
           GestureDetector(
-            onTap: () => _showColorPickerDialog(context),
+            onTap: () => _showColorPickerDialog(context, themeVM),
             child: Container(
               width: 44,
               height: 44,
@@ -53,7 +54,7 @@ class ColorPicker extends ConsumerWidget {
     );
   }
 
-  void _showColorPickerDialog(BuildContext context) {
+  void _showColorPickerDialog(BuildContext context, ThemeViewModel themeVM) {
     showDialog(
       context: context,
       builder: (context) {
@@ -95,7 +96,7 @@ class ColorPicker extends ConsumerWidget {
                         .map(
                           (c) => GestureDetector(
                             onTap: () {
-                              addCustomColor(c);
+                              themeVM.addCustomColor(c);
                               Navigator.pop(context);
                             },
                             child: Container(

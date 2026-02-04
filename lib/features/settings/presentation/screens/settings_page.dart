@@ -1,13 +1,14 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/settings_provider.dart';
 import 'package:daily_os/features/settings/presentation/components/pro_toggle_card.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_header.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_item.dart';
 import 'package:daily_os/features/settings/presentation/components/settings_section.dart';
 import 'package:daily_os/features/settings/presentation/screens/appearance_settings_page.dart';
 import 'package:daily_os/features/settings/presentation/screens/notification_settings_page.dart';
+import 'package:daily_os/features/settings/presentation/state/settings_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -15,7 +16,8 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
   @override
   Widget build(BuildContext context) {
-    final isCalSync = isCalendarSyncEnabled.watch(context);
+    final settingsVM = sl<SettingsViewModel>();
+    final isCalSync = settingsVM.isCalendarSyncEnabled.watch(context);
     final colors = context.colors;
 
     return GlassScaffold(
@@ -69,11 +71,10 @@ class SettingsPage extends StatelessWidget {
                 iconColor: Colors.greenAccent,
                 title: 'Calendriers Connectés',
                 subtitle: 'Google, Outlook, Apple',
-                onTap: () =>
-                    isCalendarSyncEnabled.value = !isCalendarSyncEnabled.value,
+                onTap: () => settingsVM.toggleCalendarSync(!isCalSync),
                 trailing: Switch(
                   value: isCalSync,
-                  onChanged: (v) => isCalendarSyncEnabled.value = v,
+                  onChanged: (v) => settingsVM.toggleCalendarSync(v),
                   activeTrackColor: colors.accent,
                 ),
               ),

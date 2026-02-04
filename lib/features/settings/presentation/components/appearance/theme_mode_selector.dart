@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
 
 class ThemeModeSelector extends StatelessWidget {
@@ -9,6 +10,7 @@ class ThemeModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeVM = sl<ThemeViewModel>();
     final colors = context.colors;
     final accent = colors.accent;
     final textMuted = colors.textSecondary;
@@ -25,7 +27,7 @@ class ThemeModeSelector extends StatelessWidget {
             icon: AppIcons.mobile(context),
             label: 'Système',
             isSelected: currentMode == 0,
-            onTap: () => setThemeMode(0),
+            onTap: () => themeVM.setThemeMode(0),
             accent: accent,
             textMuted: textMuted,
             isDark: isDark,
@@ -34,7 +36,7 @@ class ThemeModeSelector extends StatelessWidget {
             icon: AppIcons.moon(context),
             label: 'Sombre',
             isSelected: currentMode == 1,
-            onTap: () => setThemeMode(1),
+            onTap: () => themeVM.setThemeMode(1),
             accent: accent,
             textMuted: textMuted,
             isDark: isDark,
@@ -43,7 +45,7 @@ class ThemeModeSelector extends StatelessWidget {
             icon: AppIcons.sun(context),
             label: 'Clair',
             isSelected: currentMode == 2,
-            onTap: () => setThemeMode(2),
+            onTap: () => themeVM.setThemeMode(2),
             accent: accent,
             textMuted: textMuted,
             isDark: isDark,

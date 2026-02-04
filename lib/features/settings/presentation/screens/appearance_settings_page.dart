@@ -1,25 +1,26 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/animation_settings.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/choice_selector.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/color_picker.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/header.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/section_title.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/theme_mode_selector.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class AppearanceSettingsPage extends ConsumerWidget {
+class AppearanceSettingsPage extends StatelessWidget {
   const AppearanceSettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final mode = themeModeSignal.watch(context);
-    final accent = accentColorSignal.watch(context);
-    final animMultiplier = animationDurationMultiplier.watch(context);
-    final fontFamily = fontSignal.watch(context);
-    final iconStyle = iconStyleSignal.watch(context);
+  Widget build(BuildContext context) {
+    final themeVM = sl<ThemeViewModel>();
+    final mode = themeVM.themeMode.watch(context);
+    final accent = themeVM.accentColor.watch(context);
+    final animMultiplier = themeVM.animationDurationMultiplier.watch(context);
+    final fontFamily = themeVM.fontFamily.watch(context);
+    final iconStyle = themeVM.iconStyle.watch(context);
 
     return GlassScaffold(
       body: Column(
@@ -50,7 +51,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
                   title: 'Police d\'écriture',
                   value: fontFamily,
                   items: const ['Outfit', 'Roboto', 'Inter', 'system'],
-                  onChanged: (val) => setFontFamily(val),
+                  onChanged: (val) => themeVM.setFontFamily(val),
                   isFont: true,
                 ),
                 const SizedBox(height: 12),
@@ -63,7 +64,7 @@ class AppearanceSettingsPage extends ConsumerWidget {
                     'cupertino',
                     'system',
                   ],
-                  onChanged: (val) => setIconStyle(val),
+                  onChanged: (val) => themeVM.setIconStyle(val),
                   isIcon: true,
                 ),
                 const SizedBox(height: 100),

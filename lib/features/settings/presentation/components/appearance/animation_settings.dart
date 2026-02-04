@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:daily_os/shared/utils/toast_service.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:daily_os/shared/utils/toast_service.dart';
+import 'package:flutter/material.dart';
 
 class AnimationSettings extends StatelessWidget {
   final double multiplier;
@@ -78,11 +79,12 @@ class SpeedChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeVM = sl<ThemeViewModel>();
     final colors = context.colors;
     final isSelected = value == current;
     return GestureDetector(
       onTap: () {
-        setAnimationMultiplier(value);
+        themeVM.setAnimationMultiplier(value);
         _showPreview(context);
       },
       child: AnimatedContainer(
