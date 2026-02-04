@@ -156,6 +156,7 @@ const _BlockDTOtypeEnumValueMap = {
   'divider': 6,
   'quote': 7,
   'code': 8,
+  'audio': 9,
 };
 const _BlockDTOtypeValueEnumMap = {
   0: BlockTypeDTO.paragraph,
@@ -167,6 +168,7 @@ const _BlockDTOtypeValueEnumMap = {
   6: BlockTypeDTO.divider,
   7: BlockTypeDTO.quote,
   8: BlockTypeDTO.code,
+  9: BlockTypeDTO.audio,
 };
 
 Id _blockDTOGetId(BlockDTO object) {

@@ -51,6 +51,12 @@ class SlashCommandMenu extends StatelessWidget {
       ),
       (BlockType.code, 'Code', 'Capture a code snippet.', Icons.code),
       (
+        BlockType.audio,
+        'Audio',
+        'Record a voice note.',
+        Icons.mic_none_outlined,
+      ),
+      (
         BlockType.divider,
         'Divider',
         'Visually divide sections.',

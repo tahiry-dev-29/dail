@@ -13,6 +13,7 @@ enum BlockTypeDTO {
   divider,
   quote,
   code,
+  audio,
 }
 
 /// Isar collection for Block entity

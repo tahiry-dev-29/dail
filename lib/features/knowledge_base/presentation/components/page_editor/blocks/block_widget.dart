@@ -1,4 +1,5 @@
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
+import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/blocks/audio_block_component.dart';
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/blocks/checklist_block.dart';
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/blocks/code_block.dart';
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/blocks/divider_block.dart';
@@ -42,6 +43,7 @@ class BlockWidget extends StatelessWidget {
       .code => CodeBlock(block: block),
       .divider => DividerBlock(block: block),
       .quote => QuoteBlock(block: block),
+      .audio => AudioBlockComponent(block: block),
     };
   }
 }

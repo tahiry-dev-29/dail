@@ -1,12 +1,14 @@
 import 'package:daily_os/features/knowledge_base/data/dtos/page_dto.dart';
-import 'package:daily_os/features/knowledge_base/services/isar_service.dart';
 import 'package:isar_community/isar.dart';
 
 /// Local datasource for Page CRUD operations
 class PageLocalDatasource {
+  final Isar isar;
+
+  PageLocalDatasource(this.isar);
+
   /// Get pages in a folder
   Future<List<PageDTO>> getByFolder(String folderUid) async {
-    final isar = await IsarService.instance;
     return isar.pageDTOs
         .filter()
         .folderUidEqualTo(folderUid)
@@ -17,13 +19,11 @@ class PageLocalDatasource {
 
   /// Get page by UID
   Future<PageDTO?> getByUid(String uid) async {
-    final isar = await IsarService.instance;
     return isar.pageDTOs.filter().uidEqualTo(uid).findFirst();
   }
 
   /// Create or update a page
   Future<void> save(PageDTO page) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       final existing = await isar.pageDTOs
           .filter()
@@ -69,13 +69,11 @@ class PageLocalDatasource {
 
   /// Get deleted pages (trash)
   Future<List<PageDTO>> getDeleted() async {
-    final isar = await IsarService.instance;
     return isar.pageDTOs.filter().isDeletedEqualTo(true).findAll();
   }
 
   /// Permanently delete a page
   Future<void> permanentlyDelete(String uid) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       await isar.pageDTOs.filter().uidEqualTo(uid).deleteAll();
     });
@@ -83,11 +81,20 @@ class PageLocalDatasource {
 
   /// Search pages by title
   Future<List<PageDTO>> search(String query) async {
-    final isar = await IsarService.instance;
     return isar.pageDTOs
         .filter()
         .titleContains(query, caseSensitive: false)
         .isDeletedEqualTo(false)
+        .findAll();
+  }
+
+  /// Get recently updated pages across all folders
+  Future<List<PageDTO>> getRecent(int limit) async {
+    return isar.pageDTOs
+        .filter()
+        .isDeletedEqualTo(false)
+        .sortByUpdatedAtDesc()
+        .limit(limit)
         .findAll();
   }
 }

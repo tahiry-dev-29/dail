@@ -2,6 +2,7 @@ import 'package:daily_os/features/knowledge_base/data/datasources/local/block_lo
 import 'package:daily_os/features/knowledge_base/data/datasources/local/folder_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/page_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/property_local_datasource.dart';
+import 'package:daily_os/features/knowledge_base/data/datasources/local/tag_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/workspace_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/folder_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/page_dto.dart';
@@ -10,6 +11,7 @@ import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.da
 import 'package:daily_os/features/knowledge_base/domain/entities/folder_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/property_entity.dart';
+import 'package:daily_os/features/knowledge_base/domain/entities/tag_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/workspace_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/repositories/i_knowledge_repository.dart';
 import 'package:uuid/uuid.dart';
@@ -21,20 +23,23 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   final PageLocalDatasource _pageDatasource;
   final BlockLocalDatasource _blockDatasource;
   final PropertyLocalDatasource _propertyDatasource;
+  final TagLocalDatasource _tagDatasource;
   final Uuid _uuid;
 
   KnowledgeRepositoryImpl({
-    WorkspaceLocalDatasource? workspaceDatasource,
-    FolderLocalDatasource? folderDatasource,
-    PageLocalDatasource? pageDatasource,
-    BlockLocalDatasource? blockDatasource,
-    PropertyLocalDatasource? propertyDatasource,
+    required WorkspaceLocalDatasource workspaceDatasource,
+    required FolderLocalDatasource folderDatasource,
+    required PageLocalDatasource pageDatasource,
+    required BlockLocalDatasource blockDatasource,
+    required PropertyLocalDatasource propertyDatasource,
+    required TagLocalDatasource tagDatasource,
     Uuid? uuid,
-  }) : _workspaceDatasource = workspaceDatasource ?? WorkspaceLocalDatasource(),
-       _folderDatasource = folderDatasource ?? FolderLocalDatasource(),
-       _pageDatasource = pageDatasource ?? PageLocalDatasource(),
-       _blockDatasource = blockDatasource ?? BlockLocalDatasource(),
-       _propertyDatasource = propertyDatasource ?? PropertyLocalDatasource(),
+  }) : _workspaceDatasource = workspaceDatasource,
+       _folderDatasource = folderDatasource,
+       _pageDatasource = pageDatasource,
+       _blockDatasource = blockDatasource,
+       _propertyDatasource = propertyDatasource,
+       _tagDatasource = tagDatasource,
        _uuid = uuid ?? const Uuid();
 
   // ============ Workspace Operations ============
@@ -137,7 +142,11 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
     final blockDtos = await _blockDatasource.getByPage(id);
     final blocks = blockDtos.map((b) => b.toEntity()).toList();
 
-    return pageDto.toEntity(blocks: blocks);
+    // Load properties for this page
+    final propertyDtos = await _propertyDatasource.getByPage(id);
+    final properties = propertyDtos.map((p) => p.toEntity()).toList();
+
+    return pageDto.toEntity(blocks: blocks, properties: properties);
   }
 
   @override
@@ -177,6 +186,12 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   @override
   Future<List<PageEntity>> searchPages(String query) async {
     final dtos = await _pageDatasource.search(query);
+    return dtos.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<List<PageEntity>> getRecentPages({int limit = 10}) async {
+    final dtos = await _pageDatasource.getRecent(limit);
     return dtos.map((dto) => dto.toEntity()).toList();
   }
 
@@ -229,6 +244,37 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   @override
   Future<void> deleteProperty(String id) async {
     await _propertyDatasource.delete(id);
+  }
+
+  // ============ Tag Operations ============
+
+  @override
+  Future<List<TagEntity>> getTags({String? workspaceId}) async {
+    final dtos = workspaceId != null
+        ? await _tagDatasource.getByWorkspace(workspaceId)
+        : await _tagDatasource.getAll();
+    return dtos.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
+  Future<TagEntity?> getTag(String id) async {
+    final dto = await _tagDatasource.getByUid(id);
+    return dto?.toEntity();
+  }
+
+  @override
+  Future<void> createTag(TagEntity tag) async {
+    await _tagDatasource.save(tag.toDTO());
+  }
+
+  @override
+  Future<void> updateTag(TagEntity tag) async {
+    await _tagDatasource.save(tag.toDTO());
+  }
+
+  @override
+  Future<void> deleteTag(String id) async {
+    await _tagDatasource.delete(id);
   }
 
   // ============ Trash Operations ============

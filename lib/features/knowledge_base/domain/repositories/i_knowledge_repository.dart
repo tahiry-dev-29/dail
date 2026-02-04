@@ -2,10 +2,11 @@ import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.da
 import 'package:daily_os/features/knowledge_base/domain/entities/folder_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/property_entity.dart';
+import 'package:daily_os/features/knowledge_base/domain/entities/tag_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/workspace_entity.dart';
 
 /// Repository interface for Knowledge Base feature
-/// Defines all CRUD operations for workspaces, folders, pages, and blocks
+/// Defines all CRUD operations for workspaces, folders, pages, blocks, and tags
 abstract class IKnowledgeRepository {
   // ============ Workspace Operations ============
 
@@ -76,6 +77,9 @@ abstract class IKnowledgeRepository {
   /// Search pages by title or content
   Future<List<PageEntity>> searchPages(String query);
 
+  /// Get recently updated pages
+  Future<List<PageEntity>> getRecentPages({int limit = 10});
+
   // ============ Block Operations ============
 
   /// Get all blocks for a page
@@ -106,6 +110,23 @@ abstract class IKnowledgeRepository {
 
   /// Delete property
   Future<void> deleteProperty(String id);
+
+  // ============ Tag Operations ============
+
+  /// Get all tags (optionally filtered by workspace)
+  Future<List<TagEntity>> getTags({String? workspaceId});
+
+  /// Get tag by ID
+  Future<TagEntity?> getTag(String id);
+
+  /// Create a new tag
+  Future<void> createTag(TagEntity tag);
+
+  /// Update tag
+  Future<void> updateTag(TagEntity tag);
+
+  /// Delete tag
+  Future<void> deleteTag(String id);
 
   // ============ Trash Operations ============
 

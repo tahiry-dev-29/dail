@@ -1,12 +1,14 @@
 import 'package:daily_os/features/knowledge_base/data/dtos/folder_dto.dart';
-import 'package:daily_os/features/knowledge_base/services/isar_service.dart';
 import 'package:isar_community/isar.dart';
 
 /// Local datasource for Folder CRUD operations with recursive support
 class FolderLocalDatasource {
+  final Isar isar;
+
+  FolderLocalDatasource(this.isar);
+
   /// Get root folders for a workspace (parentUid is null)
   Future<List<FolderDTO>> getRootFolders(String workspaceUid) async {
-    final isar = await IsarService.instance;
     return isar.folderDTOs
         .filter()
         .workspaceUidEqualTo(workspaceUid)
@@ -18,7 +20,6 @@ class FolderLocalDatasource {
 
   /// Get child folders of a parent folder (lazy loading)
   Future<List<FolderDTO>> getChildren(String parentUid) async {
-    final isar = await IsarService.instance;
     return isar.folderDTOs
         .filter()
         .parentUidEqualTo(parentUid)
@@ -29,13 +30,11 @@ class FolderLocalDatasource {
 
   /// Get folder by UID
   Future<FolderDTO?> getByUid(String uid) async {
-    final isar = await IsarService.instance;
     return isar.folderDTOs.filter().uidEqualTo(uid).findFirst();
   }
 
   /// Get all folders for a workspace
   Future<List<FolderDTO>> getAllForWorkspace(String workspaceUid) async {
-    final isar = await IsarService.instance;
     return isar.folderDTOs
         .filter()
         .workspaceUidEqualTo(workspaceUid)
@@ -45,7 +44,6 @@ class FolderLocalDatasource {
 
   /// Create or update a folder
   Future<void> save(FolderDTO folder) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       // Check for existing to prevent unique constraint violation
       final existing = await isar.folderDTOs
@@ -82,13 +80,11 @@ class FolderLocalDatasource {
 
   /// Get deleted folders (trash)
   Future<List<FolderDTO>> getDeleted() async {
-    final isar = await IsarService.instance;
     return isar.folderDTOs.filter().isDeletedEqualTo(true).findAll();
   }
 
   /// Permanently delete a folder
   Future<void> permanentlyDelete(String uid) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       await isar.folderDTOs.filter().uidEqualTo(uid).deleteAll();
     });

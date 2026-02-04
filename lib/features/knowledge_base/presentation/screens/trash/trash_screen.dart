@@ -1,38 +1,40 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/knowledge_base/logic/trash_controller.dart';
-import 'package:daily_os/features/knowledge_base/logic/trash_state.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/trash_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TrashScreen extends StatefulWidget {
+class TrashScreen extends HookWidget {
   const TrashScreen({super.key});
 
   @override
-  State<TrashScreen> createState() => _TrashScreenState();
-}
-
-class _TrashScreenState extends State<TrashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    TrashController.loadDeletedItems();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final deletedFoldersState = deletedFoldersSignal.watch(context);
-    final deletedPagesState = deletedPagesSignal.watch(context);
+    useEffect(() {
+      sl<TrashViewModel>().loadTrash();
+      return null;
+    }, []);
+
+    final trashVM = sl<TrashViewModel>();
+    final deletedFoldersState = trashVM.deletedFolders.watch(context);
+    final deletedPagesState = trashVM.deletedPages.watch(context);
     final colors = context.colors;
 
+    final deletedFolders = deletedFoldersState.value ?? [];
+    final deletedPages = deletedPagesState.value ?? [];
+    final isLoading =
+        deletedFoldersState.isLoading || deletedPagesState.isLoading;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).canvasColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(
           'Trash',
-          style: TextStyle(
+          style: context.h2.copyWith(
             color: colors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
@@ -45,146 +47,154 @@ class _TrashScreenState extends State<TrashScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: TextButton.icon(
-              onPressed: () {
-                // Confirm dialog
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Empty Trash?'),
-                    content: const Text(
-                      'This will permanently delete all items in the trash. This action cannot be undone.',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+          if (deletedFolders.isNotEmpty || deletedPages.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: TextButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (childContext) => AlertDialog(
+                      title: const Text('Empty Trash?'),
+                      content: const Text(
+                        'This will permanently delete all items in the trash. This action cannot be undone.',
                       ),
-                      TextButton(
-                        onPressed: () {
-                          TrashController.emptyTrash();
-                          Navigator.pop(context);
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.error,
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(childContext),
+                          child: const Text('Cancel'),
                         ),
-                        child: const Text('Empty Trash'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              icon: Icon(
-                AppIcons.delete(context),
-                size: 16,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              label: Text(
-                'Empty Trash',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          // Folders Section
-          if (deletedFoldersState.value?.isNotEmpty ?? false) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                child: Text(
-                  'Folders',
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-            SliverList.builder(
-              itemCount: deletedFoldersState.value!.length,
-              itemBuilder: (context, index) {
-                final folder = deletedFoldersState.value![index];
-                return _TrashItem(
-                  icon: Text(
-                    folder.iconEmoji,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  title: folder.name,
-                  onRestore: () => TrashController.restoreFolder(folder.id),
-                  onDelete: () =>
-                      TrashController.permanentlyDeleteFolder(folder.id),
-                );
-              },
-            ),
-          ],
-
-          // Pages Section
-          if (deletedPagesState.value?.isNotEmpty ?? false) ...[
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                child: Text(
-                  'Pages',
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-            SliverList.builder(
-              itemCount: deletedPagesState.value!.length,
-              itemBuilder: (context, index) {
-                final page = deletedPagesState.value![index];
-                return _TrashItem(
-                  icon: Icon(
-                    AppIcons.description(context),
-                    size: 20,
-                    color: colors.textSecondary,
-                  ),
-                  title: page.title,
-                  onRestore: () => TrashController.restorePage(page.id),
-                  onDelete: () =>
-                      TrashController.permanentlyDeletePage(page.id),
-                );
-              },
-            ),
-          ],
-
-          // Empty State
-          if ((deletedFoldersState.value?.isEmpty ?? true) &&
-              (deletedPagesState.value?.isEmpty ?? true))
-            SliverFillRemaining(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      AppIcons.delete(context),
-                      size: 64,
-                      color: colors.textSecondary.withValues(alpha: 0.2),
+                        TextButton(
+                          onPressed: () {
+                            trashVM.emptyTrash();
+                            Navigator.pop(childContext);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.error,
+                          ),
+                          child: const Text('Empty Trash'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Trash is empty',
-                      style: TextStyle(
-                        color: colors.textSecondary,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
+                  );
+                },
+                icon: Icon(
+                  AppIcons.delete(context),
+                  size: 16,
+                  color: Colors.redAccent,
+                ),
+                label: Text(
+                  'Empty Trash',
+                  style: context.bodySmall.copyWith(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
         ],
       ),
+      body: isLoading && deletedFolders.isEmpty && deletedPages.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              slivers: [
+                // Folders Section
+                if (deletedFolders.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                      child: Text(
+                        'Folders',
+                        style: context.bodySmall.copyWith(
+                          color: colors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverList.builder(
+                    itemCount: deletedFolders.length,
+                    itemBuilder: (context, index) {
+                      final folder = deletedFolders[index];
+                      return _TrashItem(
+                        icon: Text(
+                          folder.iconEmoji,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        title: folder.name,
+                        onRestore: () => trashVM.restoreFolder(folder.id),
+                        onDelete: () =>
+                            trashVM.permanentlyDeleteFolder(folder.id),
+                      );
+                    },
+                  ),
+                ],
+
+                // Pages Section
+                if (deletedPages.isNotEmpty) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                      child: Text(
+                        'Pages',
+                        style: context.bodySmall.copyWith(
+                          color: colors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SliverList.builder(
+                    itemCount: deletedPages.length,
+                    itemBuilder: (context, index) {
+                      final page = deletedPages[index];
+                      return _TrashItem(
+                        icon: Icon(
+                          AppIcons.description(context),
+                          size: 20,
+                          color: colors.textSecondary,
+                        ),
+                        title: page.title,
+                        onRestore: () => trashVM.restorePage(page.id),
+                        onDelete: () => trashVM.permanentlyDeletePage(page.id),
+                      );
+                    },
+                  ),
+                ],
+
+                // Empty State
+                if (deletedFolders.isEmpty &&
+                    deletedPages.isEmpty &&
+                    !isLoading)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            AppIcons.delete(context),
+                            size: 64,
+                            color: colors.textSecondary.withValues(alpha: 0.2),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Trash is empty',
+                            style: context.bodyLarge.copyWith(
+                              color: colors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
     );
   }
 }
@@ -216,7 +226,7 @@ class _TrashItem extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: context.bodyMedium.copyWith(
                   color: colors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),

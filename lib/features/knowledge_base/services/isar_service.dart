@@ -2,7 +2,9 @@ import 'package:daily_os/features/knowledge_base/data/dtos/block_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/folder_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/page_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/property_dto.dart';
+import 'package:daily_os/features/knowledge_base/data/dtos/tag_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/workspace_dto.dart';
+import 'package:daily_os/features/planner/data/dtos/task_dto.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -29,6 +31,8 @@ class IsarService {
         PageDTOSchema,
         BlockDTOSchema,
         PropertyDTOSchema,
+        TaskDTOSchema,
+        TagDTOSchema,
       ],
       directory: dir.path,
       name: 'knowledge_base',

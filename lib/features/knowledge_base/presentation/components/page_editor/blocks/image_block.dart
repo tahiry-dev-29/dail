@@ -1,9 +1,10 @@
 import 'dart:io';
 
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/logic/blocks_controller.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -12,28 +13,27 @@ class ImageBlock extends StatelessWidget {
 
   const ImageBlock({super.key, required this.block});
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final xFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (xFile != null) {
-      // For local app, path works. For web/cloud, need upload.
-      // Assuming local-first for now.
-      BlockController.updateBlock(
-        block.copyWith(content: {...block.content, 'url': xFile.path}),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final blockVM = sl<BlockViewModel>();
     final url = block.content['url'] as String?;
     final caption = block.content['caption'] as String?;
 
+    Future<void> pickImage() async {
+      final picker = ImagePicker();
+      final xFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (xFile != null) {
+        blockVM.updateBlock(
+          block.copyWith(content: {...block.content, 'url': xFile.path}),
+        );
+      }
+    }
+
     if (url == null || url.isEmpty) {
       return GestureDetector(
-        onTap: _pickImage,
+        onTap: pickImage,
         child: GlassCard(
           padding: const EdgeInsets.all(20),
           child: Center(
@@ -57,7 +57,7 @@ class ImageBlock extends StatelessWidget {
     }
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Stack(
           children: [
@@ -69,12 +69,12 @@ class ImageBlock extends StatelessWidget {
               top: 8,
               right: 8,
               child: IconButton(
-                onPressed: _pickImage,
+                onPressed: pickImage,
                 icon: const Icon(Icons.edit, size: 16),
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.black54,
                   foregroundColor: Colors.white,
-                  padding: .zero,
+                  padding: EdgeInsets.zero,
                   minimumSize: const Size(32, 32),
                 ),
               ),
@@ -92,13 +92,13 @@ class ImageBlock extends StatelessWidget {
                   color: colors.textSecondary.withValues(alpha: 0.5),
                   fontSize: 13,
                 ),
-                border: .none,
+                border: InputBorder.none,
                 isDense: true,
-                contentPadding: .zero,
+                contentPadding: EdgeInsets.zero,
               ),
               style: TextStyle(color: colors.textSecondary, fontSize: 13),
               onChanged: (value) {
-                BlockController.updateBlock(
+                blockVM.updateBlock(
                   block.copyWith(content: {...block.content, 'caption': value}),
                 );
               },
@@ -109,7 +109,6 @@ class ImageBlock extends StatelessWidget {
   }
 
   Widget _buildImage(String url, AdaptiveColors colors) {
-    // Check if it's a local file or network
     final isLocal = !url.startsWith('http');
     if (isLocal) {
       return Image.file(
@@ -121,7 +120,7 @@ class ImageBlock extends StatelessWidget {
     return Image.network(
       url,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => _buildError(colors),
+      errorBuilder: (context, error, stackTrace) => _buildError(colors),
     );
   }
 

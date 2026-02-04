@@ -9,6 +9,7 @@ enum BlockType {
   divider,
   quote,
   code,
+  audio,
 }
 
 /// Block entity - A single content block in a page
@@ -92,6 +93,23 @@ class BlockEntity {
               {'text': '', 'checked': false},
             ],
       },
+      sortOrder: sortOrder,
+    );
+  }
+
+  /// Create a new audio block
+  factory BlockEntity.audio({
+    required String id,
+    required String pageId,
+    required String path,
+    int? durationMs, // Duration in milliseconds
+    int sortOrder = 0,
+  }) {
+    return BlockEntity(
+      id: id,
+      pageId: pageId,
+      type: BlockType.audio,
+      content: {'path': path, 'duration': durationMs},
       sortOrder: sortOrder,
     );
   }

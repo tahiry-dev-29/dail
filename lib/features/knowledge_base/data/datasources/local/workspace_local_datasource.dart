@@ -1,24 +1,24 @@
 import 'package:daily_os/features/knowledge_base/data/dtos/workspace_dto.dart';
-import 'package:daily_os/features/knowledge_base/services/isar_service.dart';
 import 'package:isar_community/isar.dart';
 
 /// Local datasource for Workspace CRUD operations
 class WorkspaceLocalDatasource {
+  final Isar isar;
+
+  WorkspaceLocalDatasource(this.isar);
+
   /// Get all workspaces
   Future<List<WorkspaceDTO>> getAll() async {
-    final isar = await IsarService.instance;
     return isar.workspaceDTOs.where().findAll();
   }
 
   /// Get workspace by UID
   Future<WorkspaceDTO?> getByUid(String uid) async {
-    final isar = await IsarService.instance;
     return isar.workspaceDTOs.filter().uidEqualTo(uid).findFirst();
   }
 
   /// Create or update a workspace
   Future<void> save(WorkspaceDTO workspace) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       final existing = await isar.workspaceDTOs
           .filter()
@@ -33,7 +33,6 @@ class WorkspaceLocalDatasource {
 
   /// Delete a workspace by UID
   Future<void> delete(String uid) async {
-    final isar = await IsarService.instance;
     await isar.writeTxn(() async {
       await isar.workspaceDTOs.filter().uidEqualTo(uid).deleteAll();
     });

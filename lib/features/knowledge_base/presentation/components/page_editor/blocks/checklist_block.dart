@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/logic/blocks_controller.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 
 class ChecklistBlock extends StatelessWidget {
@@ -11,18 +12,12 @@ class ChecklistBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final blockVM = sl<BlockViewModel>();
     final items = block.checklistItems;
 
-    // If empty checklist, show at least one item
     if (items.isEmpty) {
-      // This should theoretically be handled by controller init, but safe guard.
       return const SizedBox.shrink();
     }
-
-    // For now, handling single-item block model (One block = One checklist item usually in Notion-like apps,
-    // but the entity suggests a list of items inside one block?
-    // Let's check the entity structure: "checklist: {'items': [{'text': 'Item 1', 'checked': false}, ...]}"
-    // If we support multiple items per block, we render a column.
 
     return Column(
       children: items.asMap().entries.map((entry) {
@@ -32,13 +27,13 @@ class ChecklistBlock extends StatelessWidget {
         final text = item['text'] as String? ?? '';
 
         return Row(
-          crossAxisAlignment: .start, // Align top for multiline
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
               onTap: () {
                 final newItems = List<Map<String, dynamic>>.from(items);
                 newItems[index] = {...item, 'checked': !isChecked};
-                BlockController.updateBlock(
+                blockVM.updateBlock(
                   block.copyWith(
                     content: {...block.content, 'items': newItems},
                   ),
@@ -57,9 +52,9 @@ class ChecklistBlock extends StatelessWidget {
               child: TextFormField(
                 initialValue: text,
                 decoration: const InputDecoration(
-                  border: .none,
+                  border: InputBorder.none,
                   isDense: true,
-                  contentPadding: .zero,
+                  contentPadding: EdgeInsets.zero,
                 ),
                 style: TextStyle(
                   color: isChecked ? colors.textSecondary : colors.textPrimary,
@@ -69,7 +64,7 @@ class ChecklistBlock extends StatelessWidget {
                 onChanged: (value) {
                   final newItems = List<Map<String, dynamic>>.from(items);
                   newItems[index] = {...item, 'text': value};
-                  BlockController.updateBlock(
+                  blockVM.updateBlock(
                     block.copyWith(
                       content: {...block.content, 'items': newItems},
                     ),

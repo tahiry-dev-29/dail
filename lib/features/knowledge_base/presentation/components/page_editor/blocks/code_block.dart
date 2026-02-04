@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/logic/blocks_controller.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
@@ -16,6 +17,7 @@ class CodeBlock extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final blockVM = sl<BlockViewModel>();
     final code = block.content['code'] as String? ?? '';
     final language = block.content['language'] as String? ?? 'dart';
     final isEditing = useState(false);
@@ -38,10 +40,10 @@ class CodeBlock extends HookWidget {
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: .spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 language,
@@ -52,19 +54,14 @@ class CodeBlock extends HookWidget {
           ),
           const SizedBox(height: 8),
 
-          // Toggle between HighlightView (Display) and TextFormField (Edit)
-          // For a seamless feel, usually you want the editor to look like the highlighter.
-          // Getting that right is complex. For now:
-          // If editing -> Show plain text editor (monospaced)
-          // If viewing -> Show HighlightView
           if (isEditing.value)
             TextFormField(
               focusNode: focusNode,
               initialValue: code,
               decoration: const InputDecoration(
-                border: .none,
+                border: InputBorder.none,
                 isDense: true,
-                contentPadding: .zero,
+                contentPadding: EdgeInsets.zero,
               ),
               style: GoogleFonts.firaCode(
                 color: colors.textPrimary,
@@ -73,7 +70,7 @@ class CodeBlock extends HookWidget {
               ),
               maxLines: null,
               onChanged: (value) {
-                BlockController.updateBlock(
+                blockVM.updateBlock(
                   block.copyWith(content: {...block.content, 'code': value}),
                 );
               },
@@ -82,9 +79,6 @@ class CodeBlock extends HookWidget {
             GestureDetector(
               onTap: () {
                 isEditing.value = true;
-                // Wait for rebuild then request focus?
-                // Actually `isEditing` switch will render TextField with `focusNode`.
-                // We might need to request focus manually after build.
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   focusNode.requestFocus();
                 });

@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/logic/blocks_controller.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 
 class QuoteBlock extends StatelessWidget {
@@ -11,6 +12,7 @@ class QuoteBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final blockVM = sl<BlockViewModel>();
     final text = block.text;
 
     return Container(
@@ -21,18 +23,18 @@ class QuoteBlock extends StatelessWidget {
       child: TextFormField(
         initialValue: text,
         decoration: const InputDecoration(
-          border: .none,
+          border: InputBorder.none,
           isDense: true,
-          contentPadding: .zero,
+          contentPadding: EdgeInsets.zero,
           hintText: 'Empty quote',
         ),
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           color: colors.textPrimary,
-          fontStyle: .italic,
+          fontStyle: FontStyle.italic,
         ),
         maxLines: null,
         onChanged: (value) {
-          BlockController.updateBlock(
+          blockVM.updateBlock(
             block.copyWith(content: {...block.content, 'text': value}),
           );
         },

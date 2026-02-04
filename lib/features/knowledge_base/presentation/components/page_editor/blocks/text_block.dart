@@ -1,7 +1,8 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/logic/blocks_controller.dart';
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/commands/slash_command_menu.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:uuid/uuid.dart';
@@ -15,12 +16,10 @@ class TextBlockHook extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final blockVM = sl<BlockViewModel>();
     final layerLink = useMemoized(() => LayerLink());
     final focusNode = useFocusNode();
     final overlayEntry = useState<OverlayEntry?>(null);
-
-    // Initial value for synchronization if needed, but TextFormField initialValue is usually enough
-    // for local editing.
 
     void hideCommandMenu() {
       overlayEntry.value?.remove();
@@ -35,7 +34,7 @@ class TextBlockHook extends HookWidget {
       }
 
       // 2. Update current block
-      BlockController.updateBlock(
+      blockVM.updateBlock(
         block.copyWith(content: {...block.content, 'text': newText}),
       );
 
@@ -44,61 +43,67 @@ class TextBlockHook extends HookWidget {
       BlockEntity? newBlock;
 
       switch (type) {
-        case .paragraph:
+        case BlockType.paragraph:
           newBlock = BlockEntity.paragraph(
             id: newBlockId,
             pageId: block.pageId,
           );
-        case .heading1:
+        case BlockType.heading1:
           newBlock = BlockEntity.heading(
             id: newBlockId,
             pageId: block.pageId,
             level: 1,
           );
-        case .heading2:
+        case BlockType.heading2:
           newBlock = BlockEntity.heading(
             id: newBlockId,
             pageId: block.pageId,
             level: 2,
           );
-        case .heading3:
+        case BlockType.heading3:
           newBlock = BlockEntity.heading(
             id: newBlockId,
             pageId: block.pageId,
             level: 3,
           );
-        case .checklist:
+        case BlockType.checklist:
           newBlock = BlockEntity.checklist(
             id: newBlockId,
             pageId: block.pageId,
           );
-        case .image:
+        case BlockType.image:
           newBlock = BlockEntity(
             id: newBlockId,
             pageId: block.pageId,
-            type: .image,
+            type: BlockType.image,
           );
-        case .code:
+        case BlockType.code:
           newBlock = BlockEntity(
             id: newBlockId,
             pageId: block.pageId,
-            type: .code,
+            type: BlockType.code,
           );
-        case .divider:
+        case BlockType.divider:
           newBlock = BlockEntity(
             id: newBlockId,
             pageId: block.pageId,
-            type: .divider,
+            type: BlockType.divider,
           );
-        case .quote:
+        case BlockType.quote:
           newBlock = BlockEntity(
             id: newBlockId,
             pageId: block.pageId,
-            type: .quote,
+            type: BlockType.quote,
+          );
+        case BlockType.audio:
+          newBlock = BlockEntity.audio(
+            id: newBlockId,
+            pageId: block.pageId,
+            path: '',
           );
       }
 
-      BlockController.insertBlockAfter(block.id, newBlock);
+      blockVM.insertBlockAfter(block.id, newBlock);
     }
 
     void showCommandMenu() {
@@ -111,7 +116,7 @@ class TextBlockHook extends HookWidget {
             Positioned.fill(
               child: GestureDetector(
                 onTap: hideCommandMenu,
-                behavior: .translucent,
+                behavior: HitTestBehavior.translucent,
               ),
             ),
             CompositedTransformFollower(
@@ -150,9 +155,9 @@ class TextBlockHook extends HookWidget {
           focusNode: focusNode,
           initialValue: block.text,
           decoration: const InputDecoration(
-            border: .none,
+            border: InputBorder.none,
             isDense: true,
-            contentPadding: .zero,
+            contentPadding: EdgeInsets.zero,
           ),
           style: baseStyle?.copyWith(color: colors.textPrimary),
           maxLines: null,
@@ -163,7 +168,7 @@ class TextBlockHook extends HookWidget {
               hideCommandMenu();
             }
 
-            BlockController.updateBlock(
+            blockVM.updateBlock(
               block.copyWith(content: {...block.content, 'text': value}),
             );
           },
