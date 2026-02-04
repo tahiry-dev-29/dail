@@ -1,9 +1,10 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 
 class AiInsightCard extends StatelessWidget {
@@ -14,7 +15,10 @@ class AiInsightCard extends StatelessWidget {
     final colors = context.colors;
 
     return GestureDetector(
-      onTap: () => isChatOpen.value = !isChatOpen.value,
+      onTap: () {
+        final homeVM = sl<HomeViewModel>();
+        homeVM.isChatOpen.value = !homeVM.isChatOpen.value;
+      },
       child: Stack(
         children: [
           // Glow effect only if dark mode or desired

@@ -1,19 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:daily_os/features/planner/logic/task_list_provider.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class StatsChart extends ConsumerWidget {
+class StatsChart extends StatelessWidget {
   const StatsChart({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final taskListAsync = ref.watch(taskListProvider);
+  Widget build(BuildContext context) {
     final colors = context.colors;
+    final taskListVM = sl<TaskListViewModel>();
+    final taskListAsync = taskListVM.tasks.watch(context);
 
-    return taskListAsync.maybeWhen(
+    return taskListAsync.map(
       data: (tasks) {
         final total = tasks.length;
         final done = tasks.where((t) => t.isDone).length;
@@ -99,7 +101,12 @@ class StatsChart extends ConsumerWidget {
           ),
         );
       },
-      orElse: () => const SizedBox.shrink(),
+      error: (e, _) => const SizedBox.shrink(),
+      loading: () => const GlassCard(
+        borderRadius: 24,
+        padding: EdgeInsets.all(20),
+        child: Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }

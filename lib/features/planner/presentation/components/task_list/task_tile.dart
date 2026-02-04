@@ -1,8 +1,11 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/widgets/task_check_circle.dart';
 import 'package:daily_os/features/planner/presentation/components/task_list/widgets/task_deadline_badge.dart';
@@ -11,6 +14,7 @@ import 'package:daily_os/features/planner/presentation/components/task_list/widg
 import 'package:daily_os/features/planner/presentation/screens/task_edit_page.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskTile extends StatelessWidget {
   final TaskEntity task;
@@ -49,7 +53,7 @@ class TaskTile extends StatelessWidget {
             borderRadius: 16,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
@@ -69,7 +73,7 @@ class TaskTile extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: .start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         task.name,
@@ -100,7 +104,7 @@ class TaskTile extends StatelessWidget {
                       Wrap(
                         spacing: 6,
                         runSpacing: 4,
-                        crossAxisAlignment: .center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           if (task.time.isNotEmpty && task.time != '00:00')
                             TaskTimeBadge(
@@ -116,6 +120,67 @@ class TaskTile extends StatelessWidget {
                               total: task.subtasks.length,
                               color: mutedIcon.withValues(alpha: 0.6),
                             ),
+
+                          // Workspace Indicator
+                          if (task.workspaceId != null)
+                            Watch((context) {
+                              final wsState = sl<WorkspaceViewModel>()
+                                  .workspaces
+                                  .watch(context);
+                              return wsState.maybeMap(
+                                data: (workspaces) {
+                                  final ws = workspaces.firstWhere(
+                                    (w) => w.id == task.workspaceId,
+                                    orElse: () => workspaces.first,
+                                  );
+                                  return Text(
+                                    ws.iconEmoji,
+                                    style: const TextStyle(fontSize: 12),
+                                  );
+                                },
+                                orElse: () => const SizedBox.shrink(),
+                              );
+                            }),
+
+                          // Tag Dots
+                          if (task.tagIds.isNotEmpty)
+                            Watch((context) {
+                              final tagState = sl<TagViewModel>().tags.watch(
+                                context,
+                              );
+                              return tagState.maybeMap(
+                                data: (tags) {
+                                  final taskTags = tags
+                                      .where((t) => task.tagIds.contains(t.id))
+                                      .toList();
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: taskTags
+                                        .map(
+                                          (tag) => Container(
+                                            margin: const EdgeInsets.only(
+                                              right: 4,
+                                            ),
+                                            width: 6,
+                                            height: 6,
+                                            decoration: BoxDecoration(
+                                              color: Color(
+                                                int.parse(
+                                                      tag.color.substring(1),
+                                                      radix: 16,
+                                                    ) +
+                                                    0xFF000000,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  );
+                                },
+                                orElse: () => const SizedBox.shrink(),
+                              );
+                            }),
                         ],
                       ),
                     ],

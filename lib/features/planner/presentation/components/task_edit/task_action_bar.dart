@@ -1,15 +1,15 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 
 class TaskActionBar extends StatelessWidget {
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
 
   const TaskActionBar({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
   });
 
@@ -29,10 +29,10 @@ class TaskActionBar extends StatelessWidget {
             borderRadius: 30,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             color: context.colors.accent,
-            child: Text(
+            child: const Text(
               'Save',
               style: TextStyle(
-                color: Colors.white, // Keep white on accent for contrast
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

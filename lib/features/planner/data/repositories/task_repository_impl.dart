@@ -1,7 +1,7 @@
-import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/domain/repositories/i_task_repository.dart';
 import 'package:daily_os/features/planner/data/datasources/local/task_local_datasource.dart';
 import 'package:daily_os/features/planner/data/dtos/task_dto.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/domain/repositories/i_task_repository.dart';
 
 class TaskRepositoryImpl implements ITaskRepository {
   final ITaskLocalDataSource localDataSource;
@@ -16,59 +16,39 @@ class TaskRepositoryImpl implements ITaskRepository {
 
   @override
   Future<void> addTask(TaskEntity task) async {
-    final tasks = await localDataSource.getTasks();
-    tasks.add(TaskDTO.fromEntity(task));
-    await localDataSource.saveTasks(tasks);
+    await localDataSource.saveTask(TaskDTO.fromEntity(task));
   }
 
   @override
   Future<void> updateTask(TaskEntity task) async {
-    final tasks = await localDataSource.getTasks();
-    final index = tasks.indexWhere((t) => t.id == task.id);
-    if (index != -1) {
-      tasks[index] = TaskDTO.fromEntity(task);
-      await localDataSource.saveTasks(tasks);
-    }
+    await localDataSource.saveTask(TaskDTO.fromEntity(task));
   }
 
   @override
   Future<void> deleteTask(String id) async {
-    final tasks = await localDataSource.getTasks();
-    tasks.removeWhere((t) => t.id == id);
-    await localDataSource.saveTasks(tasks);
+    await localDataSource.deleteTask(id);
   }
 
   @override
   Future<void> toggleTask(String id) async {
-    final tasks = await localDataSource.getTasks();
-    final index = tasks.indexWhere((t) => t.id == id);
-    if (index != -1) {
-      final task = tasks[index];
-      tasks[index] = task.copyWith(isDone: !task.isDone);
-      await localDataSource.saveTasks(tasks);
+    // Inefficient but safe: fetch all, find, toggle, save.
+    // Ideally DataSource should support getById or proper partial update.
+    final dtos = await localDataSource.getTasks();
+    final taskDto = dtos.cast<TaskDTO?>().firstWhere(
+      (t) => t?.uid == id,
+      orElse: () => null,
+    );
+
+    if (taskDto != null) {
+      taskDto.isDone = !taskDto.isDone;
+      await localDataSource.saveTask(taskDto);
     }
   }
 
   @override
   Future<void> saveTasks(List<TaskEntity> tasks) async {
+    // Used for reordering or bulk updates
     final dtos = tasks.map((t) => TaskDTO.fromEntity(t)).toList();
     await localDataSource.saveTasks(dtos);
-  }
-}
-
-extension TaskDTOCopyWith on TaskDTO {
-  TaskDTO copyWith({bool? isDone}) {
-    return TaskDTO(
-      id: id,
-      name: name,
-      description: description,
-      time: time,
-      isDone: isDone ?? this.isDone,
-      date: date,
-      deadline: deadline,
-      isFavorite: isFavorite,
-      isIgnored: isIgnored,
-      subtasks: subtasks,
-    );
   }
 }

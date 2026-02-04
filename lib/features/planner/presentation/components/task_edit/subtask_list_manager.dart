@@ -1,40 +1,37 @@
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/subtask_empty_state.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/subtask_header.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/subtask_item_tile.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-/// Orchestrateur pour la gestion des sous-tâches.
-/// Segmenté en micro-composants pour respecter la règle des 120 lignes (Standards 2026).
-class SubtaskListManager extends ConsumerWidget {
-  final TaskEditController controller;
+class SubtaskListManager extends StatelessWidget {
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
 
   const SubtaskListManager({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final subtasks = controller.subtasks.watch(context);
-    final isAdding = controller.isAddingSubtask.watch(context);
-    final isExpanded = controller.isSubtasksExpanded.watch(context);
-    final editingId = controller.editingSubtaskId.watch(context);
+  Widget build(BuildContext context) {
+    final subtasks = viewModel.subtasks.watch(context);
+    final isAdding = viewModel.isAddingSubtask.watch(context);
+    final isExpanded = viewModel.isSubtasksExpanded.watch(context);
+    final editingId = viewModel.editingSubtaskId.watch(context);
     final colors = context.colors;
     final accent = colors.accent;
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SubtaskHeader(
-          controller: controller,
+          viewModel: viewModel,
           isAdding: isAdding,
           isExpanded: isExpanded,
           accent: accent,
@@ -54,7 +51,7 @@ class SubtaskListManager extends ConsumerWidget {
                         physics: const NeverScrollableScrollPhysics(),
                         buildDefaultDragHandles: false,
                         onReorder: (oldIndex, newIndex) {
-                          controller.reorderSubtasks(oldIndex, newIndex);
+                          viewModel.reorderSubtasks(oldIndex, newIndex);
                           onSave();
                         },
                         proxyDecorator: (child, index, animation) {
@@ -79,7 +76,7 @@ class SubtaskListManager extends ConsumerWidget {
                             st: entry.value,
                             index: entry.key,
                             isEditing: editingId == entry.value.id,
-                            controller: controller,
+                            viewModel: viewModel,
                             onSave: onSave,
                           );
                         }).toList(),
@@ -97,8 +94,10 @@ class SubtaskListManager extends ConsumerWidget {
                                 time,
                                 deadline,
                                 required isFavorite,
+                                List<String> tagIds = const [],
+                                String? workspaceId,
                               }) {
-                                controller.addSubtask(
+                                viewModel.addSubtask(
                                   name: name,
                                   description: description,
                                   time: time ?? '00:00',
@@ -107,13 +106,13 @@ class SubtaskListManager extends ConsumerWidget {
                                 );
                                 onSave();
                               },
-                          onCancel: controller.toggleAddingSubtask,
+                          onCancel: viewModel.toggleAddingSubtask,
                           hintText: 'Nom de la sous-tâche',
                         ),
                       )
                     else if (subtasks.isEmpty)
                       SubtaskEmptyState(
-                        onPressed: controller.toggleAddingSubtask,
+                        onPressed: viewModel.toggleAddingSubtask,
                         accent: accent,
                       ),
                   ],

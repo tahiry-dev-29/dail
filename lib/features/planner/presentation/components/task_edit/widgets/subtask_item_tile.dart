@@ -4,16 +4,15 @@ import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class SubtaskItemTile extends ConsumerWidget {
+class SubtaskItemTile extends StatelessWidget {
   final SubTaskEntity st;
   final bool isEditing;
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
   final int index;
 
@@ -21,13 +20,13 @@ class SubtaskItemTile extends ConsumerWidget {
     super.key,
     required this.st,
     required this.isEditing,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
     required this.index,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (isEditing) {
       return Padding(
         key: ValueKey('edit_${st.id}'),
@@ -47,8 +46,10 @@ class SubtaskItemTile extends ConsumerWidget {
                 time,
                 deadline,
                 required isFavorite,
+                List<String> tagIds = const [],
+                String? workspaceId,
               }) {
-                controller.updateSubtask(
+                viewModel.updateSubtask(
                   st.id,
                   name: name,
                   description: description,
@@ -58,7 +59,7 @@ class SubtaskItemTile extends ConsumerWidget {
                 );
                 onSave();
               },
-          onCancel: () => controller.setEditingSubtask(null),
+          onCancel: () => viewModel.setEditingSubtask(null),
           hintText: 'Modifier la sous-tâche',
         ),
       );
@@ -84,7 +85,7 @@ class SubtaskItemTile extends ConsumerWidget {
                       ? AppIcons.circleCheck(context)
                       : AppIcons.solidCircle(context),
                   onTap: () {
-                    controller.toggleSubtaskDone(st.id);
+                    viewModel.toggleSubtaskDone(st.id);
                     onSave();
                   },
                   color: st.isDone
@@ -96,7 +97,7 @@ class SubtaskItemTile extends ConsumerWidget {
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () => controller.setEditingSubtask(st.id),
+                    onTap: () => viewModel.setEditingSubtask(st.id),
                     child: Column(
                       crossAxisAlignment: .start,
                       children: [
@@ -129,20 +130,20 @@ class SubtaskItemTile extends ConsumerWidget {
                 ActionIcon(
                   icon: AppIcons.promote(context),
                   onTap: () {
-                    controller.promoteSubtask(st.id, ref);
+                    viewModel.promoteSubtask(st.id);
                     onSave();
                   },
                   color: Colors.blueAccent,
                 ),
                 ActionIcon(
                   icon: AppIcons.view(context),
-                  onTap: () => controller.setEditingSubtask(st.id),
+                  onTap: () => viewModel.setEditingSubtask(st.id),
                   color: context.colors.textMuted,
                 ),
                 ActionIcon(
                   icon: AppIcons.delete(context),
                   onTap: () {
-                    controller.deleteSubtask(st.id);
+                    viewModel.deleteSubtask(st.id);
                     onSave();
                   },
                   color: Colors.redAccent.withValues(alpha: 0.6),

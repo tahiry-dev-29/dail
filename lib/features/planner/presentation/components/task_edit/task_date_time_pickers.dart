@@ -1,24 +1,24 @@
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/picker_card.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskDateTimePickers extends StatelessWidget {
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
 
   const TaskDateTimePickers({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
   });
 
   @override
   Widget build(BuildContext context) {
-    final time = controller.time.watch(context);
-    final deadline = controller.deadline.watch(context);
+    final time = viewModel.time.watch(context);
+    final deadline = viewModel.deadline.watch(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
@@ -36,7 +36,7 @@ class TaskDateTimePickers extends StatelessWidget {
                 initialTime: TimeOfDay.now(),
               );
               if (tod != null && context.mounted) {
-                controller.time.value = tod.format(context);
+                viewModel.time.value = tod.format(context);
               }
             },
           ),
@@ -73,7 +73,7 @@ class TaskDateTimePickers extends StatelessWidget {
     );
     if (time == null || !context.mounted) return;
 
-    controller.deadline.value = DateTime(
+    viewModel.deadline.value = DateTime(
       date.year,
       date.month,
       date.day,

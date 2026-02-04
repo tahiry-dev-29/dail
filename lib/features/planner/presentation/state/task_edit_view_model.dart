@@ -1,46 +1,39 @@
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
-import 'package:daily_os/features/planner/logic/task_list_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TaskEditController {
+class TaskEditViewModel {
   final TaskEntity initialTask;
+  final TaskListViewModel _taskListViewModel;
 
-  // ---------------------------------------------------------------------------
-  // Core Data Signals (Mutable state for the form)
-  // ---------------------------------------------------------------------------
+  // Form Fields
   final Signal<String> name;
   final Signal<String> description;
   final Signal<String> time;
   final Signal<DateTime?> deadline;
   final Signal<bool> isFavorite;
   final Signal<bool> isDone;
-
-  // Utilisation de ListSignal pour des mutations optimisées (add, removeAt...)
   final ListSignal<SubTaskEntity> subtasks;
 
-  // ---------------------------------------------------------------------------
-  // UI State Signals (View Logic)
-  // ---------------------------------------------------------------------------
+  // UI State
   final Signal<bool> isAddingSubtask = Signal(false);
   final Signal<String?> editingSubtaskId = Signal(null);
-  // On initialise à false, on ouvrira si besoin dans le constructeur
   final Signal<bool> isDescriptionExpanded = Signal(false);
   final Signal<bool> isSubtasksExpanded = Signal(false);
+  final ListSignal<String> tagIds;
+  final Signal<String?> workspaceId;
 
-  // ---------------------------------------------------------------------------
-  // Constructor & Init
-  // ---------------------------------------------------------------------------
-  TaskEditController(this.initialTask)
+  TaskEditViewModel(this.initialTask, this._taskListViewModel)
     : name = Signal(initialTask.name),
       description = Signal(initialTask.description),
       time = Signal(initialTask.time),
       deadline = Signal(initialTask.deadline),
       isFavorite = Signal(initialTask.isFavorite),
       isDone = Signal(initialTask.isDone),
-      subtasks = ListSignal([...initialTask.subtasks]) {
-    // Auto-expand logic based on content
+      subtasks = ListSignal([...initialTask.subtasks]),
+      tagIds = ListSignal([...initialTask.tagIds]),
+      workspaceId = Signal(initialTask.workspaceId) {
     if (initialTask.description.isNotEmpty) {
       isDescriptionExpanded.value = true;
     }
@@ -49,18 +42,14 @@ class TaskEditController {
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Actions
-  // ---------------------------------------------------------------------------
-
   void toggleFavorite() => isFavorite.value = !isFavorite.value;
   void toggleDone() => isDone.value = !isDone.value;
 
   void toggleAddingSubtask() {
     isAddingSubtask.value = !isAddingSubtask.value;
     if (isAddingSubtask.value) {
-      editingSubtaskId.value = null; // Ferme l'édition si on ajoute
-      isSubtasksExpanded.value = true; // Force l'ouverture
+      editingSubtaskId.value = null;
+      isSubtasksExpanded.value = true;
     }
   }
 
@@ -78,7 +67,7 @@ class TaskEditController {
     DateTime? deadline,
     bool isFavorite = false,
   }) {
-    if (name.isEmpty) return;
+    if (name.trim().isEmpty) return;
 
     final newSubtask = SubTaskEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -90,10 +79,7 @@ class TaskEditController {
       isDone: false,
     );
 
-    // La magie de ListSignal : pas besoin de cloner la liste
     subtasks.add(newSubtask);
-
-    // Reset UI state
     isAddingSubtask.value = false;
   }
 
@@ -109,7 +95,6 @@ class TaskEditController {
     if (index == -1) return;
 
     final current = subtasks[index];
-    // Modification directe via l'index (optimisé par ListSignal)
     subtasks[index] = current.copyWith(
       name: name ?? current.name,
       description: description ?? current.description,
@@ -140,29 +125,26 @@ class TaskEditController {
     subtasks.insert(newIndex, item);
   }
 
-  /// Promeut une sous-tâche en tâche principale
-  void promoteSubtask(String id, WidgetRef ref) {
+  void promoteSubtask(String id) {
     final index = subtasks.indexWhere((s) => s.id == id);
     if (index == -1) return;
 
     final subtask = subtasks[index];
     deleteSubtask(id); // Retire de la liste locale
 
-    // Ajoute à la liste globale via le provider parent
-    ref
-        .read(taskListProvider.notifier)
-        .addTask(
-          name: subtask.name,
-          description: subtask.description,
-          time: subtask.time,
-          date: initialTask.date ?? DateTime.now(), // Garde la date du parent
-          deadline: subtask.deadline,
-          isFavorite: subtask.isFavorite,
-        );
+    // Ajoute à la liste globale via le list view model
+    _taskListViewModel.addTask(
+      name: subtask.name,
+      description: subtask.description,
+      time: subtask.time,
+      date: initialTask.date ?? DateTime.now(),
+      deadline: subtask.deadline,
+      isFavorite: subtask.isFavorite,
+    );
   }
 
-  /// Sauvegarde finale
-  void save(WidgetRef ref) {
+  /// Save changes back to TaskListViewModel
+  void save() {
     final updatedTask = initialTask.copyWith(
       name: name.value,
       description: description.value,
@@ -170,15 +152,11 @@ class TaskEditController {
       deadline: deadline.value,
       isFavorite: isFavorite.value,
       isDone: isDone.value,
-      subtasks: subtasks.toList(), // Conversion ListSignal -> List
+      subtasks: subtasks.toList(),
+      tagIds: tagIds.toList(),
+      workspaceId: workspaceId.value,
     );
 
-    ref.read(taskListProvider.notifier).updateTask(updatedTask);
+    _taskListViewModel.updateTask(updatedTask);
   }
 }
-
-// Le Provider unique
-final taskEditControllerProvider = Provider.autoDispose
-    .family<TaskEditController, TaskEntity>((ref, task) {
-      return TaskEditController(task);
-    });

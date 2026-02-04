@@ -2,17 +2,17 @@ import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskEditHeader extends StatelessWidget {
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
 
   const TaskEditHeader({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
   });
 
@@ -31,39 +31,45 @@ class TaskEditHeader extends StatelessWidget {
               icon: AppIcons.arrowLeft(context),
               onTap: () => Navigator.pop(context),
               color: context.colors.textPrimary,
-              size: 18, // Slightly larger icon
-              padding: const EdgeInsets.all(16), // Increased hit area
+              size: 18,
+              padding: const EdgeInsets.all(16),
             ),
           ),
 
           Row(
             children: [
               // Favorite toggle
-              Builder(
-                builder: (context) {
-                  final isFav = controller.isFavorite.watch(context);
-                  return GlassCard(
-                    borderRadius: 50,
-                    padding: EdgeInsets.zero,
-                    child: ActionIcon(
-                      icon: AppIcons.favorite(context, isFav),
-                      onTap: () => controller.toggleFavorite(),
-                      color: isFav
-                          ? Colors.redAccent
-                          : context.colors.textSecondary,
-                      size: 18, // Slightly larger icon
-                      padding: const EdgeInsets.all(16), // Increased hit area
-                    ),
-                  );
-                },
-              ),
+              Watch((context) {
+                final isFav = viewModel.isFavorite.watch(context);
+                return GlassCard(
+                  borderRadius: 50,
+                  padding: EdgeInsets.zero,
+                  child: ActionIcon(
+                    icon: AppIcons.favorite(context, isFav),
+                    onTap: () => viewModel.toggleFavorite(),
+                    color: isFav
+                        ? Colors.redAccent
+                        : context.colors.textSecondary,
+                    size: 18,
+                    padding: const EdgeInsets.all(16),
+                  ),
+                );
+              }),
               const SizedBox(width: 12),
               // Personnalise widgets button
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   onTap: () {
-                    // TODO: Open widget customization
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Widget customization coming soon!',
+                          style: TextStyle(color: context.colors.textOnAccent),
+                        ),
+                        backgroundColor: context.colors.accent,
+                      ),
+                    );
                   },
                   behavior: HitTestBehavior.opaque,
                   child: GlassCard(

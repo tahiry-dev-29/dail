@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
+import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -18,7 +19,7 @@ class CalendarHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          onPressed: () => calendarState.prevMonth(),
+          onPressed: () => sl<CalendarViewModel>().prevMonth(),
           icon: Icon(
             AppIcons.chevronLeft(context),
             color: contentColor,
@@ -35,7 +36,7 @@ class CalendarHeader extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () => calendarState.nextMonth(),
+          onPressed: () => sl<CalendarViewModel>().nextMonth(),
           icon: Icon(
             AppIcons.chevronRight(context),
             color: contentColor,

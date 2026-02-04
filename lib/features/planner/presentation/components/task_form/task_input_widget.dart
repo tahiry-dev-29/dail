@@ -1,18 +1,23 @@
 import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_input_provider.dart';
+import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/task_tag_picker.dart';
+import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/task_workspace_picker.dart';
+import 'package:daily_os/features/planner/presentation/state/task_input_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TaskInputWidget extends ConsumerWidget {
+class TaskInputWidget extends HookWidget {
   final Function({
     required String name,
     required String description,
     String? time,
     DateTime? deadline,
     required bool isFavorite,
+    List<String> tagIds,
+    String? workspaceId,
   })
   onSave;
   final VoidCallback? onCancel;
@@ -28,14 +33,19 @@ class TaskInputWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(taskInputProvider(initialValues));
+  Widget build(BuildContext context) {
+    // Manage ViewModel lifecycle using hooks
+    final state = useMemoized(() => TaskInputViewModel(initialValues), [
+      initialValues,
+    ]);
+    useEffect(() => state.dispose, [state]);
+
     final colors = context.colors;
 
     // Glass surface styling
     final surface = colors.isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.6);
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.white.withValues(alpha: 0.8);
     final borderColor = colors.border;
 
     return TapRegion(
@@ -65,7 +75,7 @@ class TaskInputWidget extends ConsumerWidget {
     );
   }
 
-  void _handleSave(TaskInputState state) {
+  void _handleSave(TaskInputViewModel state) {
     final name = state.nameController.text.trim();
     if (name.isEmpty) {
       onCancel?.call();
@@ -78,13 +88,15 @@ class TaskInputWidget extends ConsumerWidget {
       time: state.time.peek(),
       deadline: state.deadline.peek(),
       isFavorite: state.isFavorite.peek(),
+      tagIds: state.tagIds.peek(),
+      workspaceId: state.workspaceId.peek(),
     );
     state.reset();
   }
 }
 
 class _TaskNameRow extends StatelessWidget {
-  final TaskInputState state;
+  final TaskInputViewModel state;
   final String hintText;
   final VoidCallback onSave;
   final AdaptiveColors colors;
@@ -150,7 +162,7 @@ class _TaskNameRow extends StatelessWidget {
 }
 
 class _TaskDescriptionField extends StatelessWidget {
-  final TaskInputState state;
+  final TaskInputViewModel state;
   final AdaptiveColors colors;
   const _TaskDescriptionField({required this.state, required this.colors});
 
@@ -202,7 +214,7 @@ class _TaskDescriptionField extends StatelessWidget {
 }
 
 class _TaskInputActions extends StatelessWidget {
-  final TaskInputState state;
+  final TaskInputViewModel state;
   final AdaptiveColors colors;
 
   const _TaskInputActions({required this.state, required this.colors});
@@ -214,13 +226,11 @@ class _TaskInputActions extends StatelessWidget {
     final time = state.time.watch(context);
     final deadline = state.deadline.watch(context);
 
-    // Active checks
     final hasTime = time != null && time.isNotEmpty;
     final hasDeadline = deadline != null;
 
     return Row(
       children: [
-        // Toggle Description
         ActionIcon(
           icon: AppIcons.description(context),
           onTap: () => state.isDescriptionExpanded.value = !isDescExpanded,
@@ -230,7 +240,6 @@ class _TaskInputActions extends StatelessWidget {
           size: 16,
         ),
         const SizedBox(width: 4),
-        // Time Picker
         ActionIcon(
           icon: AppIcons.clock(context),
           onTap: () async {
@@ -248,8 +257,6 @@ class _TaskInputActions extends StatelessWidget {
           size: 16,
         ),
         const SizedBox(width: 4),
-
-        // Deadline Picker
         ActionIcon(
           icon: AppIcons.priority(context),
           onTap: () async {
@@ -259,26 +266,20 @@ class _TaskInputActions extends StatelessWidget {
               firstDate: DateTime.now(),
               lastDate: DateTime.now().add(const Duration(days: 365)),
             );
-            if (date != null) {
-              if (context.mounted) {
-                final tod = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
+            if (date != null && context.mounted) {
+              final tod = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (tod != null) {
+                state.deadline.value = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                  tod.hour,
+                  tod.minute,
                 );
-                if (tod != null) {
-                  state.deadline.value = DateTime(
-                    date.year,
-                    date.month,
-                    date.day,
-                    tod.hour,
-                    tod.minute,
-                  );
-                } else {
-                  // If time picker is cancelled, just set the date
-                  state.deadline.value = date;
-                }
               } else {
-                // If context is not mounted, just set the date
                 state.deadline.value = date;
               }
             }
@@ -288,9 +289,11 @@ class _TaskInputActions extends StatelessWidget {
               : colors.textSecondary.withValues(alpha: 0.5),
           size: 16,
         ),
+        const SizedBox(width: 4),
+        _WorkspaceAction(state: state, colors: colors),
+        const SizedBox(width: 4),
+        _TagAction(state: state, colors: colors),
         const Spacer(),
-
-        // Toggle Favorite
         ActionIcon(
           icon: AppIcons.favorite(context, isFavorite),
           onTap: () => state.isFavorite.value = !isFavorite,
@@ -300,6 +303,101 @@ class _TaskInputActions extends StatelessWidget {
           size: 16,
         ),
       ],
+    );
+  }
+}
+
+class _WorkspaceAction extends StatelessWidget {
+  final TaskInputViewModel state;
+  final AdaptiveColors colors;
+
+  const _WorkspaceAction({required this.state, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    final workspaceId = state.workspaceId.watch(context);
+    final hasWorkspace = workspaceId != null;
+
+    return ActionIcon(
+      icon: Icons.workspaces_outlined,
+      onTap: () {
+        _showWorkspacePicker(context);
+      },
+      color: hasWorkspace
+          ? colors.accent
+          : colors.textSecondary.withValues(alpha: 0.5),
+      size: 16,
+    );
+  }
+
+  void _showWorkspacePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Workspace', style: context.h2),
+            const SizedBox(height: 16),
+            TaskWorkspacePicker(selectedWorkspaceId: state.workspaceId),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TagAction extends StatelessWidget {
+  final TaskInputViewModel state;
+  final AdaptiveColors colors;
+
+  const _TagAction({required this.state, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    final tagIds = state.tagIds.watch(context);
+    final hasTags = tagIds.isNotEmpty;
+
+    return ActionIcon(
+      icon: Icons.label_outline,
+      onTap: () {
+        _showTagPicker(context);
+      },
+      color: hasTags
+          ? colors.accent
+          : colors.textSecondary.withValues(alpha: 0.5),
+      size: 16,
+    );
+  }
+
+  void _showTagPicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Tags', style: context.h2),
+            const SizedBox(height: 16),
+            TaskTagPicker(selectedTagIds: state.tagIds),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 }

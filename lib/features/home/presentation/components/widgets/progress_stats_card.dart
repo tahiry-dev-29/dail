@@ -1,24 +1,37 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:daily_os/features/planner/logic/task_selectors.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
-import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class ProgressStatsCard extends ConsumerWidget {
+class ProgressStatsCard extends StatelessWidget {
   const ProgressStatsCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch filtered tasks (Today/Selected Date) instead of all tasks
-    final tasks = ref.watch(filteredTasksProvider);
-    final total = tasks.length;
-    final done = tasks.where((t) => t.isDone).length;
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final taskListVM = sl<TaskListViewModel>();
+    final calendarVM = sl<CalendarViewModel>();
+    final themeVM = sl<ThemeViewModel>();
+    final selectedDate = calendarVM.selectedDate.watch(context);
+
+    // Watch tasks and filter by selected date
+    final tasksAsync = taskListVM.tasks.watch(context);
+    final allTasks = tasksAsync.value ?? [];
+
+    final filteredTasks = allTasks.where((t) {
+      if (t.date == null) return false;
+      return DateUtils.isSameDay(t.date!, selectedDate);
+    }).toList();
+
+    final total = filteredTasks.length;
+    final done = filteredTasks.where((t) => t.isDone).length;
     final remaining = total - done;
     final progress = total > 0 ? done / total : 0.0;
-
-    final colors = context.colors;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -31,14 +44,14 @@ class ProgressStatsCard extends ConsumerWidget {
           borderRadius: 24,
           child: Column(
             children: [
-              // Progress Header (ANIMATED TEXT)
+              // Progress Header
               Text(
                 'Progression',
                 style: context.bodySmall.copyWith(color: colors.textSecondary),
               ),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: progress),
-                duration: getAdaptedDuration(
+                duration: themeVM.getAdaptedDuration(
                   const Duration(milliseconds: 1000),
                 ),
                 curve: Curves.easeOutCubic,
@@ -51,7 +64,7 @@ class ProgressStatsCard extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              // Progress Bar (ANIMATED WIDTH)
+              // Progress Bar
               Container(
                 height: 8,
                 width: double.infinity,
@@ -63,7 +76,7 @@ class ProgressStatsCard extends ConsumerWidget {
                 ),
                 child: TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: progress),
-                  duration: getAdaptedDuration(
+                  duration: themeVM.getAdaptedDuration(
                     const Duration(milliseconds: 1200),
                   ),
                   curve: Curves.easeOutBack,
@@ -95,7 +108,6 @@ class ProgressStatsCard extends ConsumerWidget {
                     label: 'TERMINEES',
                     value: done,
                     color: Colors.green,
-                    isDark: colors.isDark,
                     colors: colors,
                     valueSize: statValueSize,
                     labelSize: statLabelSize,
@@ -112,7 +124,6 @@ class ProgressStatsCard extends ConsumerWidget {
                     label: 'RESTANTES',
                     value: remaining,
                     color: Colors.orange,
-                    isDark: colors.isDark,
                     colors: colors,
                     valueSize: statValueSize,
                     labelSize: statLabelSize,
@@ -129,7 +140,6 @@ class ProgressStatsCard extends ConsumerWidget {
                     label: 'TOTAL',
                     value: total,
                     color: Colors.blue,
-                    isDark: colors.isDark,
                     colors: colors,
                     valueSize: statValueSize,
                     labelSize: statLabelSize,
@@ -148,7 +158,6 @@ class _StatItem extends StatelessWidget {
   final String label;
   final int value;
   final Color color;
-  final bool isDark;
   final AdaptiveColors colors;
   final double valueSize;
   final double labelSize;
@@ -157,7 +166,6 @@ class _StatItem extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
-    required this.isDark,
     required this.colors,
     this.valueSize = 20.0,
     this.labelSize = 10.0,

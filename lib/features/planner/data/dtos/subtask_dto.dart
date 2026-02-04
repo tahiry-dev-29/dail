@@ -1,17 +1,22 @@
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
+import 'package:isar_community/isar.dart';
 
+part 'subtask_dto.g.dart';
+
+@embedded
 class SubTaskDTO {
-  final String id;
-  final String name;
-  final String description;
-  final bool isDone;
-  final String time;
-  final DateTime? deadline;
-  final bool isFavorite;
+  String?
+  id; // Embedded objects don't strictly require unique ID for Isar, but domain entity does.
+  String? name;
+  String? description;
+  bool? isDone;
+  String? time;
+  DateTime? deadline;
+  bool? isFavorite;
 
-  const SubTaskDTO({
-    required this.id,
-    required this.name,
+  SubTaskDTO({
+    this.id,
+    this.name,
     this.description = '',
     this.isDone = false,
     this.time = '00:00',
@@ -33,13 +38,13 @@ class SubTaskDTO {
 
   SubTaskEntity toEntity() {
     return SubTaskEntity(
-      id: id,
-      name: name,
-      description: description,
-      isDone: isDone,
-      time: time,
+      id: id ?? '',
+      name: name ?? '',
+      description: description ?? '',
+      isDone: isDone ?? false,
+      time: time ?? '00:00',
       deadline: deadline,
-      isFavorite: isFavorite,
+      isFavorite: isFavorite ?? false,
     );
   }
 
@@ -57,8 +62,8 @@ class SubTaskDTO {
 
   factory SubTaskDTO.fromJson(Map<String, dynamic> json) {
     return SubTaskDTO(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String?,
+      name: json['name'] as String?,
       description: (json['description'] as String?) ?? '',
       isDone: (json['isDone'] as bool?) ?? false,
       time: (json['time'] as String?) ?? '00:00',

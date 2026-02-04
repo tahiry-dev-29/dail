@@ -1,25 +1,29 @@
 import 'dart:ui';
 
-import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
-import 'package:daily_os/features/planner/logic/task_input_provider.dart';
-import 'package:daily_os/features/planner/logic/task_list_provider.dart';
+import 'package:daily_os/core/di/injection_container.dart';
+import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
+import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/presentation/components/task_form/task_input_widget.dart';
+import 'package:daily_os/features/planner/presentation/state/task_input_view_model.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class QuickAddTaskOverlay extends ConsumerWidget {
+class QuickAddTaskOverlay extends StatelessWidget {
   const QuickAddTaskOverlay({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isVisible = isAddTaskVisible.watch(context);
+  Widget build(BuildContext context) {
+    final isVisible = sl<HomeViewModel>().isAddTaskVisible.watch(context);
     final parentTask = parentTaskSignal.watch(context);
 
     if (!isVisible) return const SizedBox.shrink();
 
-    final selectedDate = calendarState.selectedDate.value;
+    final taskListVM = sl<TaskListViewModel>();
+    final calendarVM = sl<CalendarViewModel>();
+    final selectedDate = calendarVM.selectedDate.value;
 
     void onSave({
       required String name,
@@ -27,33 +31,41 @@ class QuickAddTaskOverlay extends ConsumerWidget {
       String? time,
       DateTime? deadline,
       required bool isFavorite,
+      List<String> tagIds = const [],
+      String? workspaceId,
     }) {
       if (parentTask != null) {
-        ref
-            .read(taskListProvider.notifier)
-            .addSubtask(
-              parentTask.id,
-              name: name,
-              description: description,
-              time: time ?? '00:00',
-              deadline: deadline,
-              isFavorite: isFavorite,
-            );
+        // Add subtask (subtasks don't support tags/workspace directly in entity yet, but keep signature)
+        final newSubtask = SubTaskEntity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          name: name,
+          description: description,
+          time: time ?? '00:00',
+          deadline: deadline,
+          isFavorite: isFavorite,
+        );
+
+        final updatedParent = parentTask.copyWith(
+          subtasks: [...parentTask.subtasks, newSubtask],
+        );
+
+        taskListVM.updateTask(updatedParent);
       } else {
-        ref
-            .read(taskListProvider.notifier)
-            .addTask(
-              name: name,
-              description: description,
-              time: time ?? '00:00',
-              date: selectedDate,
-              deadline: deadline,
-              isFavorite: isFavorite,
-            );
+        // Add regular task
+        taskListVM.addTask(
+          name: name,
+          description: description,
+          time: time ?? '00:00',
+          date: selectedDate,
+          deadline: deadline,
+          isFavorite: isFavorite,
+          tagIds: tagIds,
+          workspaceId: workspaceId,
+        );
       }
 
       clearDraft();
-      isAddTaskVisible.value = false;
+      sl<HomeViewModel>().isAddTaskVisible.value = false;
       parentTaskSignal.value = null;
 
       ToastService.success(
@@ -68,7 +80,7 @@ class QuickAddTaskOverlay extends ConsumerWidget {
         Positioned.fill(
           child: GestureDetector(
             onTap: () {
-              isAddTaskVisible.value = false;
+              sl<HomeViewModel>().isAddTaskVisible.value = false;
               parentTaskSignal.value = null;
             },
             behavior: HitTestBehavior.opaque,
@@ -81,7 +93,7 @@ class QuickAddTaskOverlay extends ConsumerWidget {
 
         // Input Area
         Align(
-          alignment: .bottomCenter,
+          alignment: Alignment.bottomCenter,
           child: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
@@ -91,7 +103,7 @@ class QuickAddTaskOverlay extends ConsumerWidget {
             child: TaskInputWidget(
               onSave: onSave,
               onCancel: () {
-                isAddTaskVisible.value = false;
+                sl<HomeViewModel>().isAddTaskVisible.value = false;
                 parentTaskSignal.value = null;
               },
               hintText: parentTask != null

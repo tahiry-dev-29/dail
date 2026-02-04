@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/features/calendar/presentation/components/grid/calendar_day_tile.dart';
-import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -9,9 +10,10 @@ class CalendarGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final daysInMonth = calendarState.daysInMonth.watch(context);
-    final firstDayOffset = calendarState.firstDayOffset.watch(context);
-    final selectedDate = calendarState.selectedDate.watch(context);
+    final calendarVM = sl<CalendarViewModel>();
+    final daysInMonth = calendarVM.daysInMonth.watch(context);
+    final firstDayOffset = calendarVM.firstDayOffset.watch(context);
+    final selectedDate = calendarVM.selectedDate.watch(context);
 
     // Calculate total slots including empty ones before the 1st of the month
     // Offset: Mon=1...Sun=7. If 1st is Mon, offset is 0. If 1st is Tue, offset is 1.
@@ -52,8 +54,8 @@ class CalendarGrid extends StatelessWidget {
           isSelected: isSelected,
           isToday: isToday,
           onTap: () {
-            calendarState.selectDate(day);
-            switchTab(1); // Navigate to Planner
+            calendarVM.selectDate(day);
+            sl<HomeViewModel>().switchTab(1); // Navigate to Planner
           },
         );
       },

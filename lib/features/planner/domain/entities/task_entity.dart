@@ -11,6 +11,8 @@ class TaskEntity {
   final bool isFavorite;
   final bool isIgnored;
   final List<SubTaskEntity> subtasks;
+  final List<String> tagIds;
+  final String? workspaceId;
 
   const TaskEntity({
     required this.id,
@@ -23,6 +25,8 @@ class TaskEntity {
     this.isFavorite = false,
     this.isIgnored = false,
     this.subtasks = const [],
+    this.tagIds = const [],
+    this.workspaceId,
   });
 
   bool get isOverdue {
@@ -59,6 +63,8 @@ class TaskEntity {
     bool? isFavorite,
     bool? isIgnored,
     List<SubTaskEntity>? subtasks,
+    List<String>? tagIds,
+    String? workspaceId,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -71,6 +77,8 @@ class TaskEntity {
       isFavorite: isFavorite ?? this.isFavorite,
       isIgnored: isIgnored ?? this.isIgnored,
       subtasks: subtasks ?? this.subtasks,
+      tagIds: tagIds ?? this.tagIds,
+      workspaceId: workspaceId ?? this.workspaceId,
     );
   }
 }

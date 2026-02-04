@@ -1,17 +1,17 @@
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 
 class SubtaskHeader extends StatelessWidget {
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final bool isAdding;
   final bool isExpanded;
   final Color accent;
 
   const SubtaskHeader({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.isAdding,
     required this.isExpanded,
     required this.accent,
@@ -20,16 +20,16 @@ class SubtaskHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => controller.isSubtasksExpanded.value = !isExpanded,
-      behavior: .opaque,
+      onTap: () => viewModel.isSubtasksExpanded.value = !isExpanded,
+      behavior: HitTestBehavior.opaque,
       child: Row(
-        mainAxisAlignment: .spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('SOUS-TÂCHES', style: context.caption),
           const Spacer(),
           if (!isAdding)
             IconButton(
-              onPressed: controller.toggleAddingSubtask,
+              onPressed: viewModel.toggleAddingSubtask,
               icon: Icon(Icons.add, size: 20, color: accent),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),

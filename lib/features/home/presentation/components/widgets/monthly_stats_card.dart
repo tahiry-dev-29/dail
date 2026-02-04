@@ -1,24 +1,25 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
-import 'package:daily_os/features/planner/logic/stats_provider.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/planner/presentation/state/stats_view_model.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:flutter/material.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class MonthlyStatsCard extends ConsumerWidget {
+class MonthlyStatsCard extends StatelessWidget {
   const MonthlyStatsCard({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colors;
+    final statsVM = sl<StatsViewModel>();
 
-    // Watch Real Data Provider
-    final monthlyStats = ref.watch(monthlyTaskStatsProvider);
+    // Watch Real Data via Signal
+    final monthlyStats = statsVM.monthlyStats.watch(context);
     final count = monthlyStats.totalTasksLast6Months;
-    // Calculate simple growth (mock logic for now as we don't track 'previous period' explicitly yet,
-    // or we could differ last month vs this month)
-    final growth = "+12%";
+    // Calculate simple growth (mock logic for now)
+    const growth = "+12%";
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -124,6 +125,7 @@ class _MonthBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeVM = sl<ThemeViewModel>();
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -132,7 +134,9 @@ class _MonthBar extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: value),
-              duration: getAdaptedDuration(const Duration(milliseconds: 1000)),
+              duration: themeVM.getAdaptedDuration(
+                const Duration(milliseconds: 1000),
+              ),
               curve: Curves.easeOutBack,
               builder: (context, val, _) {
                 final h = val <= 0 ? 4.0 : (70 * val);

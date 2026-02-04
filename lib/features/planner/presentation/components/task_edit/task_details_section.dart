@@ -2,31 +2,33 @@ import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/logic/task_edit_controller.dart';
+import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/task_tag_picker.dart';
+import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/task_workspace_picker.dart';
+import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskDetailsSection extends StatelessWidget {
-  final TaskEditController controller;
+  final TaskEditViewModel viewModel;
   final VoidCallback onSave;
 
   const TaskDetailsSection({
     super.key,
-    required this.controller,
+    required this.viewModel,
     required this.onSave,
   });
 
   @override
   Widget build(BuildContext context) {
     // Watch signals
-    final desc = controller.description.watch(context);
-    final isExpanded = controller.isDescriptionExpanded.watch(context);
+    final desc = viewModel.description.watch(context);
+    final isExpanded = viewModel.isDescriptionExpanded.watch(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: () => controller.isDescriptionExpanded.value = !isExpanded,
+          onTap: () => viewModel.isDescriptionExpanded.value = !isExpanded,
           behavior: HitTestBehavior.opaque,
           child: Row(
             children: [
@@ -55,7 +57,7 @@ class TaskDetailsSection extends StatelessWidget {
                     controller: TextEditingController(
                       text: desc,
                     )..selection = TextSelection.collapsed(offset: desc.length),
-                    onChanged: (val) => controller.description.value = val,
+                    onChanged: (val) => viewModel.description.value = val,
                     style: context.bodyMedium,
                     maxLines: 4,
                     maxLength: 1000,
@@ -73,6 +75,10 @@ class TaskDetailsSection extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
+        const SizedBox(height: 24),
+        TaskWorkspacePicker(selectedWorkspaceId: viewModel.workspaceId),
+        const SizedBox(height: 24),
+        TaskTagPicker(selectedTagIds: viewModel.tagIds),
       ],
     );
   }
