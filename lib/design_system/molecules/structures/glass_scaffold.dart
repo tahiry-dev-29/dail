@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class GlassScaffold extends StatelessWidget {
   final Widget body;
@@ -54,39 +56,20 @@ class GlassScaffold extends StatelessWidget {
   }
 }
 
-class _ModernLightBlobs extends StatefulWidget {
+class _ModernLightBlobs extends HookWidget {
   const _ModernLightBlobs();
 
   @override
-  State<_ModernLightBlobs> createState() => _ModernLightBlobsState();
-}
-
-class _ModernLightBlobsState extends State<_ModernLightBlobs>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 10), // Slow breathing
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = useAnimationController(
+      duration: const Duration(seconds: 10),
+    )..repeat(reverse: true);
+
     return AnimatedBuilder(
-      animation: _controller,
+      animation: controller,
       builder: (context, child) {
         // Subtle movement range
-        final move = _controller.value * 20.0;
+        final move = controller.value * 20.0;
 
         return Stack(
           children: [

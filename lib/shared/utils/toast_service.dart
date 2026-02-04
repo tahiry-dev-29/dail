@@ -1,6 +1,8 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart'; // Keep this if used elsewhere, otherwise remove.
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ToastService {
   static void show(
@@ -46,7 +48,7 @@ class ToastService {
 
 enum ToastType { success, error, info, warning }
 
-class _ToastContent extends StatefulWidget {
+class _ToastContent extends HookWidget {
   final String message;
   final ToastType type;
   final Duration duration;
@@ -60,33 +62,15 @@ class _ToastContent extends StatefulWidget {
   });
 
   @override
-  State<_ToastContent> createState() => _ToastContentState();
-}
-
-class _ToastContentState extends State<_ToastContent>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _progressController;
-
-  @override
-  void initState() {
-    super.initState();
-    _progressController = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _progressController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final progressController = useAnimationController(duration: duration)
+      ..forward();
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: getAdaptedDuration(const Duration(milliseconds: 400)),
+      duration: sl<ThemeViewModel>().getAdaptedDuration(
+        const Duration(milliseconds: 400),
+      ),
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
         return Transform.translate(
@@ -124,12 +108,16 @@ class _ToastContentState extends State<_ToastContent>
                         color: Colors.white.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(_getIcon(), color: Colors.white, size: 18),
+                      child: Icon(
+                        _getIcon(context),
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        widget.message,
+                        message,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
@@ -139,7 +127,7 @@ class _ToastContentState extends State<_ToastContent>
                       ),
                     ),
                     IconButton(
-                      onPressed: widget.onClose,
+                      onPressed: onClose,
                       icon: Icon(
                         AppIcons.xmark(context),
                         color:
@@ -155,10 +143,10 @@ class _ToastContentState extends State<_ToastContent>
               ),
               // Progress indicator
               AnimatedBuilder(
-                animation: _progressController,
+                animation: progressController,
                 builder: (context, child) {
                   return LinearProgressIndicator(
-                    value: 1.0 - _progressController.value,
+                    value: 1.0 - progressController.value,
                     backgroundColor: Colors.transparent,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Colors.white.withValues(alpha: 0.3),
@@ -175,7 +163,7 @@ class _ToastContentState extends State<_ToastContent>
   }
 
   Color _getMainColor() {
-    switch (widget.type) {
+    switch (type) {
       case ToastType.success:
         return const Color(0xFF10B981);
       case ToastType.error:
@@ -188,7 +176,7 @@ class _ToastContentState extends State<_ToastContent>
   }
 
   List<Color> _getGradientColors() {
-    switch (widget.type) {
+    switch (type) {
       case ToastType.success:
         return [const Color(0xFF10B981), const Color(0xFF059669)];
       case ToastType.error:
@@ -200,8 +188,8 @@ class _ToastContentState extends State<_ToastContent>
     }
   }
 
-  IconData _getIcon() {
-    switch (widget.type) {
+  IconData _getIcon(BuildContext context) {
+    switch (type) {
       case ToastType.success:
         return AppIcons.check(context);
       case ToastType.error:

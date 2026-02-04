@@ -1,7 +1,8 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -10,7 +11,8 @@ class AtomicNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = currentTab.watch(context);
+    final homeVM = sl<HomeViewModel>();
+    final current = homeVM.currentTab.watch(context);
     final colors = context.colors;
 
     return Padding(
@@ -28,35 +30,35 @@ class AtomicNavBar extends StatelessWidget {
                 icon: AppIcons.home(context),
                 label: 'Home',
                 isActive: current == AppTabs.home.index,
-                onTap: () => switchTab(AppTabs.home.index),
+                onTap: () => homeVM.switchTab(AppTabs.home.index),
                 colors: colors,
               ),
               _NavButton(
                 icon: AppIcons.planner(context),
                 label: 'Planner',
                 isActive: current == AppTabs.planner.index,
-                onTap: () => switchTab(AppTabs.planner.index),
+                onTap: () => homeVM.switchTab(AppTabs.planner.index),
                 colors: colors,
               ),
               _NavButton(
                 icon: AppIcons.calendar(context),
                 label: 'Mois',
                 isActive: current == AppTabs.calendar.index,
-                onTap: () => switchTab(AppTabs.calendar.index),
+                onTap: () => homeVM.switchTab(AppTabs.calendar.index),
                 colors: colors,
               ),
               _NavButton(
                 icon: Icons.book_outlined,
                 label: 'Docs',
                 isActive: current == AppTabs.knowledge.index,
-                onTap: () => switchTab(AppTabs.knowledge.index),
+                onTap: () => homeVM.switchTab(AppTabs.knowledge.index),
                 colors: colors,
               ),
               _NavButton(
                 icon: AppIcons.assistant(context),
                 label: 'Assistant',
                 isActive: current == AppTabs.aiChat.index,
-                onTap: () => switchTab(AppTabs.aiChat.index),
+                onTap: () => homeVM.switchTab(AppTabs.aiChat.index),
                 colors: colors,
               ),
             ],

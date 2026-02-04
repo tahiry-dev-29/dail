@@ -1,22 +1,23 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/calendar/logic/calendar_provider.dart';
+import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
 import 'package:daily_os/features/notifications/presentation/screens/notifications_page.dart';
-import 'package:daily_os/features/planner/logic/task_list_provider.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:daily_os/features/settings/presentation/screens/settings_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class AtomicHeader extends ConsumerWidget {
+class AtomicHeader extends StatelessWidget {
   const AtomicHeader({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedDate = calendarState.selectedDate.watch(context);
+  Widget build(BuildContext context) {
+    final calendarVM = sl<CalendarViewModel>();
+    final selectedDate = calendarVM.selectedDate.watch(context);
     final dateStr = DateFormat('d MMMM', 'fr_FR').format(selectedDate);
     final colors = context.colors;
 
@@ -102,38 +103,29 @@ class AtomicHeader extends ConsumerWidget {
   }
 }
 
-class _DayProgressIndicator extends ConsumerWidget {
+class _DayProgressIndicator extends StatelessWidget {
   final DateTime selectedDate;
 
   const _DayProgressIndicator({required this.selectedDate});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch tasks
-    final tasksAsync = ref.watch(taskListProvider);
+  Widget build(BuildContext context) {
+    final taskListVM = sl<TaskListViewModel>();
+    final tasksAsync = taskListVM.tasks.watch(context);
     final colors = context.colors;
 
-    // Calculate progress
     double progress = 0.0;
 
-    // Default to 0 if loading/error, or calculate if data available
-    tasksAsync.whenData((tasks) {
-      // Filter tasks for the selected date
-      final dayTasks = tasks.where((t) {
-        // If task has a specific date, match it.
-        // If task has no date but is in the list, we might assume it's "today" or "backlog".
-        // For "Daily Data", strictly matching the selected date seems appropriate.
-        // If t.date is null, it might be a general task.
-        // Let's assume we want tasks that are scheduled for this date.
-        if (t.date == null) return false;
-        return DateUtils.isSameDay(t.date!, selectedDate);
-      }).toList();
+    final tasks = tasksAsync.value ?? [];
+    final dayTasks = tasks.where((t) {
+      if (t.date == null) return false;
+      return DateUtils.isSameDay(t.date!, selectedDate);
+    }).toList();
 
-      if (dayTasks.isNotEmpty) {
-        final completed = dayTasks.where((t) => t.isDone).length;
-        progress = completed / dayTasks.length;
-      }
-    });
+    if (dayTasks.isNotEmpty) {
+      final completed = dayTasks.where((t) => t.isDone).length;
+      progress = completed / dayTasks.length;
+    }
 
     final percentage = (progress * 100).toInt();
 
@@ -143,14 +135,12 @@ class _DayProgressIndicator extends ConsumerWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Background track
           CircularProgressIndicator(
             value: 1.0,
             strokeWidth: 4,
             color: colors.textSecondary.withValues(alpha: 0.1),
             strokeCap: StrokeCap.round,
           ),
-          // Progress
           CircularProgressIndicator(
             value: progress,
             strokeWidth: 4,

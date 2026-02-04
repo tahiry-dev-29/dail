@@ -1,35 +1,48 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/ai_chat/presentation/screens/ai_chat_page.dart';
 import 'package:daily_os/features/calendar/presentation/screens/calendar_screen.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
 import 'package:daily_os/features/home/presentation/screens/home_screen.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/knowledge_base_screen.dart';
-import 'package:daily_os/features/planner/logic/task_input_provider.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:daily_os/features/planner/presentation/screens/planner_dashboard_screen.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:daily_os/shared/widgets/atomic_header.dart';
 import 'package:daily_os/shared/widgets/atomic_nav_bar.dart';
 import 'package:daily_os/shared/widgets/floating_add_task_button.dart';
 import 'package:daily_os/shared/widgets/safe_back_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class MainLayout extends StatelessWidget {
+class MainLayout extends HookWidget {
   const MainLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final current = currentTab.watch(context);
+    useEffect(() {
+      // Load initial data for all main features
+      Future.microtask(() {
+        sl<TaskListViewModel>().loadTasks();
+        sl<WorkspaceViewModel>().loadWorkspaces();
+      });
+      return null;
+    }, []);
+
+    final homeVM = sl<HomeViewModel>();
+    final current = homeVM.currentTab.watch(context);
 
     return SafeBackHandler(
       onBack: () {
-        if (isAddTaskVisible.value) {
-          isAddTaskVisible.value = false;
+        if (homeVM.isAddTaskVisible.value) {
+          homeVM.isAddTaskVisible.value = false;
           return;
         }
         if (current != 0) {
-          switchTab(0);
+          homeVM.switchTab(0);
           return;
         }
       },
@@ -43,9 +56,13 @@ class MainLayout extends StatelessWidget {
                 onNotification: (notification) {
                   final direction = notification.direction;
                   if (direction == ScrollDirection.reverse) {
-                    if (isNavBarVisible.value) isNavBarVisible.value = false;
+                    if (homeVM.isNavBarVisible.value) {
+                      homeVM.isNavBarVisible.value = false;
+                    }
                   } else if (direction == ScrollDirection.forward) {
-                    if (!isNavBarVisible.value) isNavBarVisible.value = true;
+                    if (!homeVM.isNavBarVisible.value) {
+                      homeVM.isNavBarVisible.value = true;
+                    }
                   }
                   return true;
                 },
@@ -57,10 +74,12 @@ class MainLayout extends StatelessWidget {
                 right: 0,
                 child: Watch(
                   (context) => AnimatedSlide(
-                    offset: (isNavBarVisible.value && !isAddTaskVisible.value)
+                    offset:
+                        (homeVM.isNavBarVisible.value &&
+                            !homeVM.isAddTaskVisible.value)
                         ? Offset.zero
                         : const Offset(0, 1.2),
-                    duration: getAdaptedDuration(
+                    duration: sl<ThemeViewModel>().getAdaptedDuration(
                       const Duration(milliseconds: 300),
                     ),
                     curve: Curves.easeInOutCubic,
@@ -73,8 +92,8 @@ class MainLayout extends StatelessWidget {
                 right: 16,
                 child: Watch(
                   (context) => AnimatedScale(
-                    scale: isNavBarVisible.value ? 1.0 : 0.0,
-                    duration: getAdaptedDuration(
+                    scale: homeVM.isNavBarVisible.value ? 1.0 : 0.0,
+                    duration: sl<ThemeViewModel>().getAdaptedDuration(
                       const Duration(milliseconds: 300),
                     ),
                     curve: Curves.easeInOutCubic,
@@ -90,52 +109,38 @@ class MainLayout extends StatelessWidget {
   }
 }
 
-class _PageSwitcher extends StatefulWidget {
+class _PageSwitcher extends HookWidget {
   final int current;
   const _PageSwitcher({required this.current});
 
   @override
-  State<_PageSwitcher> createState() => _PageSwitcherState();
-}
-
-class _PageSwitcherState extends State<_PageSwitcher> {
-  late PageController _pageController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: widget.current);
-  }
-
-  @override
-  void didUpdateWidget(_PageSwitcher oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.current != _pageController.page?.round()) {
-      _pageController.animateToPage(
-        widget.current,
-        duration: getAdaptedDuration(const Duration(milliseconds: 400)),
-        curve: Curves.easeOutCubic,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final pageController = usePageController(initialPage: current);
+    final homeVM = sl<HomeViewModel>();
+
+    useEffect(() {
+      if (pageController.hasClients &&
+          current != pageController.page?.round()) {
+        pageController.animateToPage(
+          current,
+          duration: sl<ThemeViewModel>().getAdaptedDuration(
+            const Duration(milliseconds: 400),
+          ),
+          curve: Curves.easeOutCubic,
+        );
+      }
+      return null;
+    }, [current]);
+
     return Column(
       children: [
-        if (widget.current != AppTabs.aiChat.index) const AtomicHeader(),
+        if (current != 4) const AtomicHeader(), // 4 is aiChat index
         Expanded(
           child: PageView(
-            controller: _pageController,
+            controller: pageController,
             onPageChanged: (index) {
-              if (index != currentTab.value) {
-                switchTab(index);
+              if (index != homeVM.currentTab.value) {
+                homeVM.switchTab(index);
               }
             },
             physics: const BouncingScrollPhysics(),

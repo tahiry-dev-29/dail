@@ -9,7 +9,9 @@ class AppTheme {
   // ===========================================================================
 
   static const Color _lightScaffold = Color(0xFFF8FAFC); // Slate-50
-  static const Color _darkScaffold = Colors.black;
+  static const Color _darkScaffold = Color(
+    0xFF030712,
+  ); // Grey-950 (Premium Dark)
 
   // Modern Glass Colors
   // Light Mode: "Icy/Ceramic" look (White with variable opacity)
@@ -17,14 +19,15 @@ class AppTheme {
   static Color get lightGlassBorder => Colors.white.withValues(alpha: 0.6);
 
   // Dark Mode: "Deep Space" look (White/Black tint with low opacity)
-  static Color get darkGlass => const Color(0xFF0F172A).withValues(alpha: 0.6);
+  static Color get darkGlass =>
+      const Color(0xFF111827).withValues(alpha: 0.7); // Grey-900
   static Color get darkGlassBorder => Colors.white.withValues(alpha: 0.1);
 
   // Text Colors - Modern High Contrast
   static const Color lightTextPrimary = Color(0xFF0F172A); // Slate-900
   static const Color lightTextSecondary = Color(0xFF64748B); // Slate-500
-  static const Color darkTextPrimary = Colors.white;
-  static const Color darkTextSecondary = Colors.white70;
+  static const Color darkTextPrimary = Color(0xFFF9FAFB); // Grey-50
+  static const Color darkTextSecondary = Color(0xFF9CA3AF); // Grey-400
 
   // ===========================================================================
   // THEME DATA GENERATORS
@@ -131,6 +134,8 @@ class AdaptiveColors {
       isDark ? AppTheme.darkTextSecondary : AppTheme.lightTextSecondary;
   Color get textMuted => isDark ? Colors.white38 : Colors.black38;
 
+  Color get background => Theme.of(context).scaffoldBackgroundColor;
+
   Color get surface => isDark
       ? Colors.white.withValues(alpha: 0.07)
       : Colors.white.withValues(alpha: 0.65);
@@ -155,6 +160,11 @@ class AdaptiveColors {
 
   // Accent from theme
   Color get accent => Theme.of(context).colorScheme.primary;
+
+  // Text on Accent (Usually white or black depending on accent brightness)
+  Color get textOnAccent => Colors.white;
+
+  Color get error => Colors.redAccent;
 }
 
 extension AdaptiveColorsExtension on BuildContext {
