@@ -1,9 +1,10 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -94,8 +95,8 @@ class AiChatPage extends StatelessWidget {
               16,
               0,
               16,
-              isNavBarVisible.value ? 110 : 20,
-            ), // Dynamic bottom padding
+              sl<HomeViewModel>().isNavBarVisible.value ? 110 : 20,
+            ),
             child: GlassCard(
               borderRadius: 30,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

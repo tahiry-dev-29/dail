@@ -85,6 +85,7 @@ class DashboardHeader extends StatelessWidget {
 
 ## 🛠️ Rappels Techniques
 
+0. tu doit lire le agent.md et les skills globales
 1. **SDK Version** : `pubspec.yaml` doit avoir `sdk: '>=3.6.0'`.
 2. **Performance** : Les Slivers sont gérés de manière atomique par le moteur.
 3. **Maintien** : Tester chaque partie du scroll indépendamment via les micro-composants.

@@ -1,8 +1,9 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
-import 'package:daily_os/features/home/logic/home_signals.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -11,7 +12,8 @@ class ChatOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isOpen = isChatOpen.watch(context);
+    final homeVM = sl<HomeViewModel>();
+    final isOpen = homeVM.isChatOpen.watch(context);
 
     return AnimatedSlide(
       offset: isOpen ? Offset.zero : const Offset(0, 1),
@@ -84,7 +86,8 @@ class ChatOverlay extends StatelessWidget {
                         color: Colors.white,
                         size: 18,
                       ),
-                      onPressed: () => isChatOpen.value = false,
+                      onPressed: () =>
+                          sl<HomeViewModel>().isChatOpen.value = false,
                     ),
                   ],
                 ),

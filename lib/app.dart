@@ -1,6 +1,7 @@
+import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/core/router/app_router.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/settings/logic/theme_provider.dart';
+import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,25 +12,17 @@ class DailyOsApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeVM = sl<ThemeViewModel>();
     // Watch Theme Mode Signal
-    final mode = themeModeSignal.watch(context);
-    final accent = accentColorSignal.watch(context);
-    final fontFamily = fontSignal.watch(context);
+    final accent = themeVM.accentColor.watch(context);
+    final fontFamily = themeVM.fontFamily.watch(context);
+    themeVM.themeMode.watch(context); // Watch for reactivity (value unused)
     final router = ref.watch(appRouterProvider);
-
-    // Convert to ThemeMode enum
-    ThemeMode getThemeMode() {
-      return switch (mode) {
-        1 => ThemeMode.dark,
-        2 => ThemeMode.light,
-        _ => ThemeMode.system,
-      };
-    }
 
     return MaterialApp.router(
       title: 'DailyOS',
       debugShowCheckedModeBanner: false,
-      themeMode: getThemeMode(),
+      themeMode: themeVM.getThemeMode(),
       theme: AppTheme.lightTheme(accent, fontFamily),
       darkTheme: AppTheme.darkTheme(accent, fontFamily),
       localizationsDelegates: const [
