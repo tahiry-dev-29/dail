@@ -5,8 +5,31 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/get_
 import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/update_workspace_usecase.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
+enum WorkspaceContentType { dashboard, note, task, search }
+
 /// ViewModel for Workspace management
 class WorkspaceViewModel {
+  // Navigation State
+  final Signal<WorkspaceContentType> selectedContentType = signal(
+    WorkspaceContentType.dashboard,
+  );
+  final Signal<String?> selectedItemId = signal(null); // Page ID or Task ID
+
+  void selectNote(String pageId) {
+    selectedContentType.value = WorkspaceContentType.note;
+    selectedItemId.value = pageId;
+  }
+
+  void selectTask(String taskId) {
+    selectedContentType.value = WorkspaceContentType.task;
+    selectedItemId.value = taskId;
+  }
+
+  void showDashboard() {
+    selectedContentType.value = WorkspaceContentType.dashboard;
+    selectedItemId.value = null;
+  }
+
   // Dependencies
   final GetWorkspacesUseCase _getWorkspacesUseCase;
   final CreateWorkspaceUseCase _createWorkspaceUseCase;

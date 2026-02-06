@@ -1,10 +1,12 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/workspace_entity.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class WorkspaceSwitcherModal extends StatelessWidget {
   const WorkspaceSwitcherModal({super.key});
@@ -107,6 +109,8 @@ class WorkspaceSwitcherModal extends StatelessWidget {
                       isSelected: isSelected,
                       onTap: () {
                         workspaceVM.setActiveWorkspace(ws);
+                        workspaceVM.showDashboard();
+                        sl<HomeViewModel>().switchTab(AppTabs.workspace.index);
                         Navigator.pop(context);
                       },
                       onDelete: () {
@@ -202,7 +206,7 @@ class WorkspaceSwitcherModal extends StatelessWidget {
               final name = nameController.text.trim();
               if (name.isNotEmpty) {
                 final workspace = WorkspaceEntity(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  id: Uuid().v4(),
                   name: name,
                   iconEmoji: '🚀',
                   createdAt: DateTime.now(),
