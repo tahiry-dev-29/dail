@@ -22,6 +22,8 @@ class TaskDTO {
   late List<SubTaskDTO> subtasks;
   late List<String> tagIds;
   late String? workspaceId;
+  late String? folderId;
+  String iconEmoji = '📝';
 
   TaskDTO();
 
@@ -38,6 +40,8 @@ class TaskDTO {
     this.subtasks = const [],
     this.tagIds = const [],
     this.workspaceId,
+    this.folderId,
+    this.iconEmoji = '📝',
   });
 
   factory TaskDTO.fromEntity(TaskEntity entity) {
@@ -54,6 +58,8 @@ class TaskDTO {
       subtasks: entity.subtasks.map((st) => SubTaskDTO.fromEntity(st)).toList(),
       tagIds: entity.tagIds,
       workspaceId: entity.workspaceId,
+      folderId: entity.folderId,
+      iconEmoji: entity.iconEmoji,
     );
   }
 
@@ -71,6 +77,8 @@ class TaskDTO {
       subtasks: subtasks.map((dto) => dto.toEntity()).toList(),
       tagIds: tagIds,
       workspaceId: workspaceId,
+      folderId: folderId,
+      iconEmoji: iconEmoji,
     );
   }
 }

@@ -165,26 +165,26 @@ class _ToastContent extends HookWidget {
   Color _getMainColor() {
     switch (type) {
       case ToastType.success:
-        return const Color(0xFF10B981);
+        return Colors.greenAccent;
       case ToastType.error:
-        return const Color(0xFFEF4444);
+        return Colors.redAccent;
       case ToastType.warning:
-        return const Color(0xFFF59E0B);
+        return Colors.amber;
       case ToastType.info:
-        return const Color(0xFF6366F1);
+        return Colors.indigoAccent;
     }
   }
 
   List<Color> _getGradientColors() {
     switch (type) {
       case ToastType.success:
-        return [const Color(0xFF10B981), const Color(0xFF059669)];
+        return [Colors.greenAccent, Colors.teal];
       case ToastType.error:
-        return [const Color(0xFFEF4444), const Color(0xFFDC2626)];
+        return [Colors.redAccent, Colors.red];
       case ToastType.warning:
-        return [const Color(0xFFF59E0B), const Color(0xFFD97706)];
+        return [Colors.amber, Colors.orange];
       case ToastType.info:
-        return [const Color(0xFF6366F1), const Color(0xFF4F46E5)];
+        return [Colors.indigoAccent, Colors.blueAccent];
     }
   }
 

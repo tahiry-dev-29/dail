@@ -10,6 +10,7 @@ import 'package:daily_os/features/planner/presentation/state/task_list_view_mode
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class QuickAddTaskOverlay extends StatelessWidget {
   const QuickAddTaskOverlay({super.key});
@@ -37,7 +38,7 @@ class QuickAddTaskOverlay extends StatelessWidget {
       if (parentTask != null) {
         // Add subtask (subtasks don't support tags/workspace directly in entity yet, but keep signature)
         final newSubtask = SubTaskEntity(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          id: Uuid().v4(),
           name: name,
           description: description,
           time: time ?? '00:00',
@@ -61,6 +62,8 @@ class QuickAddTaskOverlay extends StatelessWidget {
           isFavorite: isFavorite,
           tagIds: tagIds,
           workspaceId: workspaceId,
+          folderId: taskListVM.selectedFolderId.value,
+          iconEmoji: '📝',
         );
       }
 

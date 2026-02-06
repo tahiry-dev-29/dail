@@ -1,6 +1,7 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/subtask_list_manager.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_action_bar.dart';
@@ -14,11 +15,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 class TaskEditPage extends HookWidget {
   final TaskEntity task;
+  final VoidCallback? onBack;
 
-  const TaskEditPage({super.key, required this.task});
+  const TaskEditPage({super.key, required this.task, this.onBack});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // 1. Initialize ViewModel via Hook and sl
     final viewModel = useMemoized(() => sl<TaskEditViewModel>(param1: task));
 
@@ -30,7 +33,11 @@ class TaskEditPage extends HookWidget {
         slivers: [
           // Header
           SliverToBoxAdapter(
-            child: TaskEditHeader(viewModel: viewModel, onSave: onSave),
+            child: TaskEditHeader(
+              viewModel: viewModel,
+              onSave: onSave,
+              onBack: onBack,
+            ),
           ),
 
           // Body Content
@@ -44,10 +51,10 @@ class TaskEditPage extends HookWidget {
                   // List Category
                   Row(
                     children: [
-                      const Text(
+                      Text(
                         'General Task',
                         style: TextStyle(
-                          color: Colors.blueAccent,
+                          color: colors.accent,
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
@@ -55,7 +62,7 @@ class TaskEditPage extends HookWidget {
                       const SizedBox(width: 4),
                       Icon(
                         AppIcons.caretDown(context),
-                        color: Colors.blueAccent,
+                        color: colors.accent,
                         size: 14,
                       ),
                     ],
@@ -80,7 +87,11 @@ class TaskEditPage extends HookWidget {
             fillOverscroll: true,
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: TaskActionBar(viewModel: viewModel, onSave: onSave),
+              child: TaskActionBar(
+                viewModel: viewModel,
+                onSave: onSave,
+                onBack: onBack,
+              ),
             ),
           ),
         ],

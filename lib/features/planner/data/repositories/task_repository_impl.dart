@@ -15,6 +15,12 @@ class TaskRepositoryImpl implements ITaskRepository {
   }
 
   @override
+  Future<List<TaskEntity>> getTasksByFolder(String folderId) async {
+    final dtos = await localDataSource.getTasksByFolder(folderId);
+    return dtos.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
   Future<void> addTask(TaskEntity task) async {
     await localDataSource.saveTask(TaskDTO.fromEntity(task));
   }

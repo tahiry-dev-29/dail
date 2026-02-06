@@ -2,6 +2,7 @@ import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:daily_os/shared/widgets/atomic_color_picker.dart';
 import 'package:flutter/material.dart';
 
 class ColorPicker extends StatelessWidget {
@@ -55,72 +56,11 @@ class ColorPicker extends StatelessWidget {
   }
 
   void _showColorPickerDialog(BuildContext context, ThemeViewModel themeVM) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: const Text(
-            'Choisir une couleur',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Selectionnez votre couleur d\'accent personnalisée',
-                style: TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children:
-                    [
-                          Colors.indigo,
-                          Colors.lightBlue,
-                          Colors.teal,
-                          Colors.green,
-                          Colors.lime,
-                          Colors.yellow,
-                          Colors.orange,
-                          Colors.deepOrange,
-                          Colors.brown,
-                          Colors.blueGrey,
-                          Colors.deepPurple,
-                          Colors.pink,
-                        ]
-                        .map(
-                          (c) => GestureDetector(
-                            onTap: () {
-                              themeVM.addCustomColor(c);
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: c,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
+    AtomicColorPicker.show(
+      context,
+      initialColor: selectedColor,
+      onColorChanged: (color) => themeVM.addCustomColor(color),
+      title: "Couleur d'accent",
     );
   }
 }

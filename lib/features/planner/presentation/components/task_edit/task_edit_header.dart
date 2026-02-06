@@ -9,11 +9,13 @@ import 'package:signals_flutter/signals_flutter.dart';
 class TaskEditHeader extends StatelessWidget {
   final TaskEditViewModel viewModel;
   final VoidCallback onSave;
+  final VoidCallback? onBack;
 
   const TaskEditHeader({
     super.key,
     required this.viewModel,
     required this.onSave,
+    this.onBack,
   });
 
   @override
@@ -29,7 +31,7 @@ class TaskEditHeader extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: ActionIcon(
               icon: AppIcons.arrowLeft(context),
-              onTap: () => Navigator.pop(context),
+              onTap: onBack ?? () => Navigator.pop(context),
               color: context.colors.textPrimary,
               size: 18,
               padding: const EdgeInsets.all(16),

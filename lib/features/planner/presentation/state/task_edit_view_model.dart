@@ -2,6 +2,7 @@ import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class TaskEditViewModel {
   final TaskEntity initialTask;
@@ -70,7 +71,7 @@ class TaskEditViewModel {
     if (name.trim().isEmpty) return;
 
     final newSubtask = SubTaskEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: Uuid().v4(),
       name: name,
       description: description,
       time: time,

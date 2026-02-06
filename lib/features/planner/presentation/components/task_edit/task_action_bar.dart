@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 class TaskActionBar extends StatelessWidget {
   final TaskEditViewModel viewModel;
   final VoidCallback onSave;
+  final VoidCallback? onBack;
 
   const TaskActionBar({
     super.key,
     required this.viewModel,
     required this.onSave,
+    this.onBack,
   });
 
   @override
@@ -23,7 +25,11 @@ class TaskActionBar extends StatelessWidget {
         child: GestureDetector(
           onTap: () {
             onSave();
-            Navigator.pop(context);
+            if (onBack != null) {
+              onBack!();
+            } else {
+              Navigator.pop(context);
+            }
           },
           child: GlassCard(
             borderRadius: 30,

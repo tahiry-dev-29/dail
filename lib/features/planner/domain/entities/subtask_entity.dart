@@ -36,4 +36,27 @@ class SubTaskEntity {
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SubTaskEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description &&
+          isDone == other.isDone &&
+          time == other.time &&
+          deadline == other.deadline &&
+          isFavorite == other.isFavorite;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      isDone.hashCode ^
+      time.hashCode ^
+      deadline.hashCode ^
+      isFavorite.hashCode;
 }

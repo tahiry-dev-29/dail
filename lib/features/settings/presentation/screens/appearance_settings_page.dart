@@ -1,11 +1,13 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/animation_settings.dart';
+import 'package:daily_os/features/settings/presentation/components/appearance/background_settings.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/choice_selector.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/color_picker.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/header.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/section_title.dart';
 import 'package:daily_os/features/settings/presentation/components/appearance/theme_mode_selector.dart';
+import 'package:daily_os/features/settings/presentation/components/appearance/theme_style_selector.dart';
 import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
@@ -33,9 +35,14 @@ class AppearanceSettingsPage extends StatelessWidget {
                 const SectionTitle(title: 'MODE DE THÈME'),
                 const SizedBox(height: 12),
                 ThemeModeSelector(currentMode: mode),
+                const SizedBox(height: 24),
+                const ThemeStyleSelector(),
 
                 const SizedBox(height: 32),
-                const SectionTitle(title: "PERSONNALISATION COULEUR"),
+                const BackgroundSettings(),
+
+                const SizedBox(height: 32),
+                const SectionTitle(title: "PERSONNALISATION ACCENT"),
                 const SizedBox(height: 12),
                 ColorPicker(selectedColor: accent),
 

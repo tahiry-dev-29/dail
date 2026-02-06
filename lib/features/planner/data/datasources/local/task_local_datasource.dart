@@ -3,6 +3,7 @@ import 'package:isar_community/isar.dart';
 
 abstract class ITaskLocalDataSource {
   Future<List<TaskDTO>> getTasks();
+  Future<List<TaskDTO>> getTasksByFolder(String folderId);
   Future<void> saveTask(TaskDTO task);
   Future<void> saveTasks(List<TaskDTO> tasks);
   Future<void> deleteTask(String uid);
@@ -16,6 +17,15 @@ class TaskLocalDataSource implements ITaskLocalDataSource {
   @override
   Future<List<TaskDTO>> getTasks() async {
     return isar.taskDTOs.where().findAll();
+  }
+
+  @override
+  Future<List<TaskDTO>> getTasksByFolder(String folderId) async {
+    final results = await isar.taskDTOs
+        .filter()
+        .folderIdEqualTo(folderId)
+        .findAll();
+    return results;
   }
 
   @override
