@@ -1,13 +1,12 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/knowledge_base/domain/entities/tag_entity.dart';
+import 'package:daily_os/features/knowledge_base/presentation/screens/tag_customization_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:uuid/uuid.dart';
 
 class TagManagerModal extends HookWidget {
   const TagManagerModal({super.key});
@@ -26,81 +25,11 @@ class TagManagerModal extends HookWidget {
     final colors = context.colors;
     final tagVM = sl<TagViewModel>();
     final tagsState = tagVM.tags.watch(context);
-    final activeWorkspace = sl<WorkspaceViewModel>().activeWorkspace.watch(
-      context,
-    );
 
-    // Editing state
-    final editingTagId = useState<String?>(null);
-    final nameController = useTextEditingController();
-    final selectedColor = useState<String>('#3B82F6'); // Default Blue
-
-    // Available colors
-    final tagColors = [
-      '#EF4444', // Red
-      '#F97316', // Orange
-      '#EAB308', // Yellow
-      '#22C55E', // Green
-      '#3B82F6', // Blue
-      '#A855F7', // Purple
-      '#EC4899', // Pink
-      '#64748B', // Slate
-    ];
-
-    void startEditing(TagEntity? tag) {
-      if (tag != null) {
-        editingTagId.value = tag.id;
-        nameController.text = tag.name;
-        selectedColor.value = tag.color;
-      } else {
-        editingTagId.value = 'new';
-        nameController.text = '';
-        selectedColor.value = tagColors[4];
-      }
-    }
-
-    void cancelEditing() {
-      editingTagId.value = null;
-      nameController.clear();
-    }
-
-    Future<void> saveTag() async {
-      final name = nameController.text.trim();
-      if (name.isEmpty) return;
-
-      if (editingTagId.value == 'new') {
-        final newTag = TagEntity(
-          id: const Uuid().v4(),
-          name: name,
-          color: selectedColor.value,
-          workspaceId: activeWorkspace?.id,
-          createdAt: DateTime.now(),
-        );
-        await tagVM.createTag(newTag);
-      } else {
-        final existing = tagsState.value?.firstWhere(
-          (t) => t.id == editingTagId.value,
-        );
-        if (existing != null) {
-          await tagVM.updateTag(
-            existing.copyWith(name: name, color: selectedColor.value),
-          );
-        }
-      }
-      cancelEditing();
-    }
-
-    Future<void> deleteTag(String id) async {
-      await tagVM.deleteTag(id, workspaceId: activeWorkspace?.id);
-    }
-
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      padding: const EdgeInsets.all(16),
+    return GlassCard(
+      borderRadius: 24,
+      margin: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -109,89 +38,38 @@ class TagManagerModal extends HookWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Manage Tags',
+                'Gérer les Tags',
                 style: context.h2.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
-                icon: Icon(Icons.close, color: colors.textSecondary),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
-          const Divider(),
+          const SizedBox(height: 16),
 
-          // Editor
-          if (editingTagId.value != null) ...[
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Tag Name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TagCustomizationScreen(),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Créer un nouveau Tag'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.accent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              style: context.bodyMedium.copyWith(color: colors.textPrimary),
+              elevation: 0,
             ),
-            const SizedBox(height: 12),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: tagColors.map((color) {
-                  final isSelected = selectedColor.value == color;
-                  return GestureDetector(
-                    onTap: () => selectedColor.value = color,
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: Color(
-                          int.parse(color.substring(1), radix: 16) + 0xFF000000,
-                        ),
-                        shape: BoxShape.circle,
-                        border: isSelected
-                            ? Border.all(color: colors.textPrimary, width: 2)
-                            : null,
-                      ),
-                      child: isSelected
-                          ? Icon(Icons.check, size: 16, color: Colors.white)
-                          : null,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: cancelEditing,
-                  child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 8),
-                FilledButton(
-                  onPressed: saveTag,
-                  child: Text(editingTagId.value == 'new' ? 'Create' : 'Save'),
-                ),
-              ],
-            ),
-            const Divider(),
-          ] else ...[
-            ElevatedButton.icon(
-              onPressed: () => startEditing(null),
-              icon: const Icon(Icons.add),
-              label: const Text('Create New Tag'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(40),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
+          ),
+          const SizedBox(height: 16),
 
           // List
           Expanded(
@@ -200,18 +78,26 @@ class TagManagerModal extends HookWidget {
                 if (tags.isEmpty) {
                   return Center(
                     child: Text(
-                      'No tags yet',
+                      'Aucun tag pour le moment',
                       style: context.bodyMedium.copyWith(
-                        color: colors.textSecondary,
+                        color: colors.textSecondary.withValues(alpha: 0.5),
                       ),
                     ),
                   );
                 }
+
+                // Sort by priority (asc)
+                final sortedTags = tags.toList()
+                  ..sort((a, b) => a.priority.compareTo(b.priority));
+
                 return ListView.separated(
-                  itemCount: tags.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemCount: sortedTags.length,
+                  separatorBuilder: (_, _) => Divider(
+                    height: 1,
+                    color: colors.border.withValues(alpha: 0.1),
+                  ),
                   itemBuilder: (context, index) {
-                    final tag = tags[index];
+                    final tag = sortedTags[index];
                     Color tagColor = colors.accent;
                     try {
                       if (tag.color.startsWith('#')) {
@@ -225,8 +111,8 @@ class TagManagerModal extends HookWidget {
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
-                        width: 12,
-                        height: 12,
+                        width: 14,
+                        height: 14,
                         decoration: BoxDecoration(
                           color: tagColor,
                           shape: BoxShape.circle,
@@ -236,26 +122,37 @@ class TagManagerModal extends HookWidget {
                         tag.name,
                         style: context.bodyMedium.copyWith(
                           color: colors.textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      subtitle: Text(
+                        "Priorité: ${tag.priority}",
+                        style: context.caption.copyWith(
+                          color: colors.textSecondary.withValues(alpha: 0.7),
                         ),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: colors.textSecondary,
-                            ),
-                            onPressed: () => startEditing(tag),
+                            icon: const Icon(Icons.edit_outlined, size: 20),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      TagCustomizationScreen(tag: tag),
+                                ),
+                              );
+                            },
                           ),
                           IconButton(
                             icon: Icon(
-                              Icons.delete,
-                              size: 18,
+                              Icons.delete_outline,
+                              size: 20,
                               color: colors.error,
                             ),
-                            onPressed: () => deleteTag(tag.id),
+                            onPressed: () => tagVM.deleteTag(tag.id),
                           ),
                         ],
                       ),
@@ -263,7 +160,7 @@ class TagManagerModal extends HookWidget {
                   },
                 );
               },
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => Center(child: Text('Erreur: $e')),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),
           ),

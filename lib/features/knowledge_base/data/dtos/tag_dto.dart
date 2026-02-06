@@ -12,6 +12,7 @@ class TagDTO {
 
   late String name;
   late String color;
+  int priority = 0;
   String? workspaceId;
   late DateTime createdAt;
 
@@ -21,6 +22,7 @@ class TagDTO {
     required this.uid,
     required this.name,
     required this.color,
+    this.priority = 0,
     this.workspaceId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();

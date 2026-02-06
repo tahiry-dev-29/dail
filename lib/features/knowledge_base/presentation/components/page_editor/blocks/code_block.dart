@@ -32,9 +32,7 @@ class CodeBlock extends HookWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colors.isDark
-            ? const Color(0xFF282C34)
-            : const Color(0xFFF6F8FA),
+        color: colors.surfaceElevated,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: colors.border),
       ),

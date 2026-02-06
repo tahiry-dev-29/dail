@@ -4,6 +4,7 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/pages/delete_pa
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_page_by_id_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/update_page_usecase.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 /// ViewModel for Active Page management
 class ActivePageViewModel {
@@ -89,9 +90,9 @@ class ActivePageViewModel {
   /// Create a new page in a folder and select it
   Future<void> createNewPage(String folderId) async {
     final newPage = PageEntity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: Uuid().v4(),
       folderId: folderId,
-      title: 'Untilted',
+      title: 'Untitled',
       iconEmoji: '📄',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -102,12 +103,19 @@ class ActivePageViewModel {
     await setActivePageId(newPage.id);
   }
 
+  /// Delete a page by ID
+  Future<void> deletePage(String pageId) async {
+    await _deletePageUseCase(pageId);
+    if (_activePageId.value == pageId) {
+      clear();
+    }
+  }
+
   /// Delete the active page
   Future<void> deleteActivePage() async {
     final pageId = _activePageId.value;
     if (pageId != null) {
-      await _deletePageUseCase(pageId);
-      clear();
+      await deletePage(pageId);
     }
   }
 

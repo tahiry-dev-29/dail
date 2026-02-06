@@ -3,6 +3,7 @@ class TagEntity {
   final String id;
   final String name;
   final String color; // Hex color e.g. '#3B82F6'
+  final int priority; // New priority field
   final String? workspaceId;
   final DateTime createdAt;
 
@@ -10,6 +11,7 @@ class TagEntity {
     required this.id,
     required this.name,
     required this.color,
+    this.priority = 0,
     this.workspaceId,
     required this.createdAt,
   });
@@ -18,6 +20,7 @@ class TagEntity {
     String? id,
     String? name,
     String? color,
+    int? priority,
     String? workspaceId,
     DateTime? createdAt,
   }) {
@@ -25,6 +28,7 @@ class TagEntity {
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
+      priority: priority ?? this.priority,
       workspaceId: workspaceId ?? this.workspaceId,
       createdAt: createdAt ?? this.createdAt,
     );

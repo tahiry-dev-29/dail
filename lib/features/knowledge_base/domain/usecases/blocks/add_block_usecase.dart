@@ -10,11 +10,12 @@ class AddBlockUseCase {
   /// Execute the use case
   /// Throws [ArgumentError] if block content is empty for text-based blocks
   Future<void> call(BlockEntity block) async {
-    // Business validation: prevent empty paragraph blocks
-    if (block.type == BlockType.paragraph &&
-        (block.content['text'] as String?)?.isEmpty == true) {
-      throw ArgumentError('Cannot add empty paragraph block');
-    }
+    // Business validation: Match functionality over strictness for now
+    // We allow empty paragraphs to let users start typing
+    // if (block.type == BlockType.paragraph &&
+    //     (block.content['text'] as String?)?.isEmpty == true) {
+    //   throw ArgumentError('Cannot add empty paragraph block');
+    // }
 
     return _repository.addBlock(block);
   }

@@ -1,19 +1,45 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/ai_chat/presentation/state/ai_chat_view_model.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class AiChatPage extends StatelessWidget {
+class AiChatPage extends HookWidget {
   const AiChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final chatVM = sl<AiChatViewModel>();
+    final messages = chatVM.messages.watch(context);
+    final isTyping = chatVM.isTyping.watch(context);
+    final textController = useTextEditingController();
+    final scrollController = useScrollController();
+
+    // Auto-scroll to bottom on new messages
+    useEffect(() {
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+      return null;
+    }, [messages.length, isTyping]);
+
+    void handleSend() {
+      final text = textController.text.trim();
+      if (text.isNotEmpty) {
+        chatVM.sendMessage(text);
+        textController.clear();
+      }
+    }
 
     return Column(
       children: [
@@ -24,11 +50,9 @@ class AiChatPage extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF9333EA), Color(0xFF2563EB)],
-                  ),
-                  shape: BoxShape.circle,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [colors.ai, colors.accent]),
+                  shape: .circle,
                 ),
                 child: Icon(
                   AppIcons.robot(context),
@@ -76,14 +100,17 @@ class AiChatPage extends StatelessWidget {
           child: GlassCard(
             padding: const EdgeInsets.all(24),
             borderRadius: 32,
-            child: ListView(
-              children: [
-                _ChatBubble(
-                  message:
-                      "Bonjour ! Je suis ton assistant DailyOS. Je peux créer, modifier ou déplacer tes tâches.",
-                  isAi: true,
-                ),
-              ],
+            child: ListView.builder(
+              controller: scrollController,
+              itemCount: messages.length + (isTyping ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index < messages.length) {
+                  final msg = messages[index];
+                  return _ChatBubble(message: msg.text, isAi: !msg.isUser);
+                } else {
+                  return const _TypingIndicator();
+                }
+              },
             ),
           ),
         ),
@@ -95,7 +122,9 @@ class AiChatPage extends StatelessWidget {
               16,
               0,
               16,
-              sl<HomeViewModel>().isNavBarVisible.value ? 110 : 20,
+              sl<HomeViewModel>().isNavBarVisible.value
+                  ? 100
+                  : 20, // Reduced from 110 to 100
             ),
             child: GlassCard(
               borderRadius: 30,
@@ -104,9 +133,11 @@ class AiChatPage extends StatelessWidget {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: textController,
                       style: context.bodyMedium.copyWith(
                         color: colors.textPrimary,
                       ),
+                      onSubmitted: (_) => handleSend(),
                       decoration: InputDecoration(
                         hintText: "Demandez à Gemini...",
                         hintStyle: context.bodyMedium.copyWith(
@@ -119,10 +150,10 @@ class AiChatPage extends StatelessWidget {
                   IconButton(
                     icon: Icon(
                       AppIcons.send(context),
-                      color: AppColors.aiColor,
+                      color: colors.ai,
                       size: 18,
                     ),
-                    onPressed: () {},
+                    onPressed: handleSend,
                   ),
                 ],
               ),
@@ -155,7 +186,7 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: isAi ? aiBg : AppColors.accent,
+          color: isAi ? aiBg : colors.accent,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(20),
             topRight: const Radius.circular(20),
@@ -167,6 +198,47 @@ class _ChatBubble extends StatelessWidget {
           message,
           style: context.bodyMedium.copyWith(color: text, height: 1.4),
         ),
+      ),
+    );
+  }
+}
+
+class _TypingIndicator extends StatelessWidget {
+  const _TypingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, left: 24),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
       ),
     );
   }

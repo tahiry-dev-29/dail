@@ -1,8 +1,10 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -20,6 +22,11 @@ class PageTile extends StatelessWidget {
     return InkWell(
       onTap: () {
         sl<ActivePageViewModel>().setActivePageId(page.id);
+        sl<WorkspaceViewModel>().selectNote(page.id);
+        sl<HomeViewModel>().switchTab(AppTabs.workspace.index);
+        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+          Navigator.of(context).pop(); // Close drawer
+        }
       },
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -53,6 +60,46 @@ class PageTile extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            if (isSelected)
+              PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.more_horiz,
+                  size: 16,
+                  color: colors.textSecondary.withValues(alpha: 0.5),
+                ),
+                padding: EdgeInsets.zero,
+                onSelected: (value) {
+                  if (value == 'delete') {
+                    sl<ActivePageViewModel>().deletePage(page.id);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'rename',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 18),
+                        SizedBox(width: 8),
+                        Text('Rename'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: colors.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: colors.error)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

@@ -1,8 +1,8 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
@@ -14,13 +14,14 @@ class ChatOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeVM = sl<HomeViewModel>();
     final isOpen = homeVM.isChatOpen.watch(context);
+    final colors = context.colors;
 
     return AnimatedSlide(
       offset: isOpen ? Offset.zero : const Offset(0, 1),
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       child: Container(
-        color: Colors.black.withValues(alpha: 0.9),
+        color: colors.background.withValues(alpha: 0.95),
         child: SafeArea(
           child: Column(
             children: [
@@ -37,9 +38,9 @@ class ChatOverlay extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Color(0xFF9333EA), Color(0xFF2563EB)],
+                              colors: [colors.ai, colors.accent],
                             ),
                             shape: BoxShape.circle,
                           ),
@@ -56,7 +57,7 @@ class ChatOverlay extends StatelessWidget {
                             Text(
                               "Gemini Core",
                               style: context.bodyMedium.copyWith(
-                                color: Colors.white,
+                                color: colors.textPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -83,7 +84,7 @@ class ChatOverlay extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         AppIcons.close(context),
-                        color: Colors.white,
+                        color: colors.textPrimary,
                         size: 18,
                       ),
                       onPressed: () =>
@@ -108,12 +109,14 @@ class ChatOverlay extends StatelessWidget {
                       Expanded(
                         child: TextField(
                           style: context.bodyMedium.copyWith(
-                            color: Colors.white,
+                            color: colors.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: "Demandez à Gemini...",
                             hintStyle: context.bodyMedium.copyWith(
-                              color: Colors.white38,
+                              color: colors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
                             ),
                             border: InputBorder.none,
                           ),
@@ -123,7 +126,7 @@ class ChatOverlay extends StatelessWidget {
                         onPressed: () {},
                         icon: Icon(
                           AppIcons.send(context),
-                          color: AppColors.blue500,
+                          color: colors.accent,
                           size: 18,
                         ),
                       ),
@@ -165,6 +168,7 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Align(
       alignment: isAi ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -172,7 +176,7 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         constraints: const BoxConstraints(maxWidth: 260),
         decoration: BoxDecoration(
-          color: isAi ? Colors.white.withValues(alpha: 0.1) : AppColors.accent,
+          color: isAi ? colors.surfaceElevated : colors.accent,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
@@ -182,7 +186,9 @@ class _ChatBubble extends StatelessWidget {
         ),
         child: Text(
           message,
-          style: context.bodyMedium.copyWith(color: Colors.white),
+          style: context.bodyMedium.copyWith(
+            color: isAi ? colors.textPrimary : Colors.white,
+          ),
         ),
       ),
     );

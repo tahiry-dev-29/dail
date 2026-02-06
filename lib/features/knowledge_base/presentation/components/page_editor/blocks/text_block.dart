@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
@@ -5,7 +7,6 @@ import 'package:daily_os/features/knowledge_base/presentation/components/page_ed
 import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:uuid/uuid.dart';
 
 class TextBlockHook extends HookWidget {
   final BlockEntity block;
@@ -14,12 +15,38 @@ class TextBlockHook extends HookWidget {
   const TextBlockHook({super.key, required this.block, this.style});
 
   @override
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final blockVM = sl<BlockViewModel>();
     final layerLink = useMemoized(() => LayerLink());
     final focusNode = useFocusNode();
     final overlayEntry = useState<OverlayEntry?>(null);
+    final controller = useTextEditingController(text: block.text);
+    final debounceTimer = useRef<Timer?>(null);
+
+    // Track focus
+    useEffect(() {
+      void listener() {
+        if (focusNode.hasFocus) {
+          blockVM.setFocusedBlockId(block.id);
+        } else if (blockVM.focusedBlockId.value == block.id) {
+          blockVM.setFocusedBlockId(null);
+        }
+      }
+
+      focusNode.addListener(listener);
+      return () => focusNode.removeListener(listener);
+    }, [block.id]);
+
+    // Sync controller if block text changes externally (optional, strictly for fresh loads)
+    // We avoid aggressive syncing to prevent cursor jumps while typing.
+    useEffect(() {
+      if (controller.text != block.text && !focusNode.hasFocus) {
+        controller.text = block.text;
+      }
+      return null;
+    }, [block.text]);
 
     void hideCommandMenu() {
       overlayEntry.value?.remove();
@@ -28,82 +55,87 @@ class TextBlockHook extends HookWidget {
 
     void handleCommandSelection(BlockType type) {
       // 1. Remove the '/' from current text
-      String newText = block.text;
+      String newText = controller.text;
       if (newText.endsWith('/')) {
         newText = newText.substring(0, newText.length - 1);
       }
 
-      // 2. Update current block
-      blockVM.updateBlock(
-        block.copyWith(content: {...block.content, 'text': newText}),
-      );
-
-      // 3. Create new block of selected type
-      final newBlockId = const Uuid().v4();
-      BlockEntity? newBlock;
+      // 2. Perform conversion (Update current block type and text)
+      // This preserves ID and position.
+      BlockEntity updatedBlock;
 
       switch (type) {
         case BlockType.paragraph:
-          newBlock = BlockEntity.paragraph(
-            id: newBlockId,
-            pageId: block.pageId,
+          updatedBlock = block.copyWith(
+            type: BlockType.paragraph,
+            content: {...block.content, 'text': newText},
           );
         case BlockType.heading1:
-          newBlock = BlockEntity.heading(
-            id: newBlockId,
-            pageId: block.pageId,
-            level: 1,
+          updatedBlock = block.copyWith(
+            type: BlockType.heading1,
+            content: {...block.content, 'text': newText},
           );
         case BlockType.heading2:
-          newBlock = BlockEntity.heading(
-            id: newBlockId,
-            pageId: block.pageId,
-            level: 2,
+          updatedBlock = block.copyWith(
+            type: BlockType.heading2,
+            content: {...block.content, 'text': newText},
           );
         case BlockType.heading3:
-          newBlock = BlockEntity.heading(
-            id: newBlockId,
-            pageId: block.pageId,
-            level: 3,
+          updatedBlock = block.copyWith(
+            type: BlockType.heading3,
+            content: {...block.content, 'text': newText},
           );
         case BlockType.checklist:
-          newBlock = BlockEntity.checklist(
-            id: newBlockId,
+          // Convert text to first item of checklist
+          updatedBlock = BlockEntity.checklist(
+            id: block.id,
             pageId: block.pageId,
-          );
-        case BlockType.image:
-          newBlock = BlockEntity(
-            id: newBlockId,
-            pageId: block.pageId,
-            type: BlockType.image,
-          );
-        case BlockType.code:
-          newBlock = BlockEntity(
-            id: newBlockId,
-            pageId: block.pageId,
-            type: BlockType.code,
-          );
-        case BlockType.divider:
-          newBlock = BlockEntity(
-            id: newBlockId,
-            pageId: block.pageId,
-            type: BlockType.divider,
+            items: [
+              {'text': newText, 'checked': false},
+            ],
+            sortOrder: block.sortOrder,
           );
         case BlockType.quote:
-          newBlock = BlockEntity(
-            id: newBlockId,
-            pageId: block.pageId,
+          updatedBlock = block.copyWith(
             type: BlockType.quote,
+            content: {...block.content, 'text': newText},
+          );
+        case BlockType.code:
+          updatedBlock = block.copyWith(
+            type: BlockType.code,
+            content: {'code': newText, 'language': 'dart'},
+          );
+        case BlockType.divider:
+          // For non-text blocks, we might want to insert instead?
+          // Or strictly convert. Let's convert for now.
+          updatedBlock = BlockEntity(
+            id: block.id,
+            pageId: block.pageId,
+            type: BlockType.divider,
+            sortOrder: block.sortOrder,
+          );
+        case BlockType.image:
+          updatedBlock = BlockEntity(
+            id: block.id,
+            pageId: block.pageId,
+            type: BlockType.image,
+            sortOrder: block.sortOrder,
           );
         case BlockType.audio:
-          newBlock = BlockEntity.audio(
-            id: newBlockId,
+          updatedBlock = BlockEntity.audio(
+            id: block.id,
             pageId: block.pageId,
             path: '',
+            sortOrder: block.sortOrder,
           );
       }
 
-      blockVM.insertBlockAfter(block.id, newBlock);
+      blockVM.updateBlock(updatedBlock);
+
+      // Update controller text to match cleaned text (no slash)
+      controller.text = newText;
+      // Focus remains because we didn't unmount the widget (hopefully).
+      focusNode.requestFocus();
     }
 
     void showCommandMenu() {
@@ -117,6 +149,7 @@ class TextBlockHook extends HookWidget {
               child: GestureDetector(
                 onTap: hideCommandMenu,
                 behavior: HitTestBehavior.translucent,
+                child: Container(color: Colors.transparent),
               ),
             ),
             CompositedTransformFollower(
@@ -141,8 +174,14 @@ class TextBlockHook extends HookWidget {
       overlay.insert(entry);
     }
 
-    // Effect to clean up overlay on unmount
-    useEffect(() => hideCommandMenu, const []);
+    // Effect to clean up overlay AND timer on unmount
+    useEffect(
+      () => () {
+        hideCommandMenu();
+        debounceTimer.value?.cancel();
+      },
+      const [],
+    );
 
     final baseStyle =
         style ?? Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.5);
@@ -152,12 +191,16 @@ class TextBlockHook extends HookWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 4.0),
         child: TextFormField(
+          controller: controller, // Use controller
           focusNode: focusNode,
-          initialValue: block.text,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: InputBorder.none,
             isDense: true,
             contentPadding: EdgeInsets.zero,
+            hintText: 'Write something... (Type / for commands)',
+            hintStyle: baseStyle?.copyWith(
+              color: colors.textSecondary.withValues(alpha: 0.3),
+            ),
           ),
           style: baseStyle?.copyWith(color: colors.textPrimary),
           maxLines: null,
@@ -168,9 +211,13 @@ class TextBlockHook extends HookWidget {
               hideCommandMenu();
             }
 
-            blockVM.updateBlock(
-              block.copyWith(content: {...block.content, 'text': value}),
-            );
+            // Debounce save to avoid heavy Isar transactions on every keystroke
+            debounceTimer.value?.cancel();
+            debounceTimer.value = Timer(const Duration(milliseconds: 500), () {
+              blockVM.updateBlock(
+                block.copyWith(content: {...block.content, 'text': value}),
+              );
+            });
           },
         ),
       ),

@@ -25,10 +25,14 @@ class BlockViewModel {
     const AsyncLoading(),
   );
   final Signal<String?> _currentPageId = signal(null);
+  final Signal<String?> _focusedBlockId = signal(null);
 
   // Public read-only access to state
   ReadonlySignal<AsyncState<List<BlockEntity>>> get blocks => _blocks;
   ReadonlySignal<String?> get currentPageId => _currentPageId;
+  ReadonlySignal<String?> get focusedBlockId => _focusedBlockId;
+
+  void setFocusedBlockId(String? id) => _focusedBlockId.value = id;
 
   BlockViewModel({
     required GetBlocksUseCase getBlocksUseCase,

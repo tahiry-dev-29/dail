@@ -2,7 +2,9 @@ import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/molecules/dialogs/delete_confirmation_dialog.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/knowledge_base/presentation/components/modals/page_title_icon_editor_modal.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/search_view_model.dart';
 import 'package:flutter/material.dart';
@@ -155,6 +157,43 @@ class SearchModal extends HookWidget {
                                         ),
                                       )
                                     : null,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.edit_outlined,
+                                        size: 18,
+                                        color: colors.textSecondary,
+                                      ),
+                                      onPressed: () =>
+                                          PageTitleIconEditorModal.show(
+                                            context,
+                                            page,
+                                          ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        size: 18,
+                                        color: colors.error.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        DeleteConfirmationDialog.show(
+                                          context,
+                                          title: 'Delete Page',
+                                          message:
+                                              'Are you sure you want to delete "${page.title}"?',
+                                          onConfirm: () =>
+                                              sl<ActivePageViewModel>()
+                                                  .deletePage(page.id),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                                 onTap: () {
                                   activePageVM.setActivePageId(page.id);
                                   Navigator.pop(context);

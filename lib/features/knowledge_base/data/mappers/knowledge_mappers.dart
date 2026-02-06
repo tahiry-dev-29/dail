@@ -212,6 +212,7 @@ extension TagMapper on TagDTO {
     id: uid,
     name: name,
     color: color,
+    priority: priority,
     workspaceId: workspaceId,
     createdAt: createdAt,
   );
@@ -222,6 +223,7 @@ extension TagEntityMapper on TagEntity {
     uid: id,
     name: name,
     color: color,
+    priority: priority,
     workspaceId: workspaceId,
     createdAt: createdAt,
   );

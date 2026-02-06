@@ -3,6 +3,7 @@ import 'package:daily_os/design_system/atoms/action_icon.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/trash_view_model.dart';
 import 'package:flutter/material.dart';
@@ -29,8 +30,8 @@ class TrashScreen extends HookWidget {
     final isLoading =
         deletedFoldersState.isLoading || deletedPagesState.isLoading;
 
-    return Scaffold(
-      backgroundColor: colors.background,
+    return GlassScaffold(
+      // Drawer is not needed here as it's a sub-page with back button usually
       appBar: AppBar(
         title: Text(
           'Trash',
@@ -83,12 +84,12 @@ class TrashScreen extends HookWidget {
                 icon: Icon(
                   AppIcons.delete(context),
                   size: 16,
-                  color: Colors.redAccent,
+                  color: colors.error,
                 ),
                 label: Text(
                   'Empty Trash',
                   style: context.bodySmall.copyWith(
-                    color: Colors.redAccent,
+                    color: colors.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -237,14 +238,14 @@ class _TrashItem extends StatelessWidget {
             ActionIcon(
               icon: AppIcons.refresh(context),
               onTap: onRestore,
-              color: Colors.green,
+              color: colors.accent,
               size: 18,
               padding: const EdgeInsets.all(8),
             ),
             ActionIcon(
               icon: AppIcons.delete(context),
               onTap: onDelete,
-              color: Theme.of(context).colorScheme.error,
+              color: colors.error,
               size: 18,
               padding: const EdgeInsets.all(8),
             ),

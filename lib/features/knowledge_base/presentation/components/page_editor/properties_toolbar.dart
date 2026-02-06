@@ -5,6 +5,7 @@ import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dar
 import 'package:daily_os/features/knowledge_base/domain/entities/property_entity.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/page_properties_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class PropertiesToolbar extends StatelessWidget {
   final PageEntity page;
@@ -142,10 +143,7 @@ class PropertiesToolbar extends StatelessWidget {
   }
 
   void _addInitialProperty(BuildContext context, PagePropertiesViewModel vm) {
-    final prop = PropertyEntity.tags(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      pageId: page.id,
-    );
+    final prop = PropertyEntity.tags(id: Uuid().v4(), pageId: page.id);
     vm.addProperty(prop);
   }
 

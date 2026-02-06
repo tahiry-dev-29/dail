@@ -7,12 +7,13 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/folders/get_roo
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/move_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/update_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_by_folder_usecase.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 /// ViewModel for Folder Tree operations
-///
-/// Replaces the static [FolderTreeController] with proper dependency injection.
 class FolderTreeViewModel {
   // Dependencies
   final GetRootFoldersUseCase _getRootFoldersUseCase;
@@ -22,6 +23,8 @@ class FolderTreeViewModel {
   final GetChildFoldersUseCase _getChildFoldersUseCase;
   final MoveFolderUseCase _moveFolderUseCase;
   final GetPagesUseCase _getPagesUseCase;
+  final GetTasksByFolderUseCase _getTasksByFolderUseCase;
+  final WorkspaceViewModel _workspaceVM;
 
   // State
   final Signal<AsyncState<List<FolderEntity>>> _rootFolders = signal(
@@ -29,9 +32,13 @@ class FolderTreeViewModel {
   );
   final Signal<Set<String>> _expandedFolders = signal({});
 
-  // Cache for lazy-loaded children and pages
+  // Cache for lazy-loaded contents
   final Map<String, Signal<AsyncState<List<FolderEntity>>>> _childrenCache = {};
   final Map<String, Signal<AsyncState<List<PageEntity>>>> _pagesCache = {};
+  final Map<String, Signal<AsyncState<List<TaskEntity>>>> _tasksCache = {};
+
+  // Track last loaded workspace to prevent redundant loads
+  String? _lastLoadedWorkspaceId;
 
   // Public read-only access
   ReadonlySignal<AsyncState<List<FolderEntity>>> get rootFolders =>
@@ -46,13 +53,63 @@ class FolderTreeViewModel {
     required GetChildFoldersUseCase getChildFoldersUseCase,
     required MoveFolderUseCase moveFolderUseCase,
     required GetPagesUseCase getPagesUseCase,
+    required GetTasksByFolderUseCase getTasksByFolderUseCase,
+    required WorkspaceViewModel workspaceVM,
   }) : _getRootFoldersUseCase = getRootFoldersUseCase,
        _createFolderUseCase = createFolderUseCase,
        _updateFolderUseCase = updateFolderUseCase,
        _deleteFolderUseCase = deleteFolderUseCase,
        _getChildFoldersUseCase = getChildFoldersUseCase,
        _moveFolderUseCase = moveFolderUseCase,
-       _getPagesUseCase = getPagesUseCase;
+       _getPagesUseCase = getPagesUseCase,
+       _getTasksByFolderUseCase = getTasksByFolderUseCase,
+       _workspaceVM = workspaceVM {
+    // Automatically load root folders when active workspace changes
+    effect(() {
+      final workspace = _workspaceVM.activeWorkspace.value;
+      final workspaceId = workspace?.id;
+
+      // Only load if workspace ID actually changed
+      if (workspaceId != _lastLoadedWorkspaceId) {
+        _lastLoadedWorkspaceId = workspaceId;
+
+        if (workspaceId != null) {
+          // Use microtask to avoid synchronous state updates during build
+          Future.microtask(() => loadRootFolders(workspaceId));
+        } else {
+          _rootFolders.value = const AsyncData([]);
+        }
+      }
+    });
+  }
+
+  /// Get folder by ID synchronously (from caches or root)
+  FolderEntity? getFolderSync(String folderId) {
+    // Check root folders
+    final roots = _rootFolders.value;
+    if (roots is AsyncData<List<FolderEntity>>) {
+      final found = _findInList(roots.value, folderId);
+      if (found != null) return found;
+    }
+
+    // Check children caches
+    for (final signal in _childrenCache.values) {
+      final state = signal.value;
+      if (state is AsyncData<List<FolderEntity>>) {
+        final found = _findInList(state.value, folderId);
+        if (found != null) return found;
+      }
+    }
+
+    return null;
+  }
+
+  FolderEntity? _findInList(List<FolderEntity> list, String id) {
+    for (final f in list) {
+      if (f.id == id) return f;
+    }
+    return null;
+  }
 
   /// Load root folders for a workspace
   Future<void> loadRootFolders(String workspaceId) async {
@@ -67,23 +124,20 @@ class FolderTreeViewModel {
 
   /// Get (or create) a signal for a folder's children
   Signal<AsyncState<List<FolderEntity>>> getChildrenSignal(String folderId) {
-    if (_childrenCache.containsKey(folderId)) {
-      return _childrenCache[folderId]!;
-    }
-
-    final s = signal<AsyncState<List<FolderEntity>>>(const AsyncLoading());
-    _childrenCache[folderId] = s;
-
-    // Initial load
-    _loadChildren(folderId, s);
-
-    return s;
+    return _childrenCache.putIfAbsent(
+      folderId,
+      () => signal<AsyncState<List<FolderEntity>>>(const AsyncData([])),
+    );
   }
 
   Future<void> _loadChildren(
     String folderId,
     Signal<AsyncState<List<FolderEntity>>> s,
   ) async {
+    // Only load if not already loading or loaded non-empty
+    if (s.value is AsyncLoading) return;
+    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+
     s.value = const AsyncLoading();
     try {
       final children = await _getChildFoldersUseCase(folderId);
@@ -95,23 +149,20 @@ class FolderTreeViewModel {
 
   /// Get (or create) a signal for a folder's pages
   Signal<AsyncState<List<PageEntity>>> getPagesSignal(String folderId) {
-    if (_pagesCache.containsKey(folderId)) {
-      return _pagesCache[folderId]!;
-    }
-
-    final s = signal<AsyncState<List<PageEntity>>>(const AsyncLoading());
-    _pagesCache[folderId] = s;
-
-    // Initial load
-    _loadPages(folderId, s);
-
-    return s;
+    return _pagesCache.putIfAbsent(
+      folderId,
+      () => signal<AsyncState<List<PageEntity>>>(const AsyncData([])),
+    );
   }
 
   Future<void> _loadPages(
     String folderId,
     Signal<AsyncState<List<PageEntity>>> s,
   ) async {
+    // Only load if not already loading or loaded non-empty
+    if (s.value is AsyncLoading) return;
+    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+
     s.value = const AsyncLoading();
     try {
       final pages = await _getPagesUseCase(folderId);
@@ -119,6 +170,40 @@ class FolderTreeViewModel {
     } catch (e, stack) {
       s.value = AsyncError(e, stack);
     }
+  }
+
+  /// Get (or create) a signal for a folder's tasks
+  Signal<AsyncState<List<TaskEntity>>> getTasksSignal(String folderId) {
+    return _tasksCache.putIfAbsent(
+      folderId,
+      () => signal<AsyncState<List<TaskEntity>>>(const AsyncData([])),
+    );
+  }
+
+  Future<void> _loadTasks(
+    String folderId,
+    Signal<AsyncState<List<TaskEntity>>> s,
+  ) async {
+    // Only load if not already loading or loaded non-empty
+    if (s.value is AsyncLoading) return;
+    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+
+    s.value = const AsyncLoading();
+    try {
+      final tasks = await _getTasksByFolderUseCase(folderId);
+      s.value = AsyncData(tasks);
+    } catch (e, stack) {
+      s.value = AsyncError(e, stack);
+    }
+  }
+
+  /// Ensure all contents of a folder are loaded
+  Future<void> ensureLoaded(String folderId) async {
+    await Future.wait([
+      _loadChildren(folderId, getChildrenSignal(folderId)),
+      _loadPages(folderId, getPagesSignal(folderId)),
+      _loadTasks(folderId, getTasksSignal(folderId)),
+    ]);
   }
 
   /// Toggle folder expansion
@@ -130,11 +215,27 @@ class FolderTreeViewModel {
       next.remove(folderId);
     } else {
       next.add(folderId);
-      // Ensure children are loaded
-      getChildrenSignal(folderId);
+      // Trigger lazy load via microtask to avoid synchronous state updates
+      Future.microtask(() => ensureLoaded(folderId));
     }
 
     _expandedFolders.value = next;
+  }
+
+  /// Refresh folder contents
+  Future<void> refreshFolder(String? folderId, String workspaceId) async {
+    if (folderId == null) {
+      await loadRootFolders(workspaceId);
+    } else {
+      final s = _childrenCache[folderId];
+      if (s != null) await _loadChildren(folderId, s);
+
+      final sPages = _pagesCache[folderId];
+      if (sPages != null) await _loadPages(folderId, sPages);
+
+      final sTasks = _tasksCache[folderId];
+      if (sTasks != null) await _loadTasks(folderId, sTasks);
+    }
   }
 
   /// Create a new folder
@@ -155,7 +256,6 @@ class FolderTreeViewModel {
     await _createFolderUseCase(newFolder);
     await refreshFolder(parentId, workspaceId);
 
-    // Auto-expand parent
     if (parentId != null && !_expandedFolders.value.contains(parentId)) {
       toggleFolder(parentId);
     }
@@ -169,16 +269,17 @@ class FolderTreeViewModel {
   ) async {
     await _deleteFolderUseCase(folderId);
     _childrenCache.remove(folderId);
+    _pagesCache.remove(folderId);
+    _tasksCache.remove(folderId);
     await refreshFolder(parentId, workspaceId);
   }
 
-  /// Update a folder's properties
+  // Simplified rest of crud for brevity, but keep signatures
   Future<void> updateFolder(FolderEntity folder, String workspaceId) async {
     await _updateFolderUseCase(folder);
     await refreshFolder(folder.parentId, workspaceId);
   }
 
-  /// Move a folder
   Future<void> moveFolder(
     String folderId,
     String? oldParentId,
@@ -190,27 +291,11 @@ class FolderTreeViewModel {
     await refreshFolder(newParentId, workspaceId);
   }
 
-  /// Refresh folder contents
-  Future<void> refreshFolder(String? folderId, String workspaceId) async {
-    if (folderId == null) {
-      await loadRootFolders(workspaceId);
-    } else {
-      final s = _childrenCache[folderId];
-      if (s != null) {
-        await _loadChildren(folderId, s);
-      }
-      final sPages = _pagesCache[folderId];
-      if (sPages != null) {
-        await _loadPages(folderId, sPages);
-      }
-    }
-  }
-
-  /// Clear all cached state
   void clear() {
-    _rootFolders.value = AsyncData([]);
+    _rootFolders.value = const AsyncData([]);
     _expandedFolders.value = {};
     _childrenCache.clear();
     _pagesCache.clear();
+    _tasksCache.clear();
   }
 }

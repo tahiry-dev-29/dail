@@ -10,6 +10,7 @@ import 'package:daily_os/features/knowledge_base/presentation/state/block_view_m
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class PageEditor extends HookWidget {
   const PageEditor({super.key});
@@ -77,10 +78,7 @@ class PageEditor extends HookWidget {
                   child: GestureDetector(
                     onTap: () {
                       blockVM.addBlock(
-                        BlockEntity.paragraph(
-                          id: DateTime.now().millisecondsSinceEpoch.toString(),
-                          pageId: page.id,
-                        ),
+                        BlockEntity.paragraph(id: Uuid().v4(), pageId: page.id),
                       );
                     },
                     behavior: HitTestBehavior.translucent,

@@ -25,4 +25,18 @@ class WorkspaceEntity {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WorkspaceEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          iconEmoji == other.iconEmoji &&
+          createdAt == other.createdAt;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ name.hashCode ^ iconEmoji.hashCode ^ createdAt.hashCode;
 }
