@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-enum AppTabs { home, planner, calendar, knowledge, aiChat }
+enum AppTabs { home, workspace, calendar, aiChat }
 
 class HomeViewModel {
   // Current active tab index
