@@ -14,7 +14,7 @@ class FloatingAddTaskButton extends StatelessWidget {
     final isVisible = homeVM.isAddTaskVisible.watch(context);
     final current = homeVM.currentTab.watch(context);
 
-    if (isVisible || current != AppTabs.planner.index) {
+    if (isVisible || current != AppTabs.workspace.index) {
       return const SizedBox.shrink();
     }
 

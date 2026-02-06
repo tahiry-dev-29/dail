@@ -4,6 +4,8 @@ import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class AtomicNavBar extends StatelessWidget {
@@ -20,6 +22,7 @@ class AtomicNavBar extends StatelessWidget {
       child: GlassCard(
         borderRadius: 28,
         padding: const EdgeInsets.symmetric(horizontal: 16),
+        color: colors.surface.withValues(alpha: 0.4), // More transparent
         child: Container(
           height: 70,
           alignment: Alignment.center,
@@ -35,9 +38,9 @@ class AtomicNavBar extends StatelessWidget {
               ),
               _NavButton(
                 icon: AppIcons.planner(context),
-                label: 'Planner',
-                isActive: current == AppTabs.planner.index,
-                onTap: () => homeVM.switchTab(AppTabs.planner.index),
+                label: 'Workspace',
+                isActive: current == AppTabs.workspace.index,
+                onTap: () => homeVM.switchTab(AppTabs.workspace.index),
                 colors: colors,
               ),
               _NavButton(
@@ -48,16 +51,10 @@ class AtomicNavBar extends StatelessWidget {
                 colors: colors,
               ),
               _NavButton(
-                icon: Icons.book_outlined,
-                label: 'Docs',
-                isActive: current == AppTabs.knowledge.index,
-                onTap: () => homeVM.switchTab(AppTabs.knowledge.index),
-                colors: colors,
-              ),
-              _NavButton(
                 icon: AppIcons.assistant(context),
                 label: 'Assistant',
                 isActive: current == AppTabs.aiChat.index,
+                activeColor: colors.ai,
                 onTap: () => homeVM.switchTab(AppTabs.aiChat.index),
                 colors: colors,
               ),
@@ -69,10 +66,11 @@ class AtomicNavBar extends StatelessWidget {
   }
 }
 
-class _NavButton extends StatelessWidget {
+class _NavButton extends HookWidget {
   final IconData icon;
   final String label;
   final bool isActive;
+  final Color? activeColor;
   final VoidCallback onTap;
   final AdaptiveColors colors;
 
@@ -80,35 +78,50 @@ class _NavButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.isActive,
+    this.activeColor,
     required this.onTap,
     required this.colors,
   });
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? colors.accent : colors.textSecondary;
+    final isPressed = useState(false);
+    final color = isActive
+        ? (activeColor ?? colors.accent)
+        : colors.textSecondary;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
+        onTapDown: (_) {
+          isPressed.value = true;
+          HapticFeedback.lightImpact();
+        },
+        onTapUp: (_) => isPressed.value = false,
+        onTapCancel: () => isPressed.value = false,
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 60,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  color: color,
+        child: AnimatedScale(
+          scale: isPressed.value ? 0.92 : 1.0,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOutBack,
+          child: SizedBox(
+            width: 60,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 20, color: color),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    color: color,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

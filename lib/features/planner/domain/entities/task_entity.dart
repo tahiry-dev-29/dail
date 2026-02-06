@@ -13,6 +13,8 @@ class TaskEntity {
   final List<SubTaskEntity> subtasks;
   final List<String> tagIds;
   final String? workspaceId;
+  final String? folderId;
+  final String iconEmoji;
 
   const TaskEntity({
     required this.id,
@@ -27,6 +29,8 @@ class TaskEntity {
     this.subtasks = const [],
     this.tagIds = const [],
     this.workspaceId,
+    this.folderId,
+    this.iconEmoji = '📝',
   });
 
   bool get isOverdue {
@@ -65,6 +69,8 @@ class TaskEntity {
     List<SubTaskEntity>? subtasks,
     List<String>? tagIds,
     String? workspaceId,
+    String? folderId,
+    String? iconEmoji,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -79,6 +85,41 @@ class TaskEntity {
       subtasks: subtasks ?? this.subtasks,
       tagIds: tagIds ?? this.tagIds,
       workspaceId: workspaceId ?? this.workspaceId,
+      folderId: folderId ?? this.folderId,
+      iconEmoji: iconEmoji ?? this.iconEmoji,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TaskEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description &&
+          time == other.time &&
+          isDone == other.isDone &&
+          date == other.date &&
+          deadline == other.deadline &&
+          isFavorite == other.isFavorite &&
+          isIgnored == other.isIgnored &&
+          workspaceId == other.workspaceId &&
+          folderId == other.folderId &&
+          iconEmoji == other.iconEmoji;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      description.hashCode ^
+      time.hashCode ^
+      isDone.hashCode ^
+      date.hashCode ^
+      deadline.hashCode ^
+      isFavorite.hashCode ^
+      isIgnored.hashCode ^
+      workspaceId.hashCode ^
+      folderId.hashCode ^
+      iconEmoji.hashCode;
 }

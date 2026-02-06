@@ -57,6 +57,7 @@ dependencies:
   record: ^6.2.0
   audioplayers: ^6.5.1
   google_generative_ai: ^0.4.7
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

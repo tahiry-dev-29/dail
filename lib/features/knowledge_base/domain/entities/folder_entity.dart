@@ -72,4 +72,35 @@ class FolderEntity {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is FolderEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          parentId == other.parentId &&
+          workspaceId == other.workspaceId &&
+          name == other.name &&
+          iconEmoji == other.iconEmoji &&
+          coverColor == other.coverColor &&
+          sortOrder == other.sortOrder &&
+          isExpanded == other.isExpanded &&
+          isDeleted == other.isDeleted &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      parentId.hashCode ^
+      workspaceId.hashCode ^
+      name.hashCode ^
+      iconEmoji.hashCode ^
+      coverColor.hashCode ^
+      sortOrder.hashCode ^
+      isExpanded.hashCode ^
+      isDeleted.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode;
 }

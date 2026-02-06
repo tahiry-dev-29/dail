@@ -1,3 +1,4 @@
+import 'package:daily_os/features/ai_chat/presentation/state/ai_chat_view_model.dart';
 import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
 import 'package:daily_os/features/home/presentation/state/dashboard_view_model.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
@@ -64,6 +65,7 @@ import 'package:daily_os/features/planner/domain/usecases/tasks/add_task_usecase
 import 'package:daily_os/features/planner/domain/usecases/tasks/auto_ignore_overdue_tasks_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/check_task_overdue_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/delete_task_usecase.dart';
+import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_by_folder_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/reorder_tasks_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/toggle_task_usecase.dart';
@@ -176,6 +178,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => DeleteTagUseCase(sl()));
 
   // Planner
+  sl.registerFactory(() => GetTasksByFolderUseCase(sl()));
   sl.registerFactory(() => GetTasksUseCase(sl()));
   sl.registerFactory(() => AddTaskUseCase(sl()));
   sl.registerFactory(() => UpdateTaskUseCase(sl()));
@@ -207,6 +210,8 @@ Future<void> initDependencies() async {
       getChildFoldersUseCase: sl(),
       moveFolderUseCase: sl(),
       getPagesUseCase: sl(),
+      getTasksByFolderUseCase: sl(),
+      workspaceVM: sl(),
     ),
   );
 
@@ -270,6 +275,7 @@ Future<void> initDependencies() async {
   // Home
   sl.registerLazySingleton(() => HomeViewModel());
   sl.registerLazySingleton(() => DashboardViewModel(sl()));
+  sl.registerLazySingleton(() => AiChatViewModel());
 
   // Settings
   sl.registerLazySingleton(() => ThemeViewModel(sl()));
@@ -284,6 +290,7 @@ Future<void> initDependencies() async {
       deleteTaskUseCase: sl(),
       toggleTaskUseCase: sl(),
       reorderTasksUseCase: sl(),
+      workspaceVM: sl(),
       calendarVM: sl(),
     ),
   );
@@ -293,4 +300,7 @@ Future<void> initDependencies() async {
   sl.registerFactoryParam<TaskEditViewModel, TaskEntity, void>(
     (task, _) => TaskEditViewModel(task, sl<TaskListViewModel>()),
   );
+
+  // Initial data loading is now managed by MainLayout to ensure it happens
+  // only once and after the UI is ready to receive updates.
 }
