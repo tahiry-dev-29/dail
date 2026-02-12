@@ -1,9 +1,11 @@
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class AtomicColorPicker extends HookWidget {
+/// Color picker dialog — uses Signals for local state.
+/// Surgical StatefulWidget for TextEditingController lifecycle.
+class AtomicColorPicker extends StatefulWidget {
   final Color initialColor;
   final ValueChanged<Color> onColorChanged;
   final String title;
@@ -32,28 +34,49 @@ class AtomicColorPicker extends HookWidget {
   }
 
   @override
+  State<AtomicColorPicker> createState() => _AtomicColorPickerState();
+}
+
+class _AtomicColorPickerState extends State<AtomicColorPicker> {
+  late final Signal<Color> _selectedColor;
+  late final TextEditingController _hexController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedColor = signal(widget.initialColor);
+    _hexController = TextEditingController(
+      text:
+          '#${widget.initialColor.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
+    );
+  }
+
+  @override
+  void dispose() {
+    _hexController.dispose();
+    _selectedColor.dispose();
+    super.dispose();
+  }
+
+  void _updateHex(Color color) {
+    final hex =
+        '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+    if (_hexController.text.toUpperCase() != hex) {
+      _hexController.text = hex;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final selectedColor = useState(initialColor);
-    final hexController = useTextEditingController(
-      text:
-          '#${initialColor.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}',
-    );
-
-    void updateHex(Color color) {
-      final hex =
-          '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
-      if (hexController.text.toUpperCase() != hex) {
-        hexController.text = hex;
-      }
-    }
+    final selected = _selectedColor.watch(context);
 
     return AlertDialog(
       backgroundColor: colors.background,
       surfaceTintColor: colors.accent.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: Text(
-        title,
+        widget.title,
         style: TextStyle(color: colors.textPrimary, fontWeight: .bold),
       ),
       content: SingleChildScrollView(
@@ -61,10 +84,10 @@ class AtomicColorPicker extends HookWidget {
           mainAxisSize: .min,
           children: [
             ColorPicker(
-              pickerColor: selectedColor.value,
+              pickerColor: selected,
               onColorChanged: (color) {
-                selectedColor.value = color;
-                updateHex(color);
+                _selectedColor.value = color;
+                _updateHex(color);
               },
               pickerAreaHeightPercent: 0.7,
               enableAlpha: true,
@@ -75,7 +98,7 @@ class AtomicColorPicker extends HookWidget {
             ),
             const SizedBox(height: 20),
             TextField(
-              controller: hexController,
+              controller: _hexController,
               decoration: InputDecoration(
                 labelText: "Code HEX (AARRGGBB)",
                 labelStyle: TextStyle(color: colors.textSecondary),
@@ -98,12 +121,12 @@ class AtomicColorPicker extends HookWidget {
                 if (hex.length == 8) {
                   try {
                     final color = Color(int.parse(hex, radix: 16));
-                    selectedColor.value = color;
+                    _selectedColor.value = color;
                   } catch (_) {}
                 } else if (hex.length == 6) {
                   try {
                     final color = Color(int.parse('FF$hex', radix: 16));
-                    selectedColor.value = color;
+                    _selectedColor.value = color;
                   } catch (_) {}
                 }
               },
@@ -118,7 +141,7 @@ class AtomicColorPicker extends HookWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            onColorChanged(selectedColor.value);
+            widget.onColorChanged(_selectedColor.value);
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(

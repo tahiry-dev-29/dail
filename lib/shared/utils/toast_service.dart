@@ -2,7 +2,6 @@ import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 class ToastService {
   static void show(
@@ -48,7 +47,8 @@ class ToastService {
 
 enum ToastType { success, error, info, warning }
 
-class _ToastContent extends HookWidget {
+/// Surgical StatefulWidget for [AnimationController] lifecycle.
+class _ToastContent extends StatefulWidget {
   final String message;
   final ToastType type;
   final Duration duration;
@@ -62,10 +62,30 @@ class _ToastContent extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final progressController = useAnimationController(duration: duration)
-      ..forward();
+  State<_ToastContent> createState() => _ToastContentState();
+}
 
+class _ToastContentState extends State<_ToastContent>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _progressController;
+
+  @override
+  void initState() {
+    super.initState();
+    _progressController = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _progressController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: sl<ThemeViewModel>().getAdaptedDuration(
@@ -84,8 +104,8 @@ class _ToastContent extends HookWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: _getGradientColors(),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: .topLeft,
+              end: .bottomRight,
             ),
             boxShadow: [
               BoxShadow(
@@ -96,7 +116,7 @@ class _ToastContent extends HookWidget {
             ],
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
@@ -117,21 +137,20 @@ class _ToastContent extends HookWidget {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        message,
+                        widget.message,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: .w700,
                           letterSpacing: 0.3,
                         ),
                       ),
                     ),
                     IconButton(
-                      onPressed: onClose,
+                      onPressed: widget.onClose,
                       icon: Icon(
                         AppIcons.xmark(context),
-                        color:
-                            Colors.white70, // Assuming fgColor is Colors.white
+                        color: Colors.white70,
                         size: 16,
                       ),
                       padding: EdgeInsets.zero,
@@ -143,10 +162,10 @@ class _ToastContent extends HookWidget {
               ),
               // Progress indicator
               AnimatedBuilder(
-                animation: progressController,
+                animation: _progressController,
                 builder: (context, child) {
                   return LinearProgressIndicator(
-                    value: 1.0 - progressController.value,
+                    value: 1.0 - _progressController.value,
                     backgroundColor: Colors.transparent,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Colors.white.withValues(alpha: 0.3),
@@ -163,7 +182,7 @@ class _ToastContent extends HookWidget {
   }
 
   Color _getMainColor() {
-    switch (type) {
+    switch (widget.type) {
       case ToastType.success:
         return Colors.greenAccent;
       case ToastType.error:
@@ -176,7 +195,7 @@ class _ToastContent extends HookWidget {
   }
 
   List<Color> _getGradientColors() {
-    switch (type) {
+    switch (widget.type) {
       case ToastType.success:
         return [Colors.greenAccent, Colors.teal];
       case ToastType.error:
@@ -189,7 +208,7 @@ class _ToastContent extends HookWidget {
   }
 
   IconData _getIcon(BuildContext context) {
-    switch (type) {
+    switch (widget.type) {
       case ToastType.success:
         return AppIcons.check(context);
       case ToastType.error:

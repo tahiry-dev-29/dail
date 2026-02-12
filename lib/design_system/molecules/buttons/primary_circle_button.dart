@@ -1,4 +1,4 @@
-import 'package:daily_os/design_system/atoms/app_colors.dart';
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryCircleButton extends StatelessWidget {
@@ -25,13 +25,13 @@ class PrimaryCircleButton extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.purple500, AppColors.blue500],
+            gradient: LinearGradient(
+              colors: [context.colors.ai, context.colors.accent],
             ),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.purple500.withValues(alpha: 0.4),
+                color: context.colors.ai.withValues(alpha: 0.4),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

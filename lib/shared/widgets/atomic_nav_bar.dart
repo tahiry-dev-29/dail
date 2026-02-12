@@ -5,7 +5,6 @@ import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class AtomicNavBar extends StatelessWidget {
@@ -22,12 +21,12 @@ class AtomicNavBar extends StatelessWidget {
       child: GlassCard(
         borderRadius: 28,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        color: colors.surface.withValues(alpha: 0.4), // More transparent
+        color: colors.surface.withValues(alpha: 0.4),
         child: Container(
           height: 70,
-          alignment: Alignment.center,
+          alignment: .center,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: .spaceAround,
             children: [
               _NavButton(
                 icon: AppIcons.home(context),
@@ -66,7 +65,7 @@ class AtomicNavBar extends StatelessWidget {
   }
 }
 
-class _NavButton extends HookWidget {
+class _NavButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
@@ -74,7 +73,10 @@ class _NavButton extends HookWidget {
   final VoidCallback onTap;
   final AdaptiveColors colors;
 
-  const _NavButton({
+  /// Local signal for press state — ultra-fast reactivity.
+  final Signal<bool> _isPressed = signal(false);
+
+  _NavButton({
     required this.icon,
     required this.label,
     required this.isActive,
@@ -85,7 +87,7 @@ class _NavButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPressed = useState(false);
+    final pressed = _isPressed.watch(context);
     final color = isActive
         ? (activeColor ?? colors.accent)
         : colors.textSecondary;
@@ -94,21 +96,21 @@ class _NavButton extends HookWidget {
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTapDown: (_) {
-          isPressed.value = true;
+          _isPressed.value = true;
           HapticFeedback.lightImpact();
         },
-        onTapUp: (_) => isPressed.value = false,
-        onTapCancel: () => isPressed.value = false,
+        onTapUp: (_) => _isPressed.value = false,
+        onTapCancel: () => _isPressed.value = false,
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedScale(
-          scale: isPressed.value ? 0.92 : 1.0,
+          scale: pressed ? 0.92 : 1.0,
           duration: const Duration(milliseconds: 100),
           curve: Curves.easeOutBack,
           child: SizedBox(
             width: 60,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: [
                 Icon(icon, size: 20, color: color),
                 const SizedBox(height: 4),
@@ -116,7 +118,7 @@ class _NavButton extends HookWidget {
                   label,
                   style: TextStyle(
                     fontSize: 10,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isActive ? .bold : .normal,
                     color: color,
                   ),
                 ),

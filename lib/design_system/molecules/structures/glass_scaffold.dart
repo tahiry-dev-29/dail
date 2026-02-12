@@ -1,132 +1,39 @@
-import 'dart:ui' as ui;
-
+import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
 class GlassScaffold extends StatelessWidget {
   final Widget body;
+  final Widget? drawer;
+  final PreferredSizeWidget? appBar;
+  final Widget? bottomNavigationBar;
+  final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
+  final bool extendBody;
 
-  const GlassScaffold({super.key, required this.body});
+  const GlassScaffold({
+    super.key,
+    required this.body,
+    this.drawer,
+    this.appBar,
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
+    this.extendBody = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? const Color(0xFF0F172A)
-          : const Color(0xFFF0F4F8), // HTML bg: #f0f4f8
-      body: Stack(
-        children: [
-          // Background - Switch between Image (Dark) and Blob Animation (Light)
-          Positioned.fill(
-            child: isDark
-                ? Image.asset(
-                    'assets/images/background.jpg',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildDarkGradient(),
-                  )
-                : const _ModernLightBlobs(),
-          ),
-
-          // Dark Mode Overlay
-          if (isDark)
-            Positioned.fill(
-              child: Container(color: Colors.black.withValues(alpha: 0.3)),
-            ),
-
-          // Body
-          SafeArea(child: body),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDarkGradient() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E1B4B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-    );
-  }
-}
-
-class _ModernLightBlobs extends HookWidget {
-  const _ModernLightBlobs();
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = useAnimationController(
-      duration: const Duration(seconds: 10),
-    )..repeat(reverse: true);
-
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        // Subtle movement range
-        final move = controller.value * 20.0;
-
-        return Stack(
-          children: [
-            // Blob 1: Indigo-100 (Top Left)
-            Positioned(
-              top: -50 + move,
-              left: -50 + move,
-              child: _Blob(
-                color: const Color(0xFFE0E7FF), // #E0E7FF
-                size: 400,
-              ),
-            ),
-
-            // Blob 2: Teal-100 (Top Right/Mid)
-            Positioned(
-              top: 150 - move,
-              right: -80,
-              child: _Blob(
-                color: const Color(0xFFCCFBF1), // #CCFBF1
-                size: 350,
-              ),
-            ),
-
-            // Blob 3: Purple-100 (Bottom Left)
-            Positioned(
-              bottom: -50 + move,
-              left: 50,
-              child: _Blob(
-                color: const Color(0xFFF3E8FF), // #F3E8FF
-                size: 300,
-              ),
-            ),
-
-            // Whole screen blur for smooth blending
-            BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: const SizedBox.expand(),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _Blob extends StatelessWidget {
-  final Color color;
-  final double size;
-
-  const _Blob({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      backgroundColor: colors.background,
+      appBar: appBar,
+      drawer: drawer,
+      extendBody: extendBody,
+      bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
+      body: body,
     );
   }
 }
