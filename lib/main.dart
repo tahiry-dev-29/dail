@@ -10,6 +10,7 @@ void main() async {
 
   // Initialize Dependency Injection
   await initDependencies();
+  bootstrapAppData();
 
   await initializeDateFormatting('fr_FR', null);
 

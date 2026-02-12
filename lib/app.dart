@@ -14,17 +14,19 @@ class DailyOsApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeVM = sl<ThemeViewModel>();
     // Watch Theme Mode Signal
+    // Watch Theme signals
     final accent = themeVM.accentColor.watch(context);
     final fontFamily = themeVM.fontFamily.watch(context);
-    themeVM.themeMode.watch(context); // Watch for reactivity (value unused)
+    final style = themeVM.themeStyle.watch(context);
+    themeVM.themeMode.watch(context); // Watch for reactivity
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'DailyOS',
       debugShowCheckedModeBanner: false,
       themeMode: themeVM.getThemeMode(),
-      theme: AppTheme.lightTheme(accent, fontFamily),
-      darkTheme: AppTheme.darkTheme(accent, fontFamily),
+      theme: AppTheme.lightTheme(accent, fontFamily, style),
+      darkTheme: AppTheme.darkTheme(accent, fontFamily, style),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
