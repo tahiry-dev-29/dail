@@ -1,4 +1,3 @@
-import 'package:daily_os/features/knowledge_base/presentation/screens/knowledge_base_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/page_editor_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/trash/trash_screen.dart';
 import 'package:daily_os/shared/widgets/main_layout.dart';
@@ -13,7 +12,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (context, state) => const MainLayout()),
       GoRoute(
         path: '/knowledge',
-        builder: (context, state) => const KnowledgeBaseScreen(),
+        redirect: (context, state) => '/', // Redirect root knowledge to home
         routes: [
           GoRoute(
             path: 'page/:pageId',

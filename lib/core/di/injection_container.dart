@@ -29,6 +29,7 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/pages/delete_pa
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_page_by_id_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_recent_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/reorder_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/search_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/update_page_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/properties/property_usecases.dart';
@@ -149,6 +150,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => DeletePageUseCase(sl()));
   sl.registerFactory(() => GetPageByIdUseCase(sl()));
   sl.registerFactory(() => GetRecentPagesUseCase(sl()));
+  sl.registerFactory(() => ReorderPagesUseCase(sl()));
 
   // UseCases - Workspaces
   sl.registerFactory(() => GetWorkspacesUseCase(sl()));
@@ -211,6 +213,7 @@ Future<void> initDependencies() async {
       moveFolderUseCase: sl(),
       getPagesUseCase: sl(),
       getTasksByFolderUseCase: sl(),
+      reorderPagesUseCase: sl(),
       workspaceVM: sl(),
     ),
   );
@@ -230,6 +233,7 @@ Future<void> initDependencies() async {
       deletePageUseCase: sl(),
       getPageByIdUseCase: sl(),
       createPageUseCase: sl(),
+      blockVM: sl(),
     ),
   );
 
@@ -300,7 +304,14 @@ Future<void> initDependencies() async {
   sl.registerFactoryParam<TaskEditViewModel, TaskEntity, void>(
     (task, _) => TaskEditViewModel(task, sl<TaskListViewModel>()),
   );
+}
 
-  // Initial data loading is now managed by MainLayout to ensure it happens
-  // only once and after the UI is ready to receive updates.
+/// Bootstrap initial data loading.
+/// Called once from [main.dart] after DI is ready and UI is mounted.
+void bootstrapAppData() {
+  Future.microtask(() {
+    sl<TaskListViewModel>().loadTasks();
+    sl<WorkspaceViewModel>().loadWorkspaces();
+    sl<TagViewModel>().loadTags();
+  });
 }
