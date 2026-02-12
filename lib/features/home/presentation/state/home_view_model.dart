@@ -15,6 +15,7 @@ class HomeViewModel {
   final Signal<int> triggerConfetti = signal<int>(0);
   final Signal<bool> isNavBarVisible = signal<bool>(true);
   final Signal<bool> isAddTaskVisible = signal<bool>(false);
+  final Signal<bool> isDashboardEditMode = signal<bool>(false);
 
   // Time Signal
   final Signal<String> timeString = signal(

@@ -73,8 +73,8 @@ class ActiveTimerCard extends StatelessWidget {
                   ShaderMask(
                     shaderCallback: (bounds) => LinearGradient(
                       colors: isDark
-                          ? [Colors.white, Colors.lightBlueAccent]
-                          : [const Color(0xFF1E293B), const Color(0xFF3B82F6)],
+                          ? [Colors.white, colors.accent]
+                          : [colors.textPrimary, colors.accent],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ).createShader(bounds),

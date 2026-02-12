@@ -1,5 +1,4 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/design_system/atoms/app_colors.dart';
 import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
@@ -30,11 +29,11 @@ class AiInsightCard extends StatelessWidget {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.3),
+                  color: colors.ai.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(50),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.purple.withValues(alpha: 0.3),
+                      color: colors.ai.withValues(alpha: 0.3),
                       blurRadius: 60,
                       spreadRadius: 20,
                     ),
@@ -53,10 +52,10 @@ class AiInsightCard extends StatelessWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
-                      colors: [AppColors.purple500, AppColors.blue500],
+                      colors: [colors.ai, colors.accent],
                       begin: Alignment.bottomLeft,
                       end: Alignment.topRight,
                     ),
@@ -65,7 +64,7 @@ class AiInsightCard extends StatelessWidget {
                     child: Icon(
                       AppIcons.assistant(context),
                       size: 12,
-                      color: colors.accent,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -79,7 +78,7 @@ class AiInsightCard extends StatelessWidget {
                       Text(
                         'GEMINI ASSISTANT',
                         style: context.caption.copyWith(
-                          color: const Color(0xFFD8B4FE),
+                          color: colors.ai,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.0,
                         ),
