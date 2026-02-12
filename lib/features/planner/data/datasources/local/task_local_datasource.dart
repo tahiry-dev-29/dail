@@ -16,7 +16,7 @@ class TaskLocalDataSource implements ITaskLocalDataSource {
 
   @override
   Future<List<TaskDTO>> getTasks() async {
-    return isar.taskDTOs.where().findAll();
+    return isar.taskDTOs.where().sortBySortOrder().findAll();
   }
 
   @override
@@ -24,8 +24,24 @@ class TaskLocalDataSource implements ITaskLocalDataSource {
     final results = await isar.taskDTOs
         .filter()
         .folderIdEqualTo(folderId)
+        .sortBySortOrder()
         .findAll();
     return results;
+  }
+
+  Future<void> reorder(List<String> uids) async {
+    await isar.writeTxn(() async {
+      for (int i = 0; i < uids.length; i++) {
+        final task = await isar.taskDTOs
+            .filter()
+            .uidEqualTo(uids[i])
+            .findFirst();
+        if (task != null) {
+          task.sortOrder = i;
+          await isar.taskDTOs.put(task);
+        }
+      }
+    });
   }
 
   @override

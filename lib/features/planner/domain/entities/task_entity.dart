@@ -15,6 +15,7 @@ class TaskEntity {
   final String? workspaceId;
   final String? folderId;
   final String iconEmoji;
+  final int sortOrder;
 
   const TaskEntity({
     required this.id,
@@ -31,6 +32,7 @@ class TaskEntity {
     this.workspaceId,
     this.folderId,
     this.iconEmoji = '📝',
+    this.sortOrder = 0,
   });
 
   bool get isOverdue {
@@ -71,6 +73,7 @@ class TaskEntity {
     String? workspaceId,
     String? folderId,
     String? iconEmoji,
+    int? sortOrder,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -87,6 +90,7 @@ class TaskEntity {
       workspaceId: workspaceId ?? this.workspaceId,
       folderId: folderId ?? this.folderId,
       iconEmoji: iconEmoji ?? this.iconEmoji,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
@@ -106,7 +110,8 @@ class TaskEntity {
           isIgnored == other.isIgnored &&
           workspaceId == other.workspaceId &&
           folderId == other.folderId &&
-          iconEmoji == other.iconEmoji;
+          iconEmoji == other.iconEmoji &&
+          sortOrder == other.sortOrder;
 
   @override
   int get hashCode =>
@@ -121,5 +126,6 @@ class TaskEntity {
       isIgnored.hashCode ^
       workspaceId.hashCode ^
       folderId.hashCode ^
-      iconEmoji.hashCode;
+      iconEmoji.hashCode ^
+      sortOrder.hashCode;
 }

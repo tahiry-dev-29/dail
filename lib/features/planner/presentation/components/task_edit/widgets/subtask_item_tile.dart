@@ -68,13 +68,13 @@ class SubtaskItemTile extends StatelessWidget {
     final hasTime = st.time != '00:00' && st.time.isNotEmpty;
     final hasDeadline = st.deadline != null;
 
-    return ReorderableDragStartListener(
+    return Padding(
       key: ValueKey(st.id),
-      index: index,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.grab,
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ReorderableDelayedDragStartListener(
+        index: index,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.grab,
           child: GlassCard(
             borderRadius: 16,
             padding: const EdgeInsets.all(12),
@@ -99,7 +99,7 @@ class SubtaskItemTile extends StatelessWidget {
                     behavior: HitTestBehavior.opaque,
                     onTap: () => viewModel.setEditingSubtask(st.id),
                     child: Column(
-                      crossAxisAlignment: .start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           st.name,

@@ -1,4 +1,3 @@
-import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/subtask_empty_state.dart';
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/subtask_header.dart';
@@ -45,42 +44,29 @@ class SubtaskListManager extends StatelessWidget {
           child: isExpanded
               ? Column(
                   children: [
-                    if (subtasks.isNotEmpty)
-                      ReorderableListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        buildDefaultDragHandles: false,
-                        onReorder: (oldIndex, newIndex) {
-                          viewModel.reorderSubtasks(oldIndex, newIndex);
-                          onSave();
-                        },
-                        proxyDecorator: (child, index, animation) {
-                          return AnimatedBuilder(
-                            animation: animation,
-                            builder: (BuildContext context, Widget? child) {
-                              return Material(
-                                color: Colors.transparent,
-                                child: GlassCard(
-                                  borderRadius: 16,
-                                  padding: EdgeInsets.zero,
-                                  child: child ?? const SizedBox(),
-                                ),
-                              );
-                            },
-                            child: child,
-                          );
-                        },
-                        children: subtasks.asMap().entries.map((entry) {
-                          return SubtaskItemTile(
-                            key: ValueKey(entry.value.id),
-                            st: entry.value,
-                            index: entry.key,
-                            isEditing: editingId == entry.value.id,
-                            viewModel: viewModel,
-                            onSave: onSave,
-                          );
-                        }).toList(),
-                      ),
+                    if (subtasks.isNotEmpty) const SizedBox(height: 8),
+                    // Standard ListView - no drag and drop
+                    // Reorderable list for subtasks
+                    ReorderableListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: subtasks.length,
+                      onReorder: (oldIndex, newIndex) {
+                        viewModel.reorderSubtasks(oldIndex, newIndex);
+                        onSave();
+                      },
+                      itemBuilder: (context, index) {
+                        final subtask = subtasks[index];
+                        return SubtaskItemTile(
+                          key: ValueKey(subtask.id),
+                          st: subtask,
+                          index: index,
+                          isEditing: editingId == subtask.id,
+                          viewModel: viewModel,
+                          onSave: onSave,
+                        );
+                      },
+                    ),
 
                     // Add Input
                     if (isAdding)

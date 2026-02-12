@@ -40,6 +40,9 @@ class TaskListViewModel {
 
   final tasks = signal<AsyncState<List<TaskEntity>>>(const AsyncLoading());
 
+  // UI State
+  final isSearching = signal(false);
+
   // Filtering state
   final searchQuery = signal('');
   final selectedTagIds = listSignal<String>([]);
@@ -58,40 +61,46 @@ class TaskListViewModel {
     final date = _calendarVM.selectedDate.value;
 
     final filtered = allTasks.where((task) {
-      // Workspace filter (Global context)
+      // 1. Workspace filter
+      // If no active workspace is selected, show ALL tasks
+      // If 'default' is selected, show tasks with 'default', null, or empty workspaceId
       if (activeWorkspace != null) {
         final taskWsId = task.workspaceId;
         final activeWsId = activeWorkspace.id;
 
-        // Match if IDs match, or if both are "default/null" equivalents
-        final isDefaultMatch =
-            (activeWsId == 'default' && (taskWsId == null || taskWsId.isEmpty));
-        if (taskWsId != activeWsId && !isDefaultMatch) {
-          return false;
+        if (activeWsId != 'default') {
+          // Strict match for non-default workspaces
+          if (taskWsId != activeWsId) return false;
+        } else {
+          // Permissive match for default workspace
+          final isTaskDefault =
+              taskWsId == null || taskWsId.isEmpty || taskWsId == 'default';
+          if (!isTaskDefault) return false;
         }
       }
 
-      // Folder filter
+      // 2. Folder filter
       if (folder != null && task.folderId != folder) return false;
 
-      // Date filter: SKIP when a folder is explicitly selected (folder view shows ALL tasks)
+      // 3. Date filter: SKIP when a folder is explicitly selected (folder view shows ALL tasks)
+      // Also show tasks with NO date on the dashboard.
       if (folder == null) {
         final taskDate = task.date;
-        final matchesDate =
-            taskDate == null ||
-            (taskDate.year == date.year &&
-                taskDate.month == date.month &&
-                taskDate.day == date.day);
-
-        if (!matchesDate) return false;
+        if (taskDate != null) {
+          final isSameDay =
+              taskDate.year == date.year &&
+              taskDate.month == date.month &&
+              taskDate.day == date.day;
+          if (!isSameDay) return false;
+        }
+        // tasks with taskDate == null are always shown in the dashboard (unscheduled)
       }
 
-      // Search filter
+      // 4. Search and Tags
       if (query.isNotEmpty && !task.name.toLowerCase().contains(query)) {
         return false;
       }
 
-      // Tags filter
       if (tags.isNotEmpty) {
         if (task.tagIds.isEmpty) return false;
         if (!tags.any((id) => task.tagIds.contains(id))) return false;
@@ -100,6 +109,39 @@ class TaskListViewModel {
       return true;
     }).toList();
     return AsyncData(filtered);
+  });
+
+  late final activeTasks = computed<AsyncState<List<TaskEntity>>>(() {
+    final state = filteredTasks.value;
+    if (state is! AsyncData<List<TaskEntity>>) return state;
+
+    final now = DateTime.now();
+    final tasks = state.value.where((t) {
+      return !t.isDone &&
+          !t.isIgnored &&
+          (t.deadline == null || t.deadline!.isAfter(now));
+    }).toList();
+
+    return AsyncData(tasks);
+  });
+
+  late final completedTasks = computed<AsyncState<List<TaskEntity>>>(() {
+    final state = filteredTasks.value;
+    if (state is! AsyncData<List<TaskEntity>>) return state;
+
+    final tasks = state.value.where((t) => t.isDone).toList();
+    return AsyncData(tasks);
+  });
+
+  late final expiredTasks = computed<AsyncState<List<TaskEntity>>>(() {
+    final state = filteredTasks.value;
+    if (state is! AsyncData<List<TaskEntity>>) return state;
+
+    final now = DateTime.now();
+    final tasks = state.value.where((t) {
+      return !t.isDone && t.deadline != null && t.deadline!.isBefore(now);
+    }).toList();
+    return AsyncData(tasks);
   });
 
   Future<void> loadTasks() async {
@@ -172,13 +214,72 @@ class TaskListViewModel {
     }
   }
 
-  Future<void> reorderTasks(List<TaskEntity> orderedTasks) async {
+  Future<void> toggleFavorite(String id) async {
+    final state = tasks.value;
+    if (state is! AsyncData<List<TaskEntity>>) return;
+
+    final task = state.value.firstWhere((t) => t.id == id);
     try {
-      await _reorderTasksUseCase(orderedTasks);
-      await loadTasks();
+      await updateTask(task.copyWith(isFavorite: !task.isFavorite));
     } catch (e) {
       // Handle error
     }
+  }
+
+  Future<void> reorderTasks(List<TaskEntity> orderedTasks) async {
+    // 1. Optimistic Update: Update the signal immediately to keep UI smooth
+    tasks.value = AsyncData(orderedTasks);
+
+    try {
+      await _reorderTasksUseCase(orderedTasks);
+    } catch (e) {
+      // In case of error, reload original state
+      await loadTasks();
+    }
+  }
+
+  void onReorderActiveTasks(int oldIndex, int newIndex) {
+    // SliverReorderableList/ReorderableListView pass indices where if old < new, new is "after insertion" index.
+    // Standard adjustment for list.insert:
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+
+    final activeState = activeTasks.value;
+    final allState = filteredTasks.value;
+
+    if (activeState is! AsyncData || allState is! AsyncData) return;
+
+    final activeList = activeState.value!.toList();
+    final allList = allState.value!.toList();
+
+    // 1. Reorder active list locally
+    final item = activeList.removeAt(oldIndex);
+    activeList.insert(newIndex, item);
+
+    // 2. Reconstruct full list by mapping slots of active tasks
+    // We assume filteredTasks preserves the order of tasks.value
+    final newFullList = <TaskEntity>[];
+    int activeIndex = 0;
+    final now = DateTime.now();
+
+    for (final task in allList) {
+      final isActive =
+          !task.isDone &&
+          !task.isIgnored &&
+          (task.deadline == null || task.deadline!.isAfter(now));
+
+      if (isActive) {
+        if (activeIndex < activeList.length) {
+          newFullList.add(activeList[activeIndex]);
+          activeIndex++;
+        }
+      } else {
+        newFullList.add(task);
+      }
+    }
+
+    reorderTasks(newFullList);
   }
 
   void selectFolder(String? folderId) {

@@ -33,34 +33,44 @@ const TaskDTOSchema = CollectionSchema(
       name: r'folderId',
       type: IsarType.string,
     ),
-    r'isDone': PropertySchema(id: 4, name: r'isDone', type: IsarType.bool),
+    r'iconEmoji': PropertySchema(
+      id: 4,
+      name: r'iconEmoji',
+      type: IsarType.string,
+    ),
+    r'isDone': PropertySchema(id: 5, name: r'isDone', type: IsarType.bool),
     r'isFavorite': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'isFavorite',
       type: IsarType.bool,
     ),
     r'isIgnored': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'isIgnored',
       type: IsarType.bool,
     ),
-    r'name': PropertySchema(id: 7, name: r'name', type: IsarType.string),
+    r'name': PropertySchema(id: 8, name: r'name', type: IsarType.string),
+    r'sortOrder': PropertySchema(
+      id: 9,
+      name: r'sortOrder',
+      type: IsarType.long,
+    ),
     r'subtasks': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'subtasks',
       type: IsarType.objectList,
 
       target: r'SubTaskDTO',
     ),
     r'tagIds': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'tagIds',
       type: IsarType.stringList,
     ),
-    r'time': PropertySchema(id: 10, name: r'time', type: IsarType.string),
-    r'uid': PropertySchema(id: 11, name: r'uid', type: IsarType.string),
+    r'time': PropertySchema(id: 12, name: r'time', type: IsarType.string),
+    r'uid': PropertySchema(id: 13, name: r'uid', type: IsarType.string),
     r'workspaceId': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'workspaceId',
       type: IsarType.string,
     ),
@@ -108,6 +118,7 @@ int _taskDTOEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.iconEmoji.length * 3;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.subtasks.length * 3;
   {
@@ -145,20 +156,22 @@ void _taskDTOSerialize(
   writer.writeDateTime(offsets[1], object.deadline);
   writer.writeString(offsets[2], object.description);
   writer.writeString(offsets[3], object.folderId);
-  writer.writeBool(offsets[4], object.isDone);
-  writer.writeBool(offsets[5], object.isFavorite);
-  writer.writeBool(offsets[6], object.isIgnored);
-  writer.writeString(offsets[7], object.name);
+  writer.writeString(offsets[4], object.iconEmoji);
+  writer.writeBool(offsets[5], object.isDone);
+  writer.writeBool(offsets[6], object.isFavorite);
+  writer.writeBool(offsets[7], object.isIgnored);
+  writer.writeString(offsets[8], object.name);
+  writer.writeLong(offsets[9], object.sortOrder);
   writer.writeObjectList<SubTaskDTO>(
-    offsets[8],
+    offsets[10],
     allOffsets,
     SubTaskDTOSchema.serialize,
     object.subtasks,
   );
-  writer.writeStringList(offsets[9], object.tagIds);
-  writer.writeString(offsets[10], object.time);
-  writer.writeString(offsets[11], object.uid);
-  writer.writeString(offsets[12], object.workspaceId);
+  writer.writeStringList(offsets[11], object.tagIds);
+  writer.writeString(offsets[12], object.time);
+  writer.writeString(offsets[13], object.uid);
+  writer.writeString(offsets[14], object.workspaceId);
 }
 
 TaskDTO _taskDTODeserialize(
@@ -172,23 +185,25 @@ TaskDTO _taskDTODeserialize(
   object.deadline = reader.readDateTimeOrNull(offsets[1]);
   object.description = reader.readString(offsets[2]);
   object.folderId = reader.readStringOrNull(offsets[3]);
+  object.iconEmoji = reader.readString(offsets[4]);
   object.id = id;
-  object.isDone = reader.readBool(offsets[4]);
-  object.isFavorite = reader.readBool(offsets[5]);
-  object.isIgnored = reader.readBool(offsets[6]);
-  object.name = reader.readString(offsets[7]);
+  object.isDone = reader.readBool(offsets[5]);
+  object.isFavorite = reader.readBool(offsets[6]);
+  object.isIgnored = reader.readBool(offsets[7]);
+  object.name = reader.readString(offsets[8]);
+  object.sortOrder = reader.readLong(offsets[9]);
   object.subtasks =
       reader.readObjectList<SubTaskDTO>(
-        offsets[8],
+        offsets[10],
         SubTaskDTOSchema.deserialize,
         allOffsets,
         SubTaskDTO(),
       ) ??
       [];
-  object.tagIds = reader.readStringList(offsets[9]) ?? [];
-  object.time = reader.readString(offsets[10]);
-  object.uid = reader.readString(offsets[11]);
-  object.workspaceId = reader.readStringOrNull(offsets[12]);
+  object.tagIds = reader.readStringList(offsets[11]) ?? [];
+  object.time = reader.readString(offsets[12]);
+  object.uid = reader.readString(offsets[13]);
+  object.workspaceId = reader.readStringOrNull(offsets[14]);
   return object;
 }
 
@@ -208,14 +223,18 @@ P _taskDTODeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
       return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readObjectList<SubTaskDTO>(
                 offset,
                 SubTaskDTOSchema.deserialize,
@@ -224,13 +243,13 @@ P _taskDTODeserializeProp<P>(
               ) ??
               [])
           as P;
-    case 9:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 10:
-      return (reader.readString(offset)) as P;
     case 11:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringList(offset) ?? []) as P;
     case 12:
+      return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readString(offset)) as P;
+    case 14:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -892,6 +911,152 @@ extension TaskDTOQueryFilter
     });
   }
 
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'iconEmoji',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'iconEmoji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'iconEmoji',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'iconEmoji', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> iconEmojiIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'iconEmoji', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -1121,6 +1286,65 @@ extension TaskDTOQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'name', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> sortOrderEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'sortOrder', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> sortOrderGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'sortOrder',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> sortOrderLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'sortOrder',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterFilterCondition> sortOrderBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'sortOrder',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
       );
     });
   }
@@ -1900,6 +2124,18 @@ extension TaskDTOQuerySortBy on QueryBuilder<TaskDTO, TaskDTO, QSortBy> {
     });
   }
 
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortByIconEmoji() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconEmoji', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortByIconEmojiDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconEmoji', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortByIsDone() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isDone', Sort.asc);
@@ -1945,6 +2181,18 @@ extension TaskDTOQuerySortBy on QueryBuilder<TaskDTO, TaskDTO, QSortBy> {
   QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortBySortOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sortOrder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> sortBySortOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sortOrder', Sort.desc);
     });
   }
 
@@ -2035,6 +2283,18 @@ extension TaskDTOQuerySortThenBy
     });
   }
 
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenByIconEmoji() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconEmoji', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenByIconEmojiDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'iconEmoji', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -2092,6 +2352,18 @@ extension TaskDTOQuerySortThenBy
   QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenBySortOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sortOrder', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QAfterSortBy> thenBySortOrderDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sortOrder', Sort.desc);
     });
   }
 
@@ -2162,6 +2434,14 @@ extension TaskDTOQueryWhereDistinct
     });
   }
 
+  QueryBuilder<TaskDTO, TaskDTO, QDistinct> distinctByIconEmoji({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'iconEmoji', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<TaskDTO, TaskDTO, QDistinct> distinctByIsDone() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isDone');
@@ -2185,6 +2465,12 @@ extension TaskDTOQueryWhereDistinct
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<TaskDTO, TaskDTO, QDistinct> distinctBySortOrder() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sortOrder');
     });
   }
 
@@ -2251,6 +2537,12 @@ extension TaskDTOQueryProperty
     });
   }
 
+  QueryBuilder<TaskDTO, String, QQueryOperations> iconEmojiProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'iconEmoji');
+    });
+  }
+
   QueryBuilder<TaskDTO, bool, QQueryOperations> isDoneProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isDone');
@@ -2272,6 +2564,12 @@ extension TaskDTOQueryProperty
   QueryBuilder<TaskDTO, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<TaskDTO, int, QQueryOperations> sortOrderProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sortOrder');
     });
   }
 

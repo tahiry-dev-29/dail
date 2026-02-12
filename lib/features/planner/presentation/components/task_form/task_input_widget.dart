@@ -6,10 +6,10 @@ import 'package:daily_os/features/planner/presentation/components/task_edit/widg
 import 'package:daily_os/features/planner/presentation/components/task_edit/widgets/task_workspace_picker.dart';
 import 'package:daily_os/features/planner/presentation/state/task_input_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TaskInputWidget extends HookWidget {
+/// Surgical StatefulWidget for [TaskInputViewModel] lifecycle (dispose).
+class TaskInputWidget extends StatefulWidget {
   final Function({
     required String name,
     required String description,
@@ -33,13 +33,45 @@ class TaskInputWidget extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Manage ViewModel lifecycle using hooks
-    final state = useMemoized(() => TaskInputViewModel(initialValues), [
-      initialValues,
-    ]);
-    useEffect(() => state.dispose, [state]);
+  State<TaskInputWidget> createState() => _TaskInputWidgetState();
+}
 
+class _TaskInputWidgetState extends State<TaskInputWidget> {
+  late final TaskInputViewModel _state;
+
+  @override
+  void initState() {
+    super.initState();
+    _state = TaskInputViewModel(widget.initialValues);
+  }
+
+  @override
+  void dispose() {
+    _state.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    final name = _state.nameController.text.trim();
+    if (name.isEmpty) {
+      widget.onCancel?.call();
+      return;
+    }
+
+    widget.onSave(
+      name: name,
+      description: _state.descController.text.trim(),
+      time: _state.time.peek(),
+      deadline: _state.deadline.peek(),
+      isFavorite: _state.isFavorite.peek(),
+      tagIds: _state.tagIds.peek(),
+      workspaceId: _state.workspaceId.peek(),
+    );
+    _state.reset();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
 
     // Glass surface styling
@@ -49,7 +81,7 @@ class TaskInputWidget extends HookWidget {
     final borderColor = colors.border;
 
     return TapRegion(
-      onTapOutside: (_) => onCancel?.call(),
+      onTapOutside: (_) => widget.onCancel?.call(),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -58,40 +90,21 @@ class TaskInputWidget extends HookWidget {
           border: Border.all(color: borderColor),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             _TaskNameRow(
-              state: state,
-              hintText: hintText,
-              onSave: () => _handleSave(state),
+              state: _state,
+              hintText: widget.hintText,
+              onSave: _handleSave,
               colors: colors,
             ),
-            _TaskDescriptionField(state: state, colors: colors),
+            _TaskDescriptionField(state: _state, colors: colors),
             const SizedBox(height: 12),
-            _TaskInputActions(state: state, colors: colors),
+            _TaskInputActions(state: _state, colors: colors),
           ],
         ),
       ),
     );
-  }
-
-  void _handleSave(TaskInputViewModel state) {
-    final name = state.nameController.text.trim();
-    if (name.isEmpty) {
-      onCancel?.call();
-      return;
-    }
-
-    onSave(
-      name: name,
-      description: state.descController.text.trim(),
-      time: state.time.peek(),
-      deadline: state.deadline.peek(),
-      isFavorite: state.isFavorite.peek(),
-      tagIds: state.tagIds.peek(),
-      workspaceId: state.workspaceId.peek(),
-    );
-    state.reset();
   }
 }
 
@@ -150,7 +163,7 @@ class _TaskNameRow extends StatelessWidget {
               'Save',
               style: TextStyle(
                 color: colors.accent,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 fontSize: 14,
               ),
             ),
@@ -341,7 +354,7 @@ class _WorkspaceAction extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             Text('Workspace', style: context.h2),
             const SizedBox(height: 16),
@@ -388,8 +401,8 @@ class _TagAction extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: .min,
+          crossAxisAlignment: .start,
           children: [
             Text('Tags', style: context.h2),
             const SizedBox(height: 16),

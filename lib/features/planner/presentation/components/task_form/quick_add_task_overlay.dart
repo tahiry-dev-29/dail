@@ -77,45 +77,48 @@ class QuickAddTaskOverlay extends StatelessWidget {
       );
     }
 
-    return Stack(
-      children: [
-        // Blurred Backdrop
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () {
-              sl<HomeViewModel>().isAddTaskVisible.value = false;
-              parentTaskSignal.value = null;
-            },
-            behavior: HitTestBehavior.opaque,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-              child: Container(color: Colors.black.withValues(alpha: 0.2)),
-            ),
-          ),
-        ),
-
-        // Input Area
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              left: 16,
-              right: 16,
-            ),
-            child: TaskInputWidget(
-              onSave: onSave,
-              onCancel: () {
+    return Material(
+      type: MaterialType.transparency,
+      child: Stack(
+        children: [
+          // Blurred Backdrop
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
                 sl<HomeViewModel>().isAddTaskVisible.value = false;
                 parentTaskSignal.value = null;
               },
-              hintText: parentTask != null
-                  ? 'Sous-tâche pour "${parentTask.name}"...'
-                  : 'Que faut-il faire ?',
+              behavior: HitTestBehavior.opaque,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: Container(color: Colors.black.withValues(alpha: 0.2)),
+              ),
             ),
           ),
-        ),
-      ],
+
+          // Input Area
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                left: 16,
+                right: 16,
+              ),
+              child: TaskInputWidget(
+                onSave: onSave,
+                onCancel: () {
+                  sl<HomeViewModel>().isAddTaskVisible.value = false;
+                  parentTaskSignal.value = null;
+                },
+                hintText: parentTask != null
+                    ? 'Sous-tâche pour "${parentTask.name}"...'
+                    : 'Que faut-il faire ?',
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

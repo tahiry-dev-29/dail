@@ -24,6 +24,7 @@ class TaskDTO {
   late String? workspaceId;
   late String? folderId;
   String iconEmoji = '📝';
+  late int sortOrder;
 
   TaskDTO();
 
@@ -42,6 +43,7 @@ class TaskDTO {
     this.workspaceId,
     this.folderId,
     this.iconEmoji = '📝',
+    this.sortOrder = 0,
   });
 
   factory TaskDTO.fromEntity(TaskEntity entity) {
@@ -60,6 +62,7 @@ class TaskDTO {
       workspaceId: entity.workspaceId,
       folderId: entity.folderId,
       iconEmoji: entity.iconEmoji,
+      sortOrder: entity.sortOrder,
     );
   }
 
@@ -79,6 +82,7 @@ class TaskDTO {
       workspaceId: workspaceId,
       folderId: folderId,
       iconEmoji: iconEmoji,
+      sortOrder: sortOrder,
     );
   }
 }

@@ -54,7 +54,12 @@ class TaskRepositoryImpl implements ITaskRepository {
   @override
   Future<void> saveTasks(List<TaskEntity> tasks) async {
     // Used for reordering or bulk updates
-    final dtos = tasks.map((t) => TaskDTO.fromEntity(t)).toList();
+    // Assign indices as sortOrder to persist the current list order
+    final dtos = tasks.asMap().entries.map((entry) {
+      final index = entry.key;
+      final task = entry.value;
+      return TaskDTO.fromEntity(task.copyWith(sortOrder: index));
+    }).toList();
     await localDataSource.saveTasks(dtos);
   }
 }

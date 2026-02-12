@@ -11,9 +11,8 @@ import 'package:daily_os/features/planner/presentation/components/task_edit/task
 import 'package:daily_os/features/planner/presentation/components/task_edit/task_title_input.dart';
 import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class TaskEditPage extends HookWidget {
+class TaskEditPage extends StatelessWidget {
   final TaskEntity task;
   final VoidCallback? onBack;
 
@@ -22,10 +21,8 @@ class TaskEditPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // 1. Initialize ViewModel via Hook and sl
-    final viewModel = useMemoized(() => sl<TaskEditViewModel>(param1: task));
+    final viewModel = sl<TaskEditViewModel>(param1: task);
 
-    // 2. Define Save Action
     void onSave() => viewModel.save();
 
     return GlassScaffold(
@@ -45,7 +42,7 @@ class TaskEditPage extends HookWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             sliver: SliverToBoxAdapter(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   const SizedBox(height: 12),
                   // List Category
@@ -56,7 +53,7 @@ class TaskEditPage extends HookWidget {
                         style: TextStyle(
                           color: colors.accent,
                           fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: .w500,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -86,7 +83,7 @@ class TaskEditPage extends HookWidget {
             hasScrollBody: false,
             fillOverscroll: true,
             child: Align(
-              alignment: Alignment.bottomCenter,
+              alignment: .bottomCenter,
               child: TaskActionBar(
                 viewModel: viewModel,
                 onSave: onSave,
