@@ -7,19 +7,14 @@ import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart'
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/trash_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TrashScreen extends HookWidget {
+class TrashScreen extends ConsumerWidget {
   const TrashScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    useEffect(() {
-      sl<TrashViewModel>().loadTrash();
-      return null;
-    }, []);
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final trashVM = sl<TrashViewModel>();
     final deletedFoldersState = trashVM.deletedFolders.watch(context);
     final deletedPagesState = trashVM.deletedPages.watch(context);
@@ -31,7 +26,6 @@ class TrashScreen extends HookWidget {
         deletedFoldersState.isLoading || deletedPagesState.isLoading;
 
     return GlassScaffold(
-      // Drawer is not needed here as it's a sub-page with back button usually
       appBar: AppBar(
         title: Text(
           'Trash',
@@ -174,7 +168,7 @@ class TrashScreen extends HookWidget {
                   SliverFillRemaining(
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: .center,
                         children: [
                           Icon(
                             AppIcons.delete(context),
@@ -229,7 +223,7 @@ class _TrashItem extends StatelessWidget {
                 title,
                 style: context.bodyMedium.copyWith(
                   color: colors.textPrimary,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: .w500,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

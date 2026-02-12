@@ -3,6 +3,7 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/pages/create_pa
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/delete_page_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_page_by_id_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/update_page_usecase.dart';
+import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,6 +14,7 @@ class ActivePageViewModel {
   final DeletePageUseCase _deletePageUseCase;
   final GetPageByIdUseCase _getPageByIdUseCase;
   final CreatePageUseCase _createPageUseCase;
+  final BlockViewModel _blockVM;
 
   // State
   final Signal<String?> _activePageId = signal(null);
@@ -29,19 +31,25 @@ class ActivePageViewModel {
     required DeletePageUseCase deletePageUseCase,
     required GetPageByIdUseCase getPageByIdUseCase,
     required CreatePageUseCase createPageUseCase,
+    required BlockViewModel blockVM,
   }) : _updatePageUseCase = updatePageUseCase,
        _deletePageUseCase = deletePageUseCase,
        _getPageByIdUseCase = getPageByIdUseCase,
-       _createPageUseCase = createPageUseCase;
+       _createPageUseCase = createPageUseCase,
+       _blockVM = blockVM;
 
-  /// Set active page ID and load the page
+  /// Set active page ID and load the page AND its blocks
   Future<void> setActivePageId(String? pageId) async {
     _activePageId.value = pageId;
 
     if (pageId == null) {
       _activePage.value = const AsyncData(null);
+      _blockVM.clear(); // Clear blocks
       return;
     }
+
+    // Trigger block loading immediately
+    _blockVM.loadBlocks(pageId);
 
     _activePage.value = const AsyncLoading();
     try {

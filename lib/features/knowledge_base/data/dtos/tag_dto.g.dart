@@ -24,9 +24,10 @@ const TagDTOSchema = CollectionSchema(
       type: IsarType.dateTime,
     ),
     r'name': PropertySchema(id: 2, name: r'name', type: IsarType.string),
-    r'uid': PropertySchema(id: 3, name: r'uid', type: IsarType.string),
+    r'priority': PropertySchema(id: 3, name: r'priority', type: IsarType.long),
+    r'uid': PropertySchema(id: 4, name: r'uid', type: IsarType.string),
     r'workspaceId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'workspaceId',
       type: IsarType.string,
     ),
@@ -88,8 +89,9 @@ void _tagDTOSerialize(
   writer.writeString(offsets[0], object.color);
   writer.writeDateTime(offsets[1], object.createdAt);
   writer.writeString(offsets[2], object.name);
-  writer.writeString(offsets[3], object.uid);
-  writer.writeString(offsets[4], object.workspaceId);
+  writer.writeLong(offsets[3], object.priority);
+  writer.writeString(offsets[4], object.uid);
+  writer.writeString(offsets[5], object.workspaceId);
 }
 
 TagDTO _tagDTODeserialize(
@@ -103,8 +105,9 @@ TagDTO _tagDTODeserialize(
   object.createdAt = reader.readDateTime(offsets[1]);
   object.id = id;
   object.name = reader.readString(offsets[2]);
-  object.uid = reader.readString(offsets[3]);
-  object.workspaceId = reader.readStringOrNull(offsets[4]);
+  object.priority = reader.readLong(offsets[3]);
+  object.uid = reader.readString(offsets[4]);
+  object.workspaceId = reader.readStringOrNull(offsets[5]);
   return object;
 }
 
@@ -122,8 +125,10 @@ P _tagDTODeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -733,6 +738,65 @@ extension TagDTOQueryFilter on QueryBuilder<TagDTO, TagDTO, QFilterCondition> {
     });
   }
 
+  QueryBuilder<TagDTO, TagDTO, QAfterFilterCondition> priorityEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'priority', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<TagDTO, TagDTO, QAfterFilterCondition> priorityGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'priority',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TagDTO, TagDTO, QAfterFilterCondition> priorityLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'priority',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<TagDTO, TagDTO, QAfterFilterCondition> priorityBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'priority',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<TagDTO, TagDTO, QAfterFilterCondition> uidEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1083,6 +1147,18 @@ extension TagDTOQuerySortBy on QueryBuilder<TagDTO, TagDTO, QSortBy> {
     });
   }
 
+  QueryBuilder<TagDTO, TagDTO, QAfterSortBy> sortByPriority() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TagDTO, TagDTO, QAfterSortBy> sortByPriorityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.desc);
+    });
+  }
+
   QueryBuilder<TagDTO, TagDTO, QAfterSortBy> sortByUid() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'uid', Sort.asc);
@@ -1157,6 +1233,18 @@ extension TagDTOQuerySortThenBy on QueryBuilder<TagDTO, TagDTO, QSortThenBy> {
     });
   }
 
+  QueryBuilder<TagDTO, TagDTO, QAfterSortBy> thenByPriority() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TagDTO, TagDTO, QAfterSortBy> thenByPriorityDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'priority', Sort.desc);
+    });
+  }
+
   QueryBuilder<TagDTO, TagDTO, QAfterSortBy> thenByUid() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'uid', Sort.asc);
@@ -1205,6 +1293,12 @@ extension TagDTOQueryWhereDistinct on QueryBuilder<TagDTO, TagDTO, QDistinct> {
     });
   }
 
+  QueryBuilder<TagDTO, TagDTO, QDistinct> distinctByPriority() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'priority');
+    });
+  }
+
   QueryBuilder<TagDTO, TagDTO, QDistinct> distinctByUid({
     bool caseSensitive = true,
   }) {
@@ -1244,6 +1338,12 @@ extension TagDTOQueryProperty on QueryBuilder<TagDTO, TagDTO, QQueryProperty> {
   QueryBuilder<TagDTO, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<TagDTO, int, QQueryOperations> priorityProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'priority');
     });
   }
 

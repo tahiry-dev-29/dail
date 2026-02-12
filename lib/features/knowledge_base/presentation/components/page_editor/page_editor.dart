@@ -8,32 +8,28 @@ import 'package:daily_os/features/knowledge_base/presentation/components/page_ed
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:uuid/uuid.dart';
 
-class PageEditor extends HookWidget {
+/// Page editor that reacts to activePageId changes via Signals effect.
+class PageEditor extends StatelessWidget {
   const PageEditor({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get ViewModels from DI
     final activePageVM = sl<ActivePageViewModel>();
     final blockVM = sl<BlockViewModel>();
 
-    // Watch the active page state
-    final pageState = activePageVM.activePage.watch(context);
+    // Trigger load is now handled by the ViewModel coordination or routing
+    // But to be safe and reactive without StatefulWidget:
+    // We can use a signal effect if we really need to, but ideally logic is in VM.
+    // For now, let's assume WorkspaceScreen/ActivePageViewModel handles the 'setActive'
+    // which should trigger the load.
 
-    // Trigger block loading when active page changes
-    useEffect(() {
-      final page = activePageVM.activePage.value.value;
-      if (page != null) {
-        blockVM.loadBlocks(page.id);
-      } else {
-        blockVM.clear();
-      }
-      return null;
-    }, [activePageVM.activePageId.value]);
+    // Actually, looking at WorkspaceScreen, it calls `setActivePageId`.
+    // We should ensure that SETTING the active page ID triggers the block load in the VM layer.
+
+    final pageState = activePageVM.activePage.watch(context);
 
     return pageState.map(
       data: (page) {
@@ -83,7 +79,7 @@ class PageEditor extends HookWidget {
                     },
                     behavior: HitTestBehavior.translucent,
                     child: Container(
-                      alignment: Alignment.topCenter,
+                      alignment: .topCenter,
                       padding: const EdgeInsets.only(top: 20),
                       child: Text(
                         'Start typing...',

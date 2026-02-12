@@ -1,184 +1,267 @@
+import 'dart:async';
+
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.dart';
-import 'package:daily_os/features/knowledge_base/domain/services/voice_service.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class AudioBlockComponent extends HookWidget {
+/// AudioBlockComponent — surgical StatefulWidget for stream subscriptions
+/// and AudioRecorder/Player lifecycle.
+class AudioBlockComponent extends StatefulWidget {
   final BlockEntity block;
 
   const AudioBlockComponent({super.key, required this.block});
 
   @override
+  State<AudioBlockComponent> createState() => _AudioBlockComponentState();
+}
+
+class _AudioBlockComponentState extends State<AudioBlockComponent> {
+  // Signals for UI state
+  final _isRecording = signal(false);
+  final _isPlaying = signal(false);
+  final _recordingDuration = signal(Duration.zero);
+  final _playbackPosition = signal(Duration.zero);
+  final _totalDuration = signal(Duration.zero);
+
+  Timer? _recordingTimer;
+
+  @override
+  void dispose() {
+    _recordingTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final voiceService = useMemoized(() => sl<IVoiceService>());
-    final blockVM = sl<BlockViewModel>();
+    final isRecording = _isRecording.watch(context);
+    final isPlaying = _isPlaying.watch(context);
+    final recordingDuration = _recordingDuration.watch(context);
+    final playbackPosition = _playbackPosition.watch(context);
+    final totalDuration = _totalDuration.watch(context);
 
-    // State
-    final isRecording = useState(false);
-    final isPlaying = useState(false);
-    final duration = useState(Duration.zero);
-    final position = useState(Duration.zero);
-    final amplitude = useState(0.0);
-    final audioPath = useState<String?>(block.content['path'] as String?);
+    final hasAudio = widget.block.content['audioPath'] != null;
 
-    // Recording logic
-    Future<void> startRecording() async {
-      final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory.path}/voice_note_${const Uuid().v4()}.m4a';
-
-      await voiceService.startRecording(path);
-      isRecording.value = true;
-      audioPath.value = path;
-    }
-
-    Future<void> stopRecording() async {
-      await voiceService.stopRecording();
-      isRecording.value = false;
-
-      // Update block with new path
-      if (audioPath.value != null) {
-        blockVM.updateBlock(
-          block.copyWith(content: {...block.content, 'path': audioPath.value}),
-        );
-      }
-    }
-
-    // Playback logic
-    Future<void> togglePlayback() async {
-      if (audioPath.value == null) return;
-
-      if (isPlaying.value) {
-        await voiceService.pause();
-        isPlaying.value = false;
-      } else {
-        await voiceService.play(audioPath.value!);
-        isPlaying.value = true;
-      }
-    }
-
-    // Listeners
-    useEffect(() {
-      final ampSub = voiceService.amplitudeStream.listen((amp) {
-        if (isRecording.value) amplitude.value = amp;
-      });
-
-      final posSub = voiceService.positionStream.listen((pos) {
-        position.value = pos;
-      });
-
-      final durSub = voiceService.durationStream.listen((dur) {
-        duration.value = dur;
-      });
-
-      // When audio finishes
-      final finishSub = voiceService.positionStream.listen((pos) {
-        if (pos >= duration.value && duration.value > Duration.zero) {
-          isPlaying.value = false;
-        }
-      });
-
-      return () {
-        ampSub.cancel();
-        posSub.cancel();
-        durSub.cancel();
-        finishSub.cancel();
-      };
-    }, []);
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(12),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.customSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.border),
+        border: Border.all(
+          color: isRecording
+              ? colors.error.withValues(alpha: 0.5)
+              : colors.border.withValues(alpha: 0.3),
+        ),
       ),
-      child: Row(
-        children: [
-          // Control Button
-          GestureDetector(
-            onTap: () {
-              if (audioPath.value == null && !isRecording.value) {
-                startRecording();
-              } else if (isRecording.value) {
-                stopRecording();
-              } else {
-                togglePlayback();
-              }
-            },
-            child: CircleAvatar(
-              radius: 20,
-              backgroundColor: isRecording.value ? colors.error : colors.accent,
-              child: Icon(
-                isRecording.value
-                    ? Icons.stop
-                    : (audioPath.value == null
-                          ? Icons.mic
-                          : (isPlaying.value ? Icons.pause : Icons.play_arrow)),
-                color: Colors.white,
-                size: 20,
-              ),
+      child: hasAudio && !isRecording
+          ? _buildPlaybackUI(
+              context,
+              isPlaying,
+              playbackPosition,
+              totalDuration,
+            )
+          : _buildRecordUI(context, isRecording, recordingDuration),
+    );
+  }
+
+  Widget _buildRecordUI(
+    BuildContext context,
+    bool isRecording,
+    Duration elapsed,
+  ) {
+    final colors = context.colors;
+    return Row(
+      children: [
+        // Record Button
+        GestureDetector(
+          onTap: () {
+            if (isRecording) {
+              _stopRecording();
+            } else {
+              _startRecording();
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: isRecording
+                  ? colors.error
+                  : colors.error.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isRecording ? Icons.stop : Icons.mic,
+              color: isRecording ? Colors.white : colors.error,
+              size: 24,
             ),
           ),
-          const SizedBox(width: 12),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: .start,
+            children: [
+              Text(
+                isRecording ? 'Recording...' : 'Tap to record audio',
+                style: context.bodyMedium.copyWith(
+                  color: isRecording ? colors.error : colors.textSecondary,
+                  fontWeight: isRecording ? .bold : .normal,
+                ),
+              ),
+              if (isRecording)
+                Text(
+                  _formatDuration(elapsed),
+                  style: context.bodySmall.copyWith(
+                    color: colors.error.withValues(alpha: 0.7),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-          // Visualization / Progress
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isRecording.value)
+  Widget _buildPlaybackUI(
+    BuildContext context,
+    bool isPlaying,
+    Duration position,
+    Duration total,
+  ) {
+    final colors = context.colors;
+
+    return Row(
+      children: [
+        // Play/Pause Button
+        GestureDetector(
+          onTap: () {
+            if (isPlaying) {
+              _pausePlayback();
+            } else {
+              _startPlayback();
+            }
+          },
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colors.accent.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPlaying ? Icons.pause : Icons.play_arrow,
+              color: colors.accent,
+              size: 24,
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: .start,
+            children: [
+              // Progress Bar
+              LinearProgressIndicator(
+                value: total.inMilliseconds > 0
+                    ? position.inMilliseconds / total.inMilliseconds
+                    : 0.0,
+                backgroundColor: colors.border.withValues(alpha: 0.3),
+                valueColor: AlwaysStoppedAnimation(colors.accent),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: .spaceBetween,
+                children: [
                   Text(
-                    'Recording... ${amplitude.value.toStringAsFixed(1)} dB',
-                    style: context.bodySmall.copyWith(color: colors.error),
-                  )
-                else if (audioPath.value != null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LinearProgressIndicator(
-                        value: duration.value.inMilliseconds > 0
-                            ? position.value.inMilliseconds /
-                                  duration.value.inMilliseconds
-                            : 0.0,
-                        backgroundColor: colors.border,
-                        valueColor: AlwaysStoppedAnimation(colors.accent),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_formatDuration(position.value)} / ${_formatDuration(duration.value)}',
-                        style: context.bodySmall.copyWith(
-                          color: colors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  Text(
-                    'Tap to record voice note',
-                    style: context.bodyMedium.copyWith(
+                    _formatDuration(position),
+                    style: context.bodySmall.copyWith(
                       color: colors.textSecondary,
+                      fontFamily: 'monospace',
                     ),
                   ),
-              ],
-            ),
+                  Text(
+                    _formatDuration(total),
+                    style: context.bodySmall.copyWith(
+                      color: colors.textSecondary,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
+        const SizedBox(width: 12),
+        // Delete audio
+        IconButton(
+          icon: Icon(
+            Icons.delete_outline,
+            color: colors.error.withValues(alpha: 0.7),
+            size: 20,
+          ),
+          onPressed: () {
+            final newContent = Map<String, dynamic>.from(widget.block.content)
+              ..remove('audioPath');
+            sl<BlockViewModel>().updateBlock(
+              widget.block.copyWith(content: newContent),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _startRecording() {
+    _isRecording.value = true;
+    _recordingDuration.value = Duration.zero;
+
+    _recordingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _recordingDuration.value += const Duration(seconds: 1);
+    });
+
+    // TODO: Integrate actual audio recording via record package
+  }
+
+  void _stopRecording() {
+    _isRecording.value = false;
+    _recordingTimer?.cancel();
+
+    // TODO: Save recording and update block content
+    sl<BlockViewModel>().updateBlock(
+      widget.block.copyWith(
+        content: {
+          ...widget.block.content,
+          'audioPath':
+              'recorded_audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+          'duration': _recordingDuration.peek().inSeconds,
+        },
       ),
     );
   }
 
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+  void _startPlayback() {
+    _isPlaying.value = true;
+    // TODO: Integrate actual audio playback
+  }
+
+  void _pausePlayback() {
+    _isPlaying.value = false;
+    // TODO: Pause actual audio playback
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 }

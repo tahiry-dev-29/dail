@@ -5,10 +5,9 @@ import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/tag_customization_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class TagManagerModal extends HookWidget {
+class TagManagerModal extends StatelessWidget {
   const TagManagerModal({super.key});
 
   static Future<void> show(BuildContext context) async {
@@ -31,15 +30,15 @@ class TagManagerModal extends HookWidget {
       margin: const EdgeInsets.fromLTRB(16, 60, 16, 16),
       padding: const EdgeInsets.all(20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        crossAxisAlignment: .stretch,
         children: [
           // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Text(
                 'Gérer les Tags',
-                style: context.h2.copyWith(fontWeight: FontWeight.bold),
+                style: context.h2.copyWith(fontWeight: .bold),
               ),
               IconButton(
                 icon: const Icon(Icons.close),
@@ -122,7 +121,7 @@ class TagManagerModal extends HookWidget {
                         tag.name,
                         style: context.bodyMedium.copyWith(
                           color: colors.textPrimary,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: .w500,
                         ),
                       ),
                       subtitle: Text(
@@ -132,7 +131,7 @@ class TagManagerModal extends HookWidget {
                         ),
                       ),
                       trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: .min,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.edit_outlined, size: 20),

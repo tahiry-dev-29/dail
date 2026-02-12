@@ -25,22 +25,22 @@ class BlockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (block.type) {
-      .paragraph => TextBlockHook(block: block),
-      .heading1 => TextBlockHook(
+      .paragraph => TextBlockComponent(block: block),
+      .heading1 => TextBlockComponent(
         block: block,
         style: Theme.of(context).textTheme.headlineMedium,
       ),
-      .heading2 => TextBlockHook(
+      .heading2 => TextBlockComponent(
         block: block,
         style: Theme.of(context).textTheme.headlineSmall,
       ),
-      .heading3 => TextBlockHook(
+      .heading3 => TextBlockComponent(
         block: block,
         style: Theme.of(context).textTheme.titleLarge,
       ),
       .checklist => ChecklistBlock(block: block),
       .image => ImageBlock(block: block),
-      .code => CodeBlock(block: block),
+      .code => CodeBlockComponent(block: block),
       .divider => DividerBlock(block: block),
       .quote => QuoteBlock(block: block),
       .audio => AudioBlockComponent(block: block),

@@ -4,6 +4,11 @@ import 'package:signals_flutter/signals_flutter.dart';
 
 /// ViewModel for Search functionality
 class SearchViewModel {
+  SearchViewModel({required SearchPagesUseCase searchPagesUseCase})
+    : _searchPagesUseCase = searchPagesUseCase {
+    search('');
+  }
+
   // Dependencies
   final SearchPagesUseCase _searchPagesUseCase;
 
@@ -18,9 +23,6 @@ class SearchViewModel {
   ReadonlySignal<String> get query => _query;
   ReadonlySignal<AsyncState<List<PageEntity>>> get results => _results;
   ReadonlySignal<bool> get isSearching => _isSearching;
-
-  SearchViewModel({required SearchPagesUseCase searchPagesUseCase})
-    : _searchPagesUseCase = searchPagesUseCase;
 
   /// Update search query and perform search
   Future<void> search(String query) async {

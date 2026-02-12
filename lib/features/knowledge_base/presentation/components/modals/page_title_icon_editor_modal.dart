@@ -4,9 +4,10 @@ import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class PageTitleIconEditorModal extends HookWidget {
+/// Surgical StatefulWidget for TextEditingController lifecycle.
+class PageTitleIconEditorModal extends StatefulWidget {
   final PageEntity page;
 
   const PageTitleIconEditorModal({super.key, required this.page});
@@ -21,10 +22,31 @@ class PageTitleIconEditorModal extends HookWidget {
   }
 
   @override
+  State<PageTitleIconEditorModal> createState() =>
+      _PageTitleIconEditorModalState();
+}
+
+class _PageTitleIconEditorModalState extends State<PageTitleIconEditorModal> {
+  late final TextEditingController _titleController;
+  late final Signal<String> _selectedEmoji;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.page.title);
+    _selectedEmoji = signal(widget.page.iconEmoji);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final titleController = useTextEditingController(text: page.title);
-    final selectedEmoji = useState(page.iconEmoji);
+    final selectedEmoji = _selectedEmoji.watch(context);
 
     final emojis = ['📄', '📝', '📓', '📁', '💡', '🚀', '⭐', '🔥', '✅', '🏗️'];
 
@@ -39,13 +61,13 @@ class PageTitleIconEditorModal extends HookWidget {
         ),
         padding: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
           children: [
             Text(
               'Edit Page',
-              style: context.h2.copyWith(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+              style: context.h2.copyWith(fontWeight: .bold),
+              textAlign: .center,
             ),
             const SizedBox(height: 20),
             Row(
@@ -62,7 +84,7 @@ class PageTitleIconEditorModal extends HookWidget {
                       border: Border.all(color: colors.border),
                     ),
                     child: Text(
-                      selectedEmoji.value,
+                      selectedEmoji,
                       style: const TextStyle(fontSize: 24),
                     ),
                   ),
@@ -70,7 +92,7 @@ class PageTitleIconEditorModal extends HookWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextField(
-                    controller: titleController,
+                    controller: _titleController,
                     autofocus: true,
                     decoration: InputDecoration(
                       hintText: 'Page title',
@@ -84,10 +106,7 @@ class PageTitleIconEditorModal extends HookWidget {
               ],
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Choose Icon',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+            const Text('Choose Icon', style: TextStyle(fontWeight: .bold)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -95,16 +114,16 @@ class PageTitleIconEditorModal extends HookWidget {
               children: emojis
                   .map(
                     (e) => GestureDetector(
-                      onTap: () => selectedEmoji.value = e,
+                      onTap: () => _selectedEmoji.value = e,
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: selectedEmoji.value == e
+                          color: selectedEmoji == e
                               ? colors.accent.withValues(alpha: 0.1)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: selectedEmoji.value == e
+                            color: selectedEmoji == e
                                 ? colors.accent
                                 : Colors.transparent,
                           ),
@@ -118,13 +137,13 @@ class PageTitleIconEditorModal extends HookWidget {
             const SizedBox(height: 32),
             FilledButton(
               onPressed: () async {
-                // We use the existing update logic via VM if it's the active page or via specialized usecase/vm method
-                // For simplicity here, we assume the VM can handle generic page updates or we add a method
-                await sl<ActivePageViewModel>().setActivePageId(page.id);
+                await sl<ActivePageViewModel>().setActivePageId(widget.page.id);
                 await sl<ActivePageViewModel>().updateTitle(
-                  titleController.text.trim(),
+                  _titleController.text.trim(),
                 );
-                await sl<ActivePageViewModel>().updateIcon(selectedEmoji.value);
+                await sl<ActivePageViewModel>().updateIcon(
+                  _selectedEmoji.value,
+                );
 
                 if (context.mounted) Navigator.pop(context);
               },

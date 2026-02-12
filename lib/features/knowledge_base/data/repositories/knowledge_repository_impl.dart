@@ -195,6 +195,11 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
     return dtos.map((dto) => dto.toEntity()).toList();
   }
 
+  @override
+  Future<void> reorderPages(String folderId, List<String> pageIds) async {
+    await _pageDatasource.reorder(folderId, pageIds);
+  }
+
   // ============ Block Operations ============
 
   @override

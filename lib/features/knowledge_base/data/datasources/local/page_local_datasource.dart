@@ -13,8 +13,24 @@ class PageLocalDatasource {
         .filter()
         .folderUidEqualTo(folderUid)
         .isDeletedEqualTo(false)
-        .sortByUpdatedAtDesc()
+        .sortBySortOrder()
         .findAll();
+  }
+
+  /// Reorder pages in a folder
+  Future<void> reorder(String folderUid, List<String> pageUids) async {
+    await isar.writeTxn(() async {
+      for (int i = 0; i < pageUids.length; i++) {
+        final page = await isar.pageDTOs
+            .filter()
+            .uidEqualTo(pageUids[i])
+            .findFirst();
+        if (page != null) {
+          page.sortOrder = i;
+          await isar.pageDTOs.put(page);
+        }
+      }
+    });
   }
 
   /// Get page by UID

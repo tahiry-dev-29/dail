@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 /// Block types for the rich content editor
 enum BlockType {
   paragraph,
@@ -82,17 +84,25 @@ class BlockEntity {
     List<Map<String, dynamic>>? items,
     int sortOrder = 0,
   }) {
+    // Ensure each item has a unique ID for stable UI keys
+    final sanitizedItems =
+        (items ??
+                [
+                  {'text': '', 'checked': false},
+                ])
+            .map((item) {
+              if (!item.containsKey('id')) {
+                return {...item, 'id': const Uuid().v4()};
+              }
+              return item;
+            })
+            .toList();
+
     return BlockEntity(
       id: id,
       pageId: pageId,
-      type: .checklist,
-      content: {
-        'items':
-            items ??
-            [
-              {'text': '', 'checked': false},
-            ],
-      },
+      type: BlockType.checklist,
+      content: {'items': sanitizedItems},
       sortOrder: sortOrder,
     );
   }

@@ -8,7 +8,6 @@ import 'package:daily_os/features/knowledge_base/domain/entities/folder_entity.d
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/page_editor_modal.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/folder_tree_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:flutter/material.dart';
@@ -84,27 +83,13 @@ class FolderTile extends StatelessWidget {
 
               switch (value) {
                 case 'new_task':
-                  final workspaceVM = sl<WorkspaceViewModel>();
-                  final workspace = workspaceVM.activeWorkspace.value;
-                  if (workspace != null) {
-                    await sl<TaskListViewModel>().addTask(
-                      name: 'New Task',
-                      time: '09:00',
-                      date: DateTime.now(),
-                      workspaceId: workspace.id,
-                      folderId: folder.id,
-                      iconEmoji: '✅',
-                    );
-                    // Redirect to workspace
-                    sl<HomeViewModel>().switchTab(AppTabs.workspace.index);
-                    workspaceVM.showDashboard();
+                  // Link to global overlay
+                  sl<TaskListViewModel>().selectFolder(folder.id);
+                  sl<HomeViewModel>().isAddTaskVisible.value = true;
 
-                    if (context.mounted) {
-                      ToastService.success(
-                        context,
-                        'Task created in "${folder.name}"',
-                      );
-                    }
+                  // Close drawer
+                  if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                    Navigator.of(context).pop();
                   }
                   break;
                 case 'new_note':

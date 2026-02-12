@@ -5,21 +5,27 @@ import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/tag_entity.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/workspace_entity.dart';
-import 'package:daily_os/features/knowledge_base/presentation/components/sidebar/folder_tree_item.dart'; // Added import
+import 'package:daily_os/features/knowledge_base/presentation/components/sidebar/folder_tree_item.dart';
 import 'package:daily_os/features/knowledge_base/presentation/components/sidebar/workspace_switcher_modal.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/search_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/tag_customization_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/screens/trash/trash_screen.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/folder_tree_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart'; // TagVM import
+import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
+import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class KnowledgeBaseSidebar extends HookWidget {
+/// Sidebar signals for expand state — persisted across rebuilds.
+final _isTagsExpanded = signal(false);
+final _isFoldersExpanded = signal(true);
+
+class KnowledgeBaseSidebar extends StatelessWidget {
   const KnowledgeBaseSidebar({super.key});
 
   @override
@@ -28,23 +34,17 @@ class KnowledgeBaseSidebar extends HookWidget {
     final workspaceVM = sl<WorkspaceViewModel>();
     final activeWorkspace = workspaceVM.activeWorkspace.watch(context);
 
-    // RESTORED: FolderTreeVM for Tree structure
     final folderTreeVM = sl<FolderTreeViewModel>();
     final rootFoldersState = folderTreeVM.rootFolders.watch(context);
 
-    // RESTORED: TagVM for Tags
     final tagVM = sl<TagViewModel>();
     final tagState = tagVM.tags.watch(context);
 
-    // Sidebar states
-    final isTagsExpanded = useState(true);
-    final isFoldersExpanded = useState(true);
+    final taskListVM = sl<TaskListViewModel>();
 
-    useEffect(() {
-      // Trigger loadTags to verify seeding if empty
-      tagVM.loadTags();
-      return null;
-    }, []);
+    // Watch expand signals
+    final isTagsExp = _isTagsExpanded.watch(context);
+    final isFoldersExp = _isFoldersExpanded.watch(context);
 
     // Sidebar Width: 85% of screen width (Mobile optimized)
     final screenWidth = MediaQuery.of(context).size.width;
@@ -74,14 +74,20 @@ class KnowledgeBaseSidebar extends HookWidget {
                 Expanded(
                   child: CustomScrollView(
                     slivers: [
+                      _buildFavoritesSection(
+                        context,
+                        taskListVM,
+                        folderTreeVM,
+                        activeWorkspace,
+                      ),
                       _buildSectionLabel(
                         context,
                         'PRIVATE',
-                        isExpanded: isFoldersExpanded.value,
-                        onToggle: () =>
-                            isFoldersExpanded.value = !isFoldersExpanded.value,
+                        isExpanded: isFoldersExp,
+                        onToggle: () => _isFoldersExpanded.value =
+                            !_isFoldersExpanded.value,
                       ),
-                      if (isFoldersExpanded.value)
+                      if (isFoldersExp)
                         rootFoldersState.map(
                           data: (folders) => SliverList.builder(
                             itemCount: folders.length,
@@ -99,14 +105,13 @@ class KnowledgeBaseSidebar extends HookWidget {
                       _buildSectionLabel(
                         context,
                         'TAGS',
-                        isExpanded: isTagsExpanded.value,
+                        isExpanded: isTagsExp,
                         onToggle: () =>
-                            isTagsExpanded.value = !isTagsExpanded.value,
+                            _isTagsExpanded.value = !_isTagsExpanded.value,
                       ),
-                      if (isTagsExpanded.value)
+                      if (isTagsExp)
                         tagState.map(
                           data: (tags) {
-                            // Sort by priority
                             final sortedTags = tags.toList()
                               ..sort(
                                 (a, b) => a.priority.compareTo(b.priority),
@@ -156,6 +161,154 @@ class KnowledgeBaseSidebar extends HookWidget {
     );
   }
 
+  Widget _buildFavoritesSection(
+    BuildContext context,
+    TaskListViewModel taskListVM,
+    FolderTreeViewModel folderTreeVM,
+    WorkspaceEntity? activeWorkspace,
+  ) {
+    final tasksState = taskListVM.tasks.watch(context);
+    final colors = context.colors;
+
+    return tasksState.maybeMap(
+      data: (tasks) {
+        // 1. Filter by Favorites AND Active Workspace
+        final favorites = tasks.where((t) {
+          if (!t.isFavorite) return false;
+          if (activeWorkspace != null) {
+            if (t.workspaceId != activeWorkspace.id) return false;
+          }
+          return true;
+        }).toList();
+
+        if (favorites.isEmpty) return const SliverToBoxAdapter();
+
+        // 2. Group by Folder
+        final Map<String, List<TaskEntity>> groupedTasks = {};
+        for (final task in favorites) {
+          final folderId = task.folderId ?? 'root';
+          if (!groupedTasks.containsKey(folderId)) {
+            groupedTasks[folderId] = [];
+          }
+          groupedTasks[folderId]!.add(task);
+        }
+
+        return SliverMainAxisGroup(
+          slivers: [
+            _buildSectionLabel(context, 'FAVORITES'),
+            SliverList.builder(
+              itemCount: groupedTasks.length,
+              itemBuilder: (context, index) {
+                final folderId = groupedTasks.keys.elementAt(index);
+                final folderTasks = groupedTasks[folderId]!;
+
+                String folderName = 'No Folder';
+                if (folderId != 'root') {
+                  final folder = folderTreeVM.getFolderSync(folderId);
+                  folderName = folder?.name ?? 'Unknown Folder';
+                }
+
+                return Column(
+                  crossAxisAlignment: .start,
+                  children: [
+                    if (folderId != 'root')
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(28, 8, 16, 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.folder_open_rounded,
+                              size: 14,
+                              color: colors.textSecondary.withValues(
+                                alpha: 0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              folderName,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.textSecondary.withValues(
+                                  alpha: 0.7,
+                                ),
+                                fontWeight: .w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Tasks in this folder
+                    ...folderTasks.map(
+                      (task) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 2,
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            taskListVM.selectFolder(task.folderId);
+                            sl<HomeViewModel>().switchTab(
+                              AppTabs.workspace.index,
+                            );
+                            if (Scaffold.maybeOf(context)?.isDrawerOpen ??
+                                false) {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colors.surface.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: colors.border.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Text(
+                                  task.iconEmoji,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    task.name,
+                                    style: context.bodyMedium.copyWith(
+                                      color: colors.textPrimary,
+                                      fontWeight: .w500,
+                                      fontSize: 13,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.star_rounded,
+                                  size: 12,
+                                  color: Colors.amber.shade400,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                );
+              },
+            ),
+          ],
+        );
+      },
+      orElse: () => const SliverToBoxAdapter(),
+    );
+  }
+
   Widget _buildSectionLabel(
     BuildContext context,
     String label, {
@@ -173,7 +326,7 @@ class KnowledgeBaseSidebar extends HookWidget {
                 label,
                 style: AppTypography.bodySmall.copyWith(
                   color: context.colors.textSecondary.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.bold,
+                  fontWeight: .bold,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -210,7 +363,7 @@ class KnowledgeBaseSidebar extends HookWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Row(
                     children: [
@@ -218,7 +371,7 @@ class KnowledgeBaseSidebar extends HookWidget {
                         active?.name ?? 'Personal Workspace',
                         style: AppTypography.bodyMedium.copyWith(
                           color: colors.textPrimary,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: .w600,
                         ),
                       ),
                       Icon(
@@ -250,7 +403,6 @@ class KnowledgeBaseSidebar extends HookWidget {
               MaterialPageRoute(builder: (context) => const SearchPage()),
             ),
           ),
-          // Home removed as requested
         ],
       ),
     );
@@ -269,7 +421,7 @@ class KnowledgeBaseSidebar extends HookWidget {
         border: Border(top: BorderSide(color: colors.surface, width: 0.5)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: .spaceBetween,
         children: [
           IconButton(
             icon: Icon(Icons.delete_outline, color: colors.textSecondary),
@@ -279,7 +431,6 @@ class KnowledgeBaseSidebar extends HookWidget {
             ),
             tooltip: 'Trash',
           ),
-          // REQUESTED: Add Menu
           IconButton(
             icon: Icon(Icons.add, color: colors.accent),
             onPressed: () =>
@@ -308,7 +459,7 @@ class KnowledgeBaseSidebar extends HookWidget {
       ),
       builder: (context) => SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             ListTile(
               leading: Icon(
@@ -320,9 +471,40 @@ class KnowledgeBaseSidebar extends HookWidget {
                 Navigator.pop(context);
                 final activeId = workspaceVM.activeWorkspace.value?.id;
                 if (activeId != null) {
-                  folderTreeVM.createFolder(
-                    name: 'New Folder',
-                    workspaceId: activeId,
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      final controller = TextEditingController(
+                        text: 'New Folder',
+                      );
+                      return AlertDialog(
+                        title: const Text('New Folder'),
+                        content: TextField(
+                          controller: controller,
+                          autofocus: true,
+                          decoration: const InputDecoration(labelText: 'Name'),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          FilledButton(
+                            onPressed: () {
+                              final name = controller.text.trim();
+                              if (name.isNotEmpty) {
+                                folderTreeVM.createFolder(
+                                  name: name,
+                                  workspaceId: activeId,
+                                );
+                              }
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Create'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 }
               },
@@ -338,7 +520,6 @@ class KnowledgeBaseSidebar extends HookWidget {
                 _showCreateTagDialog(context, tagVM);
               },
             ),
-            // Placeholder for Task and Note (Features not fully linked here yet)
             ListTile(
               leading: Icon(
                 Icons.check_circle_outline,
@@ -381,7 +562,7 @@ class KnowledgeBaseSidebar extends HookWidget {
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: [
             ListTile(
               leading: Icon(AppIcons.settings(context)),
@@ -444,7 +625,7 @@ class _NavItem extends StatelessWidget {
           label,
           style: AppTypography.bodyMedium.copyWith(
             color: colors.textPrimary.withValues(alpha: 0.8),
-            fontWeight: FontWeight.normal,
+            fontWeight: .normal,
           ),
         ),
         dense: true,
@@ -495,7 +676,7 @@ class TagItem extends StatelessWidget {
                   tag.name,
                   style: context.bodyMedium.copyWith(
                     color: colors.textPrimary,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: .w500,
                   ),
                 ),
               ),
@@ -513,7 +694,7 @@ class TagItem extends StatelessWidget {
                     "P${tag.priority}",
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: .bold,
                       color: colors.accent,
                     ),
                   ),

@@ -8,10 +8,10 @@ import 'package:daily_os/features/knowledge_base/presentation/components/modals/
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/search_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class SearchModal extends HookWidget {
+/// Surgical StatefulWidget for TextEditingController lifecycle + cleanup effect.
+class SearchModal extends StatefulWidget {
   const SearchModal({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -35,18 +35,31 @@ class SearchModal extends HookWidget {
   }
 
   @override
+  State<SearchModal> createState() => _SearchModalState();
+}
+
+class _SearchModalState extends State<SearchModal> {
+  late final TextEditingController _searchController;
+  final _searchVM = sl<SearchViewModel>();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchVM.clearSearch();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final searchVM = sl<SearchViewModel>();
     final activePageVM = sl<ActivePageViewModel>();
-    final resultsState = searchVM.results.watch(context);
-    final searchController = useTextEditingController();
-
-    useEffect(() {
-      return () {
-        searchVM.clearSearch();
-      };
-    }, []);
+    final resultsState = _searchVM.results.watch(context);
 
     return Stack(
       children: [
@@ -67,13 +80,13 @@ class SearchModal extends HookWidget {
               child: GlassCard(
                 padding: EdgeInsets.zero,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
                     // Top Search Bar
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: TextField(
-                        controller: searchController,
+                        controller: _searchController,
                         autofocus: true,
                         decoration: InputDecoration(
                           hintText: 'Search for pages...',
@@ -89,7 +102,7 @@ class SearchModal extends HookWidget {
                         style: context.bodyLarge.copyWith(
                           color: colors.textPrimary,
                         ),
-                        onChanged: searchVM.search,
+                        onChanged: _searchVM.search,
                       ),
                     ),
                     const Divider(height: 1),
@@ -112,7 +125,7 @@ class SearchModal extends HookWidget {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    searchController.text.isEmpty
+                                    _searchController.text.isEmpty
                                         ? 'Type to search...'
                                         : 'No pages found',
                                     style: context.bodyMedium.copyWith(
@@ -144,7 +157,7 @@ class SearchModal extends HookWidget {
                                   page.title,
                                   style: context.bodyMedium.copyWith(
                                     color: colors.textPrimary,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: .bold,
                                   ),
                                 ),
                                 subtitle: page.preview.isNotEmpty
@@ -158,7 +171,7 @@ class SearchModal extends HookWidget {
                                       )
                                     : null,
                                 trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisSize: .min,
                                   children: [
                                     IconButton(
                                       icon: Icon(
@@ -247,7 +260,7 @@ class SearchModal extends HookWidget {
             key,
             style: context.bodySmall.copyWith(
               color: colors.textSecondary,
-              fontWeight: FontWeight.bold,
+              fontWeight: .bold,
               fontSize: 10,
             ),
           ),

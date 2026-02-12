@@ -6,10 +6,11 @@ import 'package:daily_os/features/knowledge_base/presentation/components/page_ed
 import 'package:daily_os/features/knowledge_base/presentation/components/page_editor/page_header.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class MarkdownNoteEditor extends HookWidget {
+/// Markdown note editor — loads blocks when page changes.
+/// Uses StatelessWidget + Signals for reactivity.
+class MarkdownNoteEditor extends StatelessWidget {
   final PageEntity page;
 
   const MarkdownNoteEditor({super.key, required this.page});
@@ -18,12 +19,6 @@ class MarkdownNoteEditor extends HookWidget {
   Widget build(BuildContext context) {
     final blockVM = sl<BlockViewModel>();
     final blocksState = blockVM.blocks.watch(context);
-
-    // Load blocks when the page changes
-    useEffect(() {
-      blockVM.loadBlocks(page.id);
-      return null;
-    }, [page.id]);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -53,7 +48,7 @@ class MarkdownNoteEditor extends HookWidget {
                         },
                         behavior: HitTestBehavior.translucent,
                         child: Container(
-                          alignment: Alignment.topCenter,
+                          alignment: .topCenter,
                           padding: const EdgeInsets.only(
                             top: 20,
                             left: 50,

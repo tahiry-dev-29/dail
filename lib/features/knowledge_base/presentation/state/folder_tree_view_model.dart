@@ -7,6 +7,7 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/folders/get_roo
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/move_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/update_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/reorder_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_by_folder_usecase.dart';
@@ -23,6 +24,7 @@ class FolderTreeViewModel {
   final GetChildFoldersUseCase _getChildFoldersUseCase;
   final MoveFolderUseCase _moveFolderUseCase;
   final GetPagesUseCase _getPagesUseCase;
+  final ReorderPagesUseCase _reorderPagesUseCase;
   final GetTasksByFolderUseCase _getTasksByFolderUseCase;
   final WorkspaceViewModel _workspaceVM;
 
@@ -53,6 +55,7 @@ class FolderTreeViewModel {
     required GetChildFoldersUseCase getChildFoldersUseCase,
     required MoveFolderUseCase moveFolderUseCase,
     required GetPagesUseCase getPagesUseCase,
+    required ReorderPagesUseCase reorderPagesUseCase,
     required GetTasksByFolderUseCase getTasksByFolderUseCase,
     required WorkspaceViewModel workspaceVM,
   }) : _getRootFoldersUseCase = getRootFoldersUseCase,
@@ -62,6 +65,7 @@ class FolderTreeViewModel {
        _getChildFoldersUseCase = getChildFoldersUseCase,
        _moveFolderUseCase = moveFolderUseCase,
        _getPagesUseCase = getPagesUseCase,
+       _reorderPagesUseCase = reorderPagesUseCase,
        _getTasksByFolderUseCase = getTasksByFolderUseCase,
        _workspaceVM = workspaceVM {
     // Automatically load root folders when active workspace changes
@@ -289,6 +293,28 @@ class FolderTreeViewModel {
     await _moveFolderUseCase(folderId, newParentId);
     await refreshFolder(oldParentId, workspaceId);
     await refreshFolder(newParentId, workspaceId);
+  }
+
+  /// Reorder pages in a folder
+  Future<void> reorderPages(
+    String folderId,
+    List<PageEntity> reorderedPages,
+  ) async {
+    final pageIds = reorderedPages.map((p) => p.id).toList();
+
+    // 1. Optimistic Update: Push data to signal immediately to prevent jump
+    final s = _pagesCache[folderId];
+    if (s != null) {
+      s.value = AsyncData(reorderedPages);
+    }
+
+    try {
+      await _reorderPagesUseCase(folderId, pageIds);
+    } catch (e) {
+      // Revert cache on error
+      if (s != null) await _loadPages(folderId, s);
+      rethrow;
+    }
   }
 
   void clear() {

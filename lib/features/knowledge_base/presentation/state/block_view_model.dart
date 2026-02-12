@@ -65,11 +65,20 @@ class BlockViewModel {
   Future<void> addBlock(BlockEntity block) async {
     final currentList = _blocks.value.value ?? [];
 
-    // Optimistic update
-    _blocks.value = AsyncData([...currentList, block]);
+    // Calculate new sortOrder = max(existing) + 1
+    // This fixes the bug where new blocks always had sortOrder=0
+    final maxOrder = currentList.fold<int>(
+      -1,
+      (max, b) => b.sortOrder > max ? b.sortOrder : max,
+    );
+
+    final newBlock = block.copyWith(sortOrder: maxOrder + 1);
+
+    // Optimistic update with the CORRECTED block
+    _blocks.value = AsyncData([...currentList, newBlock]);
 
     try {
-      await _addBlockUseCase(block);
+      await _addBlockUseCase(newBlock);
     } catch (e) {
       // Rollback on error
       _blocks.value = AsyncData(currentList);

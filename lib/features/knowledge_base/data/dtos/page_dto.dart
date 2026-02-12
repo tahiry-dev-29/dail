@@ -19,6 +19,7 @@ class PageDTO {
   late DateTime createdAt;
   late DateTime updatedAt;
   late bool isDeleted;
+  late int sortOrder;
 
   PageDTO();
 
@@ -31,6 +32,7 @@ class PageDTO {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.isDeleted = false,
+    this.sortOrder = 0,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 }

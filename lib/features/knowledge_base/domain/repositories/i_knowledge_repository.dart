@@ -80,6 +80,9 @@ abstract class IKnowledgeRepository {
   /// Get recently updated pages
   Future<List<PageEntity>> getRecentPages({int limit = 10});
 
+  /// Reorder pages in a folder
+  Future<void> reorderPages(String folderId, List<String> pageIds);
+
   // ============ Block Operations ============
 
   /// Get all blocks for a page

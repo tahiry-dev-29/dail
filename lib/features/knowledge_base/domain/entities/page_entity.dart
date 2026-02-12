@@ -13,6 +13,7 @@ class PageEntity {
   final bool isDeleted;
   final List<BlockEntity> blocks;
   final List<PropertyEntity> properties;
+  final int sortOrder;
 
   const PageEntity({
     required this.id,
@@ -25,6 +26,7 @@ class PageEntity {
     this.isDeleted = false,
     this.blocks = const [],
     this.properties = const [],
+    this.sortOrder = 0,
   });
 
   /// Check if page has any content
@@ -54,6 +56,7 @@ class PageEntity {
     bool? isDeleted,
     List<BlockEntity>? blocks,
     List<PropertyEntity>? properties,
+    int? sortOrder,
   }) {
     return PageEntity(
       id: id ?? this.id,
@@ -66,14 +69,18 @@ class PageEntity {
       isDeleted: isDeleted ?? this.isDeleted,
       blocks: blocks ?? this.blocks,
       properties: properties ?? this.properties,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PageEntity && runtimeType == other.runtimeType && id == other.id;
+      other is PageEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          sortOrder == other.sortOrder;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => id.hashCode ^ sortOrder.hashCode;
 }

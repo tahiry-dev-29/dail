@@ -48,7 +48,9 @@ class TrashViewModel {
        _restorePageUseCase = restorePageUseCase,
        _permanentlyDeleteFolderUseCase = permanentlyDeleteFolderUseCase,
        _permanentlyDeletePageUseCase = permanentlyDeletePageUseCase,
-       _emptyTrashUseCase = emptyTrashUseCase;
+       _emptyTrashUseCase = emptyTrashUseCase {
+    loadTrash();
+  }
 
   /// Load all deleted items
   Future<void> loadTrash() async {

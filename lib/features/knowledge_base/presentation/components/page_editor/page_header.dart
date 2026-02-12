@@ -6,37 +6,57 @@ import 'package:daily_os/features/knowledge_base/presentation/components/page_ed
 import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
 import 'package:daily_os/shared/widgets/emoji_picker_modal.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-class PageHeader extends HookWidget {
+/// PageHeader — surgical StatefulWidget for TextEditingController lifecycle.
+class PageHeader extends StatefulWidget {
   final PageEntity page;
 
   const PageHeader({super.key, required this.page});
 
   @override
+  State<PageHeader> createState() => _PageHeaderState();
+}
+
+class _PageHeaderState extends State<PageHeader> {
+  late final TextEditingController _titleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.page.title);
+  }
+
+  @override
+  void didUpdateWidget(covariant PageHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Keep controller in sync with page title if changed externally
+    if (oldWidget.page.title != widget.page.title &&
+        _titleController.text != widget.page.title) {
+      _titleController.text = widget.page.title;
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final activePageVM = sl<ActivePageViewModel>();
-    final titleController = useTextEditingController(text: page.title);
-
-    // Keep controller in sync with page title if changed externally
-    useEffect(() {
-      if (titleController.text != page.title) {
-        titleController.text = page.title;
-      }
-      return null;
-    }, [page.title]);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
-        if (page.coverImageUrl != null)
+        if (widget.page.coverImageUrl != null)
           Container(
             height: 200,
             width: double.infinity,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(page.coverImageUrl!),
+                image: NetworkImage(widget.page.coverImageUrl!),
                 fit: BoxFit.cover,
               ),
             ),
@@ -47,7 +67,7 @@ class PageHeader extends HookWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 50.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               // Icon
               GestureDetector(
@@ -57,11 +77,11 @@ class PageHeader extends HookWidget {
                   });
                 },
                 child: Hero(
-                  tag: 'page-icon-${page.id}',
+                  tag: 'page-icon-${widget.page.id}',
                   child: Material(
                     color: Colors.transparent,
                     child: Text(
-                      page.iconEmoji,
+                      widget.page.iconEmoji,
                       style: const TextStyle(fontSize: 72),
                     ),
                   ),
@@ -70,13 +90,13 @@ class PageHeader extends HookWidget {
               const SizedBox(height: 8),
               // Title Input
               TextField(
-                controller: titleController,
+                controller: _titleController,
                 onChanged: (value) {
                   activePageVM.updateTitle(value);
                 },
                 style: context.h1.copyWith(
                   color: colors.textPrimary,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: .bold,
                 ),
                 decoration: InputDecoration(
                   hintText: 'Untitled',
@@ -92,7 +112,7 @@ class PageHeader extends HookWidget {
               ),
               const SizedBox(height: 16),
               // Properties Toolbar
-              PropertiesToolbar(page: page),
+              PropertiesToolbar(page: widget.page),
               const SizedBox(height: 24),
               const Divider(),
             ],

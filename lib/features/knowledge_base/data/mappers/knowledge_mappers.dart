@@ -77,6 +77,7 @@ extension PageMapper on PageDTO {
     isDeleted: isDeleted,
     blocks: blocks,
     properties: properties,
+    sortOrder: sortOrder,
   );
 }
 
@@ -90,6 +91,7 @@ extension PageEntityMapper on PageEntity {
     createdAt: createdAt,
     updatedAt: updatedAt,
     isDeleted: isDeleted,
+    sortOrder: sortOrder,
   );
 }
 
