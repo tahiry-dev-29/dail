@@ -1,0 +1,11 @@
+Analyzing Flutter...                                            
+
+warning • A value for optional parameter 'badge' isn't ever given • lib/features/knowledge_base/presentation/components/sidebar/sidebar.dart:309:10 • unused_element_parameter
+   info • Don't invoke 'print' in production code • lib/features/knowledge_base/presentation/state/folder_tree_view_model.dart:159:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/knowledge_base/presentation/state/folder_tree_view_model.dart:161:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/planner/data/datasources/local/task_local_datasource.dart:24:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/planner/data/datasources/local/task_local_datasource.dart:29:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/planner/data/datasources/local/task_local_datasource.dart:45:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/planner/presentation/state/task_list_view_model.dart:57:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/planner/presentation/state/task_list_view_model.dart:95:5 • avoid_print
+
