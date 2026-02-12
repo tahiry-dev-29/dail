@@ -1,7 +1,7 @@
 import 'package:calendar_view/calendar_view.dart';
-import 'package:flutter/material.dart';
-
+import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:flutter/material.dart';
 
 class CalendarViewScreen extends StatelessWidget {
   final Function(DateTime) onDateSelected;
@@ -10,7 +10,7 @@ class CalendarViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return GlassScaffold(
       appBar: AppBar(
         title: const Text("Calendrier 2026"),
         backgroundColor: Colors.transparent,

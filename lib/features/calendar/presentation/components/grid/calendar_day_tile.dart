@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:flutter/material.dart';
 
 class CalendarDayTile extends StatelessWidget {
   final int day;
   final bool isSelected;
   final bool isToday;
+  final bool hasTasks;
+  final bool hasNotes;
   final VoidCallback onTap;
 
   const CalendarDayTile({
@@ -13,6 +16,8 @@ class CalendarDayTile extends StatelessWidget {
     required this.onTap,
     this.isSelected = false,
     this.isToday = false,
+    this.hasTasks = false,
+    this.hasNotes = false,
   });
 
   @override
@@ -26,26 +31,68 @@ class CalendarDayTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.all(4),
+        margin: const EdgeInsets.all(2), // Reduced margin for more space
         decoration: BoxDecoration(
           color: isSelected
               ? colors.accent
               : (isToday ? todayBg : Colors.transparent),
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(14), // More modern rounded corner
           border: isToday && !isSelected
-              ? Border.all(color: colors.accent, width: 2)
+              ? Border.all(
+                  color: colors.accent.withValues(alpha: 0.5),
+                  width: 1.5,
+                )
               : null,
         ),
-        child: Center(
-          child: Text(
-            "$day",
-            style: TextStyle(
-              color: isSelected ? Colors.white : textNorm,
-              fontWeight: isSelected || isToday
-                  ? FontWeight.bold
-                  : FontWeight.normal,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "$day",
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: isSelected
+                        ? Colors.white
+                        : (isToday ? colors.accent : textNorm),
+                    fontWeight: isSelected || isToday
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+                if (hasTasks || hasNotes) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (hasTasks)
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.white : colors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      if (hasTasks && hasNotes) const SizedBox(width: 2),
+                      if (hasNotes)
+                        Container(
+                          width: 4,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Colors.white70
+                                : colors.textSecondary.withValues(alpha: 0.5),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
             ),
-          ),
+          ],
         ),
       ),
     );

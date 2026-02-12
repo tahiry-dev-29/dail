@@ -6,11 +6,61 @@ import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/ai_chat/presentation/state/ai_chat_view_model.dart';
 import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
-class AiChatPage extends HookWidget {
+class AiChatPage extends StatefulWidget {
   const AiChatPage({super.key});
+
+  @override
+  State<AiChatPage> createState() => _AiChatPageState();
+}
+
+class _AiChatPageState extends State<AiChatPage> {
+  late final TextEditingController _textController;
+  late final ScrollController _scrollController;
+  EffectCleanup? _scrollEffectCleanup;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+    _scrollController = ScrollController();
+
+    // Auto-scroll to bottom on new messages
+    _scrollEffectCleanup = effect(() {
+      final chatVM = sl<AiChatViewModel>();
+      // Watch signals to trigger effect
+      chatVM.messages.value;
+      chatVM.isTyping.value;
+
+      // Use a post-frame callback to ensure list is rendered before scrolling
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _scrollController.dispose();
+    _scrollEffectCleanup?.call();
+    super.dispose();
+  }
+
+  void _handleSend() {
+    final text = _textController.text.trim();
+    if (text.isNotEmpty) {
+      sl<AiChatViewModel>().sendMessage(text);
+      _textController.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,28 +68,6 @@ class AiChatPage extends HookWidget {
     final chatVM = sl<AiChatViewModel>();
     final messages = chatVM.messages.watch(context);
     final isTyping = chatVM.isTyping.watch(context);
-    final textController = useTextEditingController();
-    final scrollController = useScrollController();
-
-    // Auto-scroll to bottom on new messages
-    useEffect(() {
-      if (scrollController.hasClients) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-      return null;
-    }, [messages.length, isTyping]);
-
-    void handleSend() {
-      final text = textController.text.trim();
-      if (text.isNotEmpty) {
-        chatVM.sendMessage(text);
-        textController.clear();
-      }
-    }
 
     return Column(
       children: [
@@ -101,7 +129,7 @@ class AiChatPage extends HookWidget {
             padding: const EdgeInsets.all(24),
             borderRadius: 32,
             child: ListView.builder(
-              controller: scrollController,
+              controller: _scrollController,
               itemCount: messages.length + (isTyping ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index < messages.length) {
@@ -133,11 +161,11 @@ class AiChatPage extends HookWidget {
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: textController,
+                      controller: _textController,
                       style: context.bodyMedium.copyWith(
                         color: colors.textPrimary,
                       ),
-                      onSubmitted: (_) => handleSend(),
+                      onSubmitted: (_) => _handleSend(),
                       decoration: InputDecoration(
                         hintText: "Demandez à Gemini...",
                         hintStyle: context.bodyMedium.copyWith(
@@ -153,7 +181,7 @@ class AiChatPage extends HookWidget {
                       color: colors.ai,
                       size: 18,
                     ),
-                    onPressed: handleSend,
+                    onPressed: _handleSend,
                   ),
                 ],
               ),
