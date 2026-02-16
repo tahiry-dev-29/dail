@@ -1,7 +1,9 @@
-import 'package:daily_os/features/ai_chat/presentation/state/ai_chat_view_model.dart';
-import 'package:daily_os/features/calendar/presentation/state/calendar_view_model.dart';
-import 'package:daily_os/features/home/presentation/state/dashboard_view_model.dart';
-import 'package:daily_os/features/home/presentation/state/home_view_model.dart';
+import 'package:daily_os/core/database/isar_service.dart';
+import 'package:daily_os/core/network/api_client.dart';
+import 'package:daily_os/features/ai_chat/views/bloc/ai_chat_view_model.dart';
+import 'package:daily_os/features/calendar/views/bloc/calendar_view_model.dart';
+import 'package:daily_os/features/home/views/bloc/dashboard_view_model.dart';
+import 'package:daily_os/features/home/views/bloc/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/block_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/folder_local_datasource.dart';
 import 'package:daily_os/features/knowledge_base/data/datasources/local/page_local_datasource.dart';
@@ -48,16 +50,15 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/crea
 import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/delete_workspace_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/get_workspaces_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/workspaces/update_workspace_usecase.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/active_page_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/block_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/folder_tree_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/page_properties_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/recent_list_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/search_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/tag_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/trash_view_model.dart';
-import 'package:daily_os/features/knowledge_base/presentation/state/workspace_view_model.dart';
-import 'package:daily_os/features/knowledge_base/services/isar_service.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/active_page_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/block_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/folder_tree_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/page_properties_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/recent_list_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/search_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/tag_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/trash_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/workspace_view_model.dart';
 import 'package:daily_os/features/planner/data/datasources/local/task_local_datasource.dart';
 import 'package:daily_os/features/planner/data/repositories/task_repository_impl.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
@@ -71,11 +72,11 @@ import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_usecas
 import 'package:daily_os/features/planner/domain/usecases/tasks/reorder_tasks_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/toggle_task_usecase.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/update_task_usecase.dart';
-import 'package:daily_os/features/planner/presentation/state/stats_view_model.dart';
-import 'package:daily_os/features/planner/presentation/state/task_edit_view_model.dart';
-import 'package:daily_os/features/planner/presentation/state/task_list_view_model.dart';
-import 'package:daily_os/features/settings/presentation/state/settings_view_model.dart';
-import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:daily_os/features/planner/views/bloc/stats_view_model.dart';
+import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
+import 'package:daily_os/features/planner/views/bloc/task_list_view_model.dart';
+import 'package:daily_os/features/settings/views/bloc/settings_view_model.dart';
+import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -92,6 +93,9 @@ Future<void> initDependencies() async {
 
   final sharedPrefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(sharedPrefs);
+
+  // Register ApiClient for network requests
+  sl.registerLazySingleton(() => ApiClient(baseUrl: 'https://api.example.com'));
 
   // ============ 2. Data Sources ============
   // Knowledge Base

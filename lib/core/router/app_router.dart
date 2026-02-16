@@ -1,6 +1,6 @@
-import 'package:daily_os/features/knowledge_base/presentation/screens/page_editor_screen.dart';
-import 'package:daily_os/features/knowledge_base/presentation/screens/trash/trash_screen.dart';
-import 'package:daily_os/shared/widgets/main_layout.dart';
+import 'package:daily_os/features/knowledge_base/views/screens/page_editor_screen.dart';
+import 'package:daily_os/features/knowledge_base/views/screens/trash/trash_screen.dart';
+import 'package:daily_os/design_system/organisms/main_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

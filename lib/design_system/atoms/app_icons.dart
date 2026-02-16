@@ -1,5 +1,5 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

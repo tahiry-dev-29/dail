@@ -1,6 +1,6 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_colors.dart';
-import 'package:daily_os/features/settings/presentation/state/theme_view_model.dart';
+import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
