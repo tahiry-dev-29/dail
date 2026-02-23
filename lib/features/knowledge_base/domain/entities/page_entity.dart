@@ -11,6 +11,7 @@ class PageEntity {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isDeleted;
+  final bool isFavorite;
   final List<BlockEntity> blocks;
   final List<PropertyEntity> properties;
   final int sortOrder;
@@ -24,6 +25,7 @@ class PageEntity {
     required this.createdAt,
     required this.updatedAt,
     this.isDeleted = false,
+    this.isFavorite = false,
     this.blocks = const [],
     this.properties = const [],
     this.sortOrder = 0,
@@ -54,6 +56,7 @@ class PageEntity {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isDeleted,
+    bool? isFavorite,
     List<BlockEntity>? blocks,
     List<PropertyEntity>? properties,
     int? sortOrder,
@@ -67,6 +70,7 @@ class PageEntity {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
+      isFavorite: isFavorite ?? this.isFavorite,
       blocks: blocks ?? this.blocks,
       properties: properties ?? this.properties,
       sortOrder: sortOrder ?? this.sortOrder,
@@ -79,8 +83,9 @@ class PageEntity {
       other is PageEntity &&
           runtimeType == other.runtimeType &&
           id == other.id &&
+          isFavorite == other.isFavorite &&
           sortOrder == other.sortOrder;
 
   @override
-  int get hashCode => id.hashCode ^ sortOrder.hashCode;
+  int get hashCode => id.hashCode ^ sortOrder.hashCode ^ isFavorite.hashCode;
 }

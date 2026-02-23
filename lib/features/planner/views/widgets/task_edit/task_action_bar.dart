@@ -18,8 +18,8 @@ class TaskActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
-      alignment: Alignment.bottomRight,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      alignment: Alignment.centerRight,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: GestureDetector(

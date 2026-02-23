@@ -1,12 +1,12 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/features/knowledge_base/views/widgets/markdown_editor/markdown_note_editor.dart';
+import 'package:daily_os/design_system/organisms/empty_state.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/workspace_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/widgets/markdown_editor/markdown_note_editor.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
+import 'package:daily_os/features/planner/views/bloc/task_list_view_model.dart';
 import 'package:daily_os/features/planner/views/screens/dashboard_view.dart';
 import 'package:daily_os/features/planner/views/screens/task_edit_page.dart';
-import 'package:daily_os/features/planner/views/bloc/task_list_view_model.dart';
-import 'package:daily_os/design_system/organisms/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -20,9 +20,12 @@ class WorkspaceScreen extends StatelessWidget {
     final contentType = workspaceVM.selectedContentType.watch(context);
     final selectedItemId = workspaceVM.selectedItemId.watch(context);
 
-    // Sync ActivePageViewModel reactively
+    // Sync ActivePageViewModel reactively — guard against redundant calls
     if (contentType == WorkspaceContentType.note && selectedItemId != null) {
-      sl<ActivePageViewModel>().setActivePageId(selectedItemId);
+      final activePageVM = sl<ActivePageViewModel>();
+      if (activePageVM.activePageId.value != selectedItemId) {
+        activePageVM.setActivePageId(selectedItemId);
+      }
     }
 
     return AnimatedSwitcher(

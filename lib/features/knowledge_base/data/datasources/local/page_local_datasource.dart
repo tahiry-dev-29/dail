@@ -1,3 +1,4 @@
+import 'package:daily_os/features/knowledge_base/data/dtos/folder_dto.dart';
 import 'package:daily_os/features/knowledge_base/data/dtos/page_dto.dart';
 import 'package:isar_community/isar.dart';
 
@@ -15,6 +16,27 @@ class PageLocalDatasource {
         .isDeletedEqualTo(false)
         .sortBySortOrder()
         .findAll();
+  }
+
+  /// Get all pages in a workspace
+  Future<List<PageDTO>> getByWorkspace(String workspaceUid) async {
+    // 1. Get all folders in the workspace
+    final folders = await isar.folderDTOs
+        .filter()
+        .workspaceUidEqualTo(workspaceUid)
+        .isDeletedEqualTo(false)
+        .findAll();
+    final folderIds = folders.map((f) => f.uid).toList();
+
+    // 2. Get all pages belonging to those folders
+    if (folderIds.isEmpty) return [];
+
+    // We fetch all pages and filter, since Isar doesn't easily support WHERE IN list for strings without writing a loop
+    final allPages = await isar.pageDTOs
+        .filter()
+        .isDeletedEqualTo(false)
+        .findAll();
+    return allPages.where((p) => folderIds.contains(p.folderUid)).toList();
   }
 
   /// Reorder pages in a folder
@@ -51,6 +73,16 @@ class PageLocalDatasource {
       page.updatedAt = DateTime.now();
       await isar.pageDTOs.put(page);
     });
+  }
+
+  /// Toggle page favorite
+  Future<void> toggleFavorite(String uid) async {
+    final page = await getByUid(uid);
+    if (page != null) {
+      page.isFavorite = !page.isFavorite;
+      page.updatedAt = DateTime.now();
+      await save(page);
+    }
   }
 
   /// Move page to new folder

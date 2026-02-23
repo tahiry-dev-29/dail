@@ -16,6 +16,8 @@ class TaskEntity {
   final String? folderId;
   final String iconEmoji;
   final int sortOrder;
+  final String? audioPath;
+  final int? audioDurationMs;
 
   const TaskEntity({
     required this.id,
@@ -33,6 +35,8 @@ class TaskEntity {
     this.folderId,
     this.iconEmoji = '📝',
     this.sortOrder = 0,
+    this.audioPath,
+    this.audioDurationMs,
   });
 
   bool get isOverdue {
@@ -74,6 +78,8 @@ class TaskEntity {
     String? folderId,
     String? iconEmoji,
     int? sortOrder,
+    String? audioPath,
+    int? audioDurationMs,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -91,6 +97,8 @@ class TaskEntity {
       folderId: folderId ?? this.folderId,
       iconEmoji: iconEmoji ?? this.iconEmoji,
       sortOrder: sortOrder ?? this.sortOrder,
+      audioPath: audioPath ?? this.audioPath,
+      audioDurationMs: audioDurationMs ?? this.audioDurationMs,
     );
   }
 

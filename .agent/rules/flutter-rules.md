@@ -1,8 +1,8 @@
 ---
 trigger: always_on
-glob: lib/**/*.dart
 description: Application stricte de la Clean Architecture Flutter avec hybridation Riverpod (Data) + Signals (UI), interdiction des StatefulWidget et Hooks, et respect de la règle des 120 lignes.
 ---
+
 Salut Tahiry ! C'est un excellent point de départ. En tant que futur senior, il est crucial que tes règles soient parfaitement alignées avec tes contraintes (notamment l'interdiction des Hooks que tu as mentionnée dans tes préférences).
 
 J'ai optimisé tes règles pour qu'elles soient plus strictes, plus "Senior-level" et surtout cohérentes avec l'usage exclusif de Signals pour la réactivité locale, en éliminant complètement les Hooks. 🚀
@@ -41,24 +41,6 @@ Computed Signals : Utiliser computed() pour dériver des états (ex: validation 
 
 Performance : Les Signals permettent de ne reconstruire que le micro-widget concerné plutôt que toute la page.
 
-📂 Structure Tree Optimisée (Feature-First)
-Plaintext
-lib/
-├── 📁 config/          # Routes (GoRouter), Theme (Design System Tokens)
-├── 📁 core/            # DI (GetIt), Error (Failures), Network (Dio), Utils
-├── 📁 shared/          # Partagé entre toutes les features
-│   ├── 📁 widgets/     # UI Atoms/Molecules (Boutons, Inputs réutilisables)
-│   ├── 📁 services/    # Services globaux (Storage, Location, AppService)
-│   └── 📁 models/      # DTOs globaux ou ValueObjects
-└── 📁 features/        # Feature-First Approach
-    └── 📁 [feature_name]/ 
-        ├── 📁 data/            # Models, DataSources, RepositoriesImpl
-        ├── 📁 domain/          # Entities, Repositories (Interfaces), UseCases
-        └── 📁 presentation/
-            ├── 📁 bloc/        # Logique d'état hybride
-            │   ├── [feature]_provider.dart  # Riverpod (Data fetching)
-            │   └── [feature]_signals.dart   # Signals (UI State & Logic)
-            ├── 📁 views/       # Scaffolds & Pages (ConsumerWidget uniquement)
             └── 📁 widgets/     # Micro-composants privés (< 120 lignes)
 🛠 Standard de Code (Doxygen & Testing)
 Documentation : Chaque méthode complexe doit être documentée au format Doxygen.

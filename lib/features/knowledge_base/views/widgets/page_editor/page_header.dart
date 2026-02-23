@@ -1,10 +1,11 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
+import 'package:daily_os/design_system/organisms/emoji_picker_modal.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/page_entity.dart';
-import 'package:daily_os/features/knowledge_base/views/widgets/page_editor/properties_toolbar.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/active_page_view_model.dart';
-import 'package:daily_os/design_system/organisms/emoji_picker_modal.dart';
+import 'package:daily_os/features/knowledge_base/views/widgets/page_editor/page_action_menu.dart';
+import 'package:daily_os/features/knowledge_base/views/widgets/page_editor/properties_toolbar.dart';
 import 'package:flutter/material.dart';
 
 /// PageHeader — surgical StatefulWidget for TextEditingController lifecycle.
@@ -69,23 +70,29 @@ class _PageHeaderState extends State<PageHeader> {
           child: Column(
             crossAxisAlignment: .start,
             children: [
-              // Icon
-              GestureDetector(
-                onTap: () {
-                  EmojiPickerModal.show(context, (emoji) {
-                    activePageVM.updateIcon(emoji);
-                  });
-                },
-                child: Hero(
-                  tag: 'page-icon-${widget.page.id}',
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      widget.page.iconEmoji,
-                      style: const TextStyle(fontSize: 72),
+              // Icon & Actions
+              Row(
+                mainAxisAlignment: .spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      EmojiPickerModal.show(context, (emoji) {
+                        activePageVM.updateIcon(emoji);
+                      });
+                    },
+                    child: Hero(
+                      tag: 'page-icon-${widget.page.id}',
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Text(
+                          widget.page.iconEmoji,
+                          style: const TextStyle(fontSize: 72),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  PageActionMenu(page: widget.page),
+                ],
               ),
               const SizedBox(height: 8),
               // Title Input

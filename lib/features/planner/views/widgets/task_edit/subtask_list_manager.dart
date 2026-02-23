@@ -1,9 +1,9 @@
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
 import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/subtask_empty_state.dart';
 import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/subtask_header.dart';
 import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/subtask_item_tile.dart';
 import 'package:daily_os/features/planner/views/widgets/task_form/task_input_widget.dart';
-import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -70,32 +70,7 @@ class SubtaskListManager extends StatelessWidget {
 
                     // Add Input
                     if (isAdding)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 24),
-                        child: TaskInputWidget(
-                          onSave:
-                              ({
-                                required name,
-                                required description,
-                                time,
-                                deadline,
-                                required isFavorite,
-                                List<String> tagIds = const [],
-                                String? workspaceId,
-                              }) {
-                                viewModel.addSubtask(
-                                  name: name,
-                                  description: description,
-                                  time: time ?? '00:00',
-                                  deadline: deadline,
-                                  isFavorite: isFavorite,
-                                );
-                                onSave();
-                              },
-                          onCancel: viewModel.toggleAddingSubtask,
-                          hintText: 'Nom de la sous-tâche',
-                        ),
-                      )
+                      _SubtaskAddInput(viewModel: viewModel, onSave: onSave)
                     else if (subtasks.isEmpty)
                       SubtaskEmptyState(
                         onPressed: viewModel.toggleAddingSubtask,
@@ -107,6 +82,59 @@ class SubtaskListManager extends StatelessWidget {
         ),
         const SizedBox(height: 48),
       ],
+    );
+  }
+}
+
+/// Inline subtask add input that scrolls itself into view on mount.
+class _SubtaskAddInput extends StatelessWidget {
+  final TaskEditViewModel viewModel;
+  final VoidCallback onSave;
+  final _key = GlobalKey();
+
+  _SubtaskAddInput({required this.viewModel, required this.onSave});
+
+  @override
+  Widget build(BuildContext context) {
+    // Scroll into view after the frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final ctx = _key.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        );
+      }
+    });
+
+    return Padding(
+      key: _key,
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
+      child: TaskInputWidget(
+        onSave:
+            ({
+              required name,
+              required description,
+              time,
+              deadline,
+              required isFavorite,
+              List<String> tagIds = const [],
+              String? workspaceId,
+            }) {
+              viewModel.addSubtask(
+                name: name,
+                description: description,
+                time: time ?? '00:00',
+                deadline: deadline,
+                isFavorite: isFavorite,
+              );
+              onSave();
+            },
+        onCancel: viewModel.toggleAddingSubtask,
+        hintText: 'Nom de la sous-tâche',
+      ),
     );
   }
 }

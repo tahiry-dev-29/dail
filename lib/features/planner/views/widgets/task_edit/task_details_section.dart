@@ -2,9 +2,8 @@ import 'package:daily_os/design_system/atoms/app_icons.dart';
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
-import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/task_tag_picker.dart';
-import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/task_workspace_picker.dart';
 import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
+import 'package:daily_os/features/planner/views/widgets/task_edit/widgets/task_tag_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -76,9 +75,7 @@ class TaskDetailsSection extends StatelessWidget {
               : const SizedBox.shrink(),
         ),
         const SizedBox(height: 24),
-        TaskWorkspacePicker(selectedWorkspaceId: viewModel.workspaceId),
-        const SizedBox(height: 24),
-        TaskTagPicker(selectedTagIds: viewModel.tagIds),
+        TaskTagPicker(selectedTagIds: viewModel.tagIds, onChanged: onSave),
       ],
     );
   }

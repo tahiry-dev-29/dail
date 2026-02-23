@@ -75,6 +75,7 @@ extension PageMapper on PageDTO {
     createdAt: createdAt,
     updatedAt: updatedAt,
     isDeleted: isDeleted,
+    isFavorite: isFavorite,
     blocks: blocks,
     properties: properties,
     sortOrder: sortOrder,
@@ -91,6 +92,7 @@ extension PageEntityMapper on PageEntity {
     createdAt: createdAt,
     updatedAt: updatedAt,
     isDeleted: isDeleted,
+    isFavorite: isFavorite,
     sortOrder: sortOrder,
   );
 }

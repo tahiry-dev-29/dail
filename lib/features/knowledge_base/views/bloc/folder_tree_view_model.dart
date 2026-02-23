@@ -7,7 +7,9 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/folders/get_roo
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/move_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/folders/update_folder_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_workspace_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/reorder_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/toggle_page_favorite_usecase.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/workspace_view_model.dart';
 import 'package:daily_os/features/planner/domain/entities/task_entity.dart';
 import 'package:daily_os/features/planner/domain/usecases/tasks/get_tasks_by_folder_usecase.dart';
@@ -24,6 +26,8 @@ class FolderTreeViewModel {
   final GetChildFoldersUseCase _getChildFoldersUseCase;
   final MoveFolderUseCase _moveFolderUseCase;
   final GetPagesUseCase _getPagesUseCase;
+  final GetWorkspacePagesUseCase _getWorkspacePagesUseCase;
+  final TogglePageFavoriteUseCase _togglePageFavoriteUseCase;
   final ReorderPagesUseCase _reorderPagesUseCase;
   final GetTasksByFolderUseCase _getTasksByFolderUseCase;
   final WorkspaceViewModel _workspaceVM;
@@ -38,6 +42,8 @@ class FolderTreeViewModel {
   final Map<String, Signal<AsyncState<List<FolderEntity>>>> _childrenCache = {};
   final Map<String, Signal<AsyncState<List<PageEntity>>>> _pagesCache = {};
   final Map<String, Signal<AsyncState<List<TaskEntity>>>> _tasksCache = {};
+  final Map<String, Signal<AsyncState<List<PageEntity>>>> _workspacePagesCache =
+      {};
 
   // Track last loaded workspace to prevent redundant loads
   String? _lastLoadedWorkspaceId;
@@ -55,6 +61,8 @@ class FolderTreeViewModel {
     required GetChildFoldersUseCase getChildFoldersUseCase,
     required MoveFolderUseCase moveFolderUseCase,
     required GetPagesUseCase getPagesUseCase,
+    required GetWorkspacePagesUseCase getWorkspacePagesUseCase,
+    required TogglePageFavoriteUseCase togglePageFavoriteUseCase,
     required ReorderPagesUseCase reorderPagesUseCase,
     required GetTasksByFolderUseCase getTasksByFolderUseCase,
     required WorkspaceViewModel workspaceVM,
@@ -65,6 +73,8 @@ class FolderTreeViewModel {
        _getChildFoldersUseCase = getChildFoldersUseCase,
        _moveFolderUseCase = moveFolderUseCase,
        _getPagesUseCase = getPagesUseCase,
+       _getWorkspacePagesUseCase = getWorkspacePagesUseCase,
+       _togglePageFavoriteUseCase = togglePageFavoriteUseCase,
        _reorderPagesUseCase = reorderPagesUseCase,
        _getTasksByFolderUseCase = getTasksByFolderUseCase,
        _workspaceVM = workspaceVM {
@@ -79,7 +89,10 @@ class FolderTreeViewModel {
 
         if (workspaceId != null) {
           // Use microtask to avoid synchronous state updates during build
-          Future.microtask(() => loadRootFolders(workspaceId));
+          Future.microtask(() {
+            loadRootFolders(workspaceId);
+            loadWorkspacePages(workspaceId);
+          });
         } else {
           _rootFolders.value = const AsyncData([]);
         }
@@ -136,11 +149,14 @@ class FolderTreeViewModel {
 
   Future<void> _loadChildren(
     String folderId,
-    Signal<AsyncState<List<FolderEntity>>> s,
-  ) async {
+    Signal<AsyncState<List<FolderEntity>>> s, {
+    bool forceReload = false,
+  }) async {
     // Only load if not already loading or loaded non-empty
-    if (s.value is AsyncLoading) return;
-    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    if (!forceReload) {
+      if (s.value is AsyncLoading) return;
+      if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    }
 
     s.value = const AsyncLoading();
     try {
@@ -161,11 +177,14 @@ class FolderTreeViewModel {
 
   Future<void> _loadPages(
     String folderId,
-    Signal<AsyncState<List<PageEntity>>> s,
-  ) async {
+    Signal<AsyncState<List<PageEntity>>> s, {
+    bool forceReload = false,
+  }) async {
     // Only load if not already loading or loaded non-empty
-    if (s.value is AsyncLoading) return;
-    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    if (!forceReload) {
+      if (s.value is AsyncLoading) return;
+      if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    }
 
     s.value = const AsyncLoading();
     try {
@@ -186,11 +205,14 @@ class FolderTreeViewModel {
 
   Future<void> _loadTasks(
     String folderId,
-    Signal<AsyncState<List<TaskEntity>>> s,
-  ) async {
+    Signal<AsyncState<List<TaskEntity>>> s, {
+    bool forceReload = false,
+  }) async {
     // Only load if not already loading or loaded non-empty
-    if (s.value is AsyncLoading) return;
-    if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    if (!forceReload) {
+      if (s.value is AsyncLoading) return;
+      if (s.value is AsyncData && (s.value.value?.isNotEmpty ?? false)) return;
+    }
 
     s.value = const AsyncLoading();
     try {
@@ -198,6 +220,52 @@ class FolderTreeViewModel {
       s.value = AsyncData(tasks);
     } catch (e, stack) {
       s.value = AsyncError(e, stack);
+    }
+  }
+
+  /// Get (or create) a signal for a workspace's pages
+  Signal<AsyncState<List<PageEntity>>> getWorkspacePagesSignal(
+    String workspaceId,
+  ) {
+    return _workspacePagesCache.putIfAbsent(
+      workspaceId,
+      () => signal<AsyncState<List<PageEntity>>>(const AsyncData([])),
+    );
+  }
+
+  /// Load pages for a workspace
+  Future<void> loadWorkspacePages(String workspaceId) async {
+    final s = getWorkspacePagesSignal(workspaceId);
+    s.value = const AsyncLoading();
+    try {
+      final pages = await _getWorkspacePagesUseCase(workspaceId);
+      s.value = AsyncData(pages);
+    } catch (e, stack) {
+      s.value = AsyncError(e, stack);
+    }
+  }
+
+  /// Toggle page favorite
+  Future<void> togglePageFavorite(String pageId) async {
+    try {
+      await _togglePageFavoriteUseCase(pageId);
+
+      final workspaceId = _workspaceVM.activeWorkspace.value?.id;
+      if (workspaceId != null) {
+        await loadWorkspacePages(workspaceId);
+      }
+
+      for (final folderId in _pagesCache.keys) {
+        final s = _pagesCache[folderId]!;
+        if (s.value is AsyncData<List<PageEntity>>) {
+          final pages = s.value.value!;
+          if (pages.any((p) => p.id == pageId)) {
+            await _loadPages(folderId, s, forceReload: true);
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore
     }
   }
 
@@ -232,13 +300,13 @@ class FolderTreeViewModel {
       await loadRootFolders(workspaceId);
     } else {
       final s = _childrenCache[folderId];
-      if (s != null) await _loadChildren(folderId, s);
+      if (s != null) await _loadChildren(folderId, s, forceReload: true);
 
       final sPages = _pagesCache[folderId];
-      if (sPages != null) await _loadPages(folderId, sPages);
+      if (sPages != null) await _loadPages(folderId, sPages, forceReload: true);
 
       final sTasks = _tasksCache[folderId];
-      if (sTasks != null) await _loadTasks(folderId, sTasks);
+      if (sTasks != null) await _loadTasks(folderId, sTasks, forceReload: true);
     }
   }
 
@@ -323,5 +391,6 @@ class FolderTreeViewModel {
     _childrenCache.clear();
     _pagesCache.clear();
     _tasksCache.clear();
+    _workspacePagesCache.clear();
   }
 }

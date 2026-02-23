@@ -56,6 +56,9 @@ abstract class IKnowledgeRepository {
   /// Get pages in a folder
   Future<List<PageEntity>> getPages(String folderId);
 
+  /// Get all pages in a workspace
+  Future<List<PageEntity>> getWorkspacePages(String workspaceId);
+
   /// Get page by ID with all blocks and properties
   Future<PageEntity?> getPage(String id);
 
@@ -64,6 +67,9 @@ abstract class IKnowledgeRepository {
 
   /// Update page (metadata only, not blocks)
   Future<void> updatePage(PageEntity page);
+
+  /// Toggle page favorite status
+  Future<void> togglePageFavorite(String pageId);
 
   /// Move page to new folder
   Future<void> movePage(String pageId, String newFolderId);

@@ -4,8 +4,8 @@ import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/molecules/cards/glass_card.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/planner/domain/entities/subtask_entity.dart';
-import 'package:daily_os/features/planner/views/widgets/task_form/task_input_widget.dart';
 import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
+import 'package:daily_os/features/planner/views/widgets/task_form/task_input_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -78,6 +78,9 @@ class SubtaskItemTile extends StatelessWidget {
           child: GlassCard(
             borderRadius: 16,
             padding: const EdgeInsets.all(12),
+            color: isEditing
+                ? context.colors.accent.withValues(alpha: 0.08)
+                : null,
             child: Row(
               children: [
                 ActionIcon(

@@ -1,10 +1,13 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/workspace_view_model.dart';
-import 'package:daily_os/features/planner/views/widgets/task_list/task_tile.dart';
 import 'package:daily_os/features/planner/views/bloc/task_provider.dart';
 import 'package:daily_os/features/planner/views/widgets/section_helpers.dart';
+import 'package:daily_os/features/planner/views/widgets/task_list/task_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:signals_flutter/signals_flutter.dart';
+
+final _isActiveTasksExpanded = signal(true);
 
 /// Sliver section displaying active (non-done, non-expired) tasks.
 class ActiveTasksSection extends ConsumerWidget {
@@ -22,6 +25,7 @@ class ActiveTasksSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksState = ref.watch(activeTasksProvider);
+    final isExpanded = _isActiveTasksExpanded.watch(context);
 
     return tasksState.when(
       data: (tasks) => SliverMainAxisGroup(
@@ -31,36 +35,42 @@ class ActiveTasksSection extends ConsumerWidget {
               icon: Icons.check_circle_outline_rounded,
               title: 'TÂCHES ACTIVES',
               trailing: CountBadge(count: tasks.length),
+              isExpanded: isExpanded,
+              onToggle: () =>
+                  _isActiveTasksExpanded.value = !_isActiveTasksExpanded.value,
             ),
           ),
-          if (tasks.isEmpty)
-            const SliverToBoxAdapter(
-              child: EmptySection(message: 'Aucune tâche active'),
-            )
-          else
-            SliverReorderableList(
-              itemCount: tasks.length,
-              onReorder: (oldIndex, newIndex) => ref
-                  .read(activeTasksProvider.notifier)
-                  .reorder(oldIndex, newIndex),
-              itemBuilder: (context, index) {
-                final task = tasks[index];
-                return ReorderableDelayedDragStartListener(
-                  key: ValueKey(task.id),
-                  index: index,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.grab,
-                    child: TaskTile(
-                      task: task,
-                      onToggle: () => onToggle(task.id),
-                      onDelete: () => onDelete(task.id),
-                      onFavorite: () => onFavorite(task.id),
-                      onTap: () => sl<WorkspaceViewModel>().selectTask(task.id),
+          if (isExpanded) ...[
+            if (tasks.isEmpty)
+              const SliverToBoxAdapter(
+                child: EmptySection(message: 'Aucune tâche active'),
+              )
+            else
+              SliverReorderableList(
+                itemCount: tasks.length,
+                onReorder: (oldIndex, newIndex) => ref
+                    .read(activeTasksProvider.notifier)
+                    .reorder(oldIndex, newIndex),
+                itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  return ReorderableDelayedDragStartListener(
+                    key: ValueKey(task.id),
+                    index: index,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.grab,
+                      child: TaskTile(
+                        task: task,
+                        onToggle: () => onToggle(task.id),
+                        onDelete: () => onDelete(task.id),
+                        onFavorite: () => onFavorite(task.id),
+                        onTap: () =>
+                            sl<WorkspaceViewModel>().selectTask(task.id),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
+          ],
         ],
       ),
       loading: () => const SliverToBoxAdapter(

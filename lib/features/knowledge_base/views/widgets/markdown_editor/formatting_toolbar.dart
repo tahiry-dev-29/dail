@@ -4,6 +4,7 @@ import 'package:daily_os/features/knowledge_base/domain/entities/block_entity.da
 import 'package:daily_os/features/knowledge_base/views/bloc/block_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class FormattingToolbar extends StatelessWidget {
   const FormattingToolbar({super.key});
@@ -71,10 +72,30 @@ class FormattingToolbar extends StatelessWidget {
                   icon: Icons.format_quote,
                   onPressed: () => _updateBlockType(focusedId, BlockType.quote),
                 ),
+                _ToolbarButton(
+                  icon: Icons.mic_none_rounded,
+                  onPressed: () => _addAudioBlock(focusedId),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _addAudioBlock(String focusedId) {
+    final blockVM = sl<BlockViewModel>();
+    final currentBlocks = blockVM.blocks.value.value ?? [];
+    final focusedBlock = currentBlocks.firstWhere((b) => b.id == focusedId);
+
+    blockVM.insertBlockAfter(
+      focusedId,
+      BlockEntity.audio(
+        id: const Uuid().v4(),
+        pageId: focusedBlock.pageId,
+        path: '', // Will be updated when recorded
+        sortOrder: focusedBlock.sortOrder + 1,
       ),
     );
   }

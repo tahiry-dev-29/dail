@@ -1,5 +1,6 @@
 import 'package:daily_os/design_system/atoms/app_typography.dart';
 import 'package:daily_os/design_system/theme/app_theme.dart';
+import 'package:daily_os/features/planner/views/widgets/filter_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 
 /// Dashboard header with folder icon, title, subtitle, and filter button.
@@ -40,7 +41,12 @@ class DashboardHeader extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.tune_rounded, color: colors.textSecondary),
                 onPressed: () {
-                  // TODO: Show Filter Bottom Sheet
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const FilterBottomSheet(),
+                  );
                 },
               ),
             ],

@@ -1,11 +1,11 @@
 import 'package:daily_os/core/di/injection_container.dart';
-import 'package:daily_os/features/home/views/widgets/widgets/active_timer_card.dart';
-import 'package:daily_os/features/home/views/widgets/widgets/gemini_assistant_card.dart';
-import 'package:daily_os/features/home/views/widgets/widgets/monthly_stats_card.dart';
-import 'package:daily_os/features/home/views/widgets/widgets/progress_stats_card.dart';
 import 'package:daily_os/features/home/views/bloc/dashboard_view_model.dart';
 import 'package:daily_os/features/home/views/bloc/home_provider.dart';
 import 'package:daily_os/features/home/views/bloc/home_view_model.dart';
+import 'package:daily_os/features/home/views/widgets/active_timer_card.dart';
+import 'package:daily_os/features/home/views/widgets/gemini_assistant_card.dart';
+import 'package:daily_os/features/home/views/widgets/monthly_stats_card.dart';
+import 'package:daily_os/features/home/views/widgets/progress_stats_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

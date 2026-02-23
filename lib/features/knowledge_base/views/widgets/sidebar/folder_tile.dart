@@ -5,9 +5,9 @@ import 'package:daily_os/design_system/molecules/dialogs/delete_confirmation_dia
 import 'package:daily_os/design_system/theme/app_theme.dart';
 import 'package:daily_os/features/home/views/bloc/home_view_model.dart';
 import 'package:daily_os/features/knowledge_base/domain/entities/folder_entity.dart';
-import 'package:daily_os/features/knowledge_base/views/widgets/page_editor/page_editor_modal.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/active_page_view_model.dart';
 import 'package:daily_os/features/knowledge_base/views/bloc/folder_tree_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/widgets/page_editor/page_editor_modal.dart';
 import 'package:daily_os/features/planner/views/bloc/task_list_view_model.dart';
 import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +55,13 @@ class FolderTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: Row(
                 children: [
-                  Text(folder.iconEmoji, style: const TextStyle(fontSize: 16)),
+                  Icon(
+                    isExpanded
+                        ? Icons.folder_open_rounded
+                        : Icons.folder_outlined,
+                    size: 18,
+                    color: colors.textSecondary.withValues(alpha: 0.8),
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

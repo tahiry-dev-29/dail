@@ -1,16 +1,17 @@
 import 'package:daily_os/core/di/injection_container.dart';
 import 'package:daily_os/design_system/molecules/structures/glass_scaffold.dart';
-import 'package:daily_os/features/ai_chat/views/screens/ai_chat_page.dart';
-import 'package:daily_os/features/calendar/views/screens/calendar_screen.dart';
-import 'package:daily_os/features/home/views/screens/home_screen.dart';
-import 'package:daily_os/features/home/views/bloc/home_view_model.dart';
-import 'package:daily_os/features/knowledge_base/views/widgets/sidebar/sidebar.dart';
-import 'package:daily_os/features/planner/views/widgets/task_form/quick_add_task_overlay.dart';
-import 'package:daily_os/features/planner/views/screens/workspace_screen.dart';
-import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:daily_os/design_system/organisms/atomic_header.dart';
 import 'package:daily_os/design_system/organisms/atomic_nav_bar.dart';
 import 'package:daily_os/design_system/organisms/floating_action_menu.dart';
+import 'package:daily_os/features/ai_chat/views/screens/ai_chat_page.dart';
+import 'package:daily_os/features/calendar/views/screens/calendar_screen.dart';
+import 'package:daily_os/features/home/views/bloc/home_view_model.dart';
+import 'package:daily_os/features/home/views/screens/home_screen.dart';
+import 'package:daily_os/features/knowledge_base/views/bloc/workspace_view_model.dart';
+import 'package:daily_os/features/knowledge_base/views/widgets/sidebar/sidebar.dart';
+import 'package:daily_os/features/planner/views/screens/workspace_screen.dart';
+import 'package:daily_os/features/planner/views/widgets/task_form/quick_add_task_overlay.dart';
+import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -24,17 +25,35 @@ class MainLayout extends StatelessWidget {
     final homeVM = sl<HomeViewModel>();
     final current = homeVM.currentTab.watch(context);
 
-    return Stack(
-      children: [
-        GlassScaffold(
-          drawer: const KnowledgeBaseSidebar(),
-          body: _PageSwitcher(current: current),
-          extendBody: true,
-          bottomNavigationBar: const AtomicNavBar(),
-          floatingActionButton: const FloatingActionMenu(),
-        ),
-        const QuickAddTaskOverlay(),
-      ],
+    // Intercept Android back button
+    final workspaceVM = sl<WorkspaceViewModel>();
+    final contentType = workspaceVM.selectedContentType.watch(context);
+    final isOnSubPage =
+        contentType != WorkspaceContentType.dashboard &&
+        current == AppTabs.workspace.index;
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (isOnSubPage) {
+          // Back from task/note → return to dashboard
+          workspaceVM.showDashboard();
+        }
+        // On dashboard or other tabs → do nothing (don't exit)
+      },
+      child: Stack(
+        children: [
+          GlassScaffold(
+            drawer: const KnowledgeBaseSidebar(),
+            body: _PageSwitcher(current: current),
+            extendBody: true,
+            bottomNavigationBar: const AtomicNavBar(),
+            floatingActionButton: const FloatingActionMenu(),
+          ),
+          const QuickAddTaskOverlay(),
+        ],
+      ),
     );
   }
 }

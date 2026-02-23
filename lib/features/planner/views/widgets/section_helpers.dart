@@ -70,36 +70,66 @@ class SectionHeader extends StatelessWidget {
   final IconData icon;
   final String title;
   final Widget? trailing;
+  final bool? isExpanded;
+  final VoidCallback? onToggle;
 
   const SectionHeader({
     super.key,
     required this.icon,
     required this.title,
     this.trailing,
+    this.isExpanded,
+    this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final row = Row(
+      children: [
+        Icon(icon, color: colors.accent, size: 18),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: colors.textPrimary,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const Spacer(),
+        if (trailing != null) trailing!,
+        if (isExpanded != null) ...[
+          const SizedBox(width: 8),
+          Icon(
+            isExpanded!
+                ? Icons.keyboard_arrow_down_rounded
+                : Icons.keyboard_arrow_right_rounded,
+            size: 20,
+            color: colors.textSecondary.withValues(alpha: 0.6),
+          ),
+        ],
+      ],
+    );
+
+    if (onToggle != null) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 4.0, bottom: 0.0),
+        child: InkWell(
+          onTap: onToggle,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+            child: row,
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, color: colors.accent, size: 18),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: colors.textPrimary,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const Spacer(),
-          if (trailing != null) trailing!,
-        ],
-      ),
+      child: row,
     );
   }
 }

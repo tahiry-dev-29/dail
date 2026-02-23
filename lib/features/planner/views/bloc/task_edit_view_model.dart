@@ -16,6 +16,8 @@ class TaskEditViewModel {
   final Signal<bool> isFavorite;
   final Signal<bool> isDone;
   final ListSignal<SubTaskEntity> subtasks;
+  final Signal<String?> audioPath;
+  final Signal<int?> audioDurationMs;
 
   // UI State
   final Signal<bool> isAddingSubtask = Signal(false);
@@ -34,7 +36,9 @@ class TaskEditViewModel {
       isDone = Signal(initialTask.isDone),
       subtasks = ListSignal([...initialTask.subtasks]),
       tagIds = ListSignal([...initialTask.tagIds]),
-      workspaceId = Signal(initialTask.workspaceId) {
+      workspaceId = Signal(initialTask.workspaceId),
+      audioPath = Signal(initialTask.audioPath),
+      audioDurationMs = Signal(initialTask.audioDurationMs) {
     if (initialTask.description.isNotEmpty) {
       isDescriptionExpanded.value = true;
     }
@@ -156,6 +160,8 @@ class TaskEditViewModel {
       subtasks: subtasks.toList(),
       tagIds: tagIds.toList(),
       workspaceId: workspaceId.value,
+      audioPath: audioPath.value,
+      audioDurationMs: audioDurationMs.value,
     );
 
     _taskListViewModel.updateTask(updatedTask);

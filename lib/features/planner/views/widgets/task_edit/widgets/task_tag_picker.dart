@@ -7,8 +7,13 @@ import 'package:signals_flutter/signals_flutter.dart';
 
 class TaskTagPicker extends StatelessWidget {
   final ListSignal<String> selectedTagIds;
+  final VoidCallback? onChanged;
 
-  const TaskTagPicker({super.key, required this.selectedTagIds});
+  const TaskTagPicker({
+    super.key,
+    required this.selectedTagIds,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +25,7 @@ class TaskTagPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('TAGS', style: context.caption),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         tagsState.map(
           data: (tags) {
             if (tags.isEmpty) {
@@ -29,42 +34,34 @@ class TaskTagPicker extends StatelessWidget {
                 style: context.bodySmall.copyWith(color: colors.textMuted),
               );
             }
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: tags.map((tag) {
-                final isSelected = selectedTagIds.contains(tag.id);
-                final tagColor = _parseColor(tag.color);
 
-                return FilterChip(
-                  label: Text(
-                    tag.name,
-                    style: context.bodySmall.copyWith(
-                      color: isSelected ? Colors.white : colors.textPrimary,
-                    ),
-                  ),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      selectedTagIds.add(tag.id);
-                    } else {
-                      selectedTagIds.remove(tag.id);
-                    }
-                  },
-                  backgroundColor: tagColor.withValues(alpha: 0.1),
-                  selectedColor: tagColor,
-                  checkmarkColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(
-                      color: isSelected ? Colors.transparent : colors.border,
-                    ),
-                  ),
-                );
-              }).toList(),
-            );
+            return Watch((context) {
+              final selected = selectedTagIds.watch(context);
+              return Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: tags.map((tag) {
+                  final isSelected = selected.contains(tag.id);
+                  final tagColor = _parseColor(tag.color);
+
+                  return _CustomTagChip(
+                    label: tag.name,
+                    color: tagColor,
+                    isSelected: isSelected,
+                    onTap: () {
+                      if (isSelected) {
+                        selectedTagIds.remove(tag.id);
+                      } else {
+                        selectedTagIds.add(tag.id);
+                      }
+                      onChanged?.call();
+                    },
+                  );
+                }).toList(),
+              );
+            });
           },
-          error: (e, _) => Text('Error loading tags'),
+          error: (e, _) => const Text('Error loading tags'),
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ],
@@ -79,5 +76,61 @@ class TaskTagPicker extends StatelessWidget {
     } catch (_) {
       return Colors.grey;
     }
+  }
+}
+
+class _CustomTagChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _CustomTagChip({
+    required this.label,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
+                  ? Colors.transparent
+                  : color.withValues(alpha: 0.3),
+              width: 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            style: context.bodySmall.copyWith(
+              color: isSelected ? Colors.white : colors.textPrimary,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

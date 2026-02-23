@@ -208,9 +208,9 @@ class AdaptiveColors {
 
   Color get surface => isDark
       ? (isGlass
-            ? Colors.white.withValues(alpha: 0.07)
+            ? Colors.white.withValues(alpha: 0.15)
             : const Color(0xFF111827))
-      : (isGlass ? Colors.white.withValues(alpha: 0.65) : Colors.white);
+      : (isGlass ? Colors.white.withValues(alpha: 0.75) : Colors.white);
 
   Color get surfaceElevated => isDark
       ? (isGlass

@@ -134,6 +134,12 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   }
 
   @override
+  Future<List<PageEntity>> getWorkspacePages(String workspaceId) async {
+    final dtos = await _pageDatasource.getByWorkspace(workspaceId);
+    return dtos.map((dto) => dto.toEntity()).toList();
+  }
+
+  @override
   Future<PageEntity?> getPage(String id) async {
     final pageDto = await _pageDatasource.getByUid(id);
     if (pageDto == null) return null;
@@ -164,6 +170,11 @@ class KnowledgeRepositoryImpl implements IKnowledgeRepository {
   @override
   Future<void> updatePage(PageEntity page) async {
     await _pageDatasource.save(page.toDTO());
+  }
+
+  @override
+  Future<void> togglePageFavorite(String pageId) async {
+    await _pageDatasource.toggleFavorite(pageId);
   }
 
   @override

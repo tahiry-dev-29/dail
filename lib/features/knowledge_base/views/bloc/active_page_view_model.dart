@@ -95,6 +95,28 @@ class ActivePageViewModel {
     await _updatePageUseCase(updatedPage);
   }
 
+  /// Toggle favorite status
+  Future<void> toggleFavorite() async {
+    final currentPage = _activePage.value.value;
+    if (currentPage == null) return;
+
+    final updatedPage = currentPage.copyWith(
+      isFavorite: !currentPage.isFavorite,
+    );
+    _activePage.value = AsyncData(updatedPage);
+    await _updatePageUseCase(updatedPage);
+  }
+
+  /// Move page to another folder
+  Future<void> movePage(String targetFolderId) async {
+    final currentPage = _activePage.value.value;
+    if (currentPage == null) return;
+
+    final updatedPage = currentPage.copyWith(folderId: targetFolderId);
+    _activePage.value = AsyncData(updatedPage);
+    await _updatePageUseCase(updatedPage);
+  }
+
   /// Create a new page in a folder and select it
   Future<void> createNewPage(String folderId) async {
     final newPage = PageEntity(

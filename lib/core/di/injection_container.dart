@@ -31,8 +31,10 @@ import 'package:daily_os/features/knowledge_base/domain/usecases/pages/delete_pa
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_page_by_id_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_recent_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/get_workspace_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/reorder_pages_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/search_pages_usecase.dart';
+import 'package:daily_os/features/knowledge_base/domain/usecases/pages/toggle_page_favorite_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/pages/update_page_usecase.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/properties/property_usecases.dart';
 import 'package:daily_os/features/knowledge_base/domain/usecases/tags/create_tag_usecase.dart';
@@ -77,6 +79,8 @@ import 'package:daily_os/features/planner/views/bloc/task_edit_view_model.dart';
 import 'package:daily_os/features/planner/views/bloc/task_list_view_model.dart';
 import 'package:daily_os/features/settings/views/bloc/settings_view_model.dart';
 import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
+import 'package:daily_os/shared/services/audio_service.dart';
+import 'package:daily_os/shared/utils/toast_service.dart';
 import 'package:get_it/get_it.dart';
 import 'package:isar_community/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -96,6 +100,10 @@ Future<void> initDependencies() async {
 
   // Register ApiClient for network requests
   sl.registerLazySingleton(() => ApiClient(baseUrl: 'https://api.example.com'));
+
+  // Core Services
+  sl.registerLazySingleton<AudioService>(() => AudioService());
+  sl.registerLazySingleton<ToastService>(() => ToastService());
 
   // ============ 2. Data Sources ============
   // Knowledge Base
@@ -148,6 +156,7 @@ Future<void> initDependencies() async {
 
   // UseCases - Pages
   sl.registerFactory(() => GetPagesUseCase(sl()));
+  sl.registerFactory(() => GetWorkspacePagesUseCase(sl()));
   sl.registerFactory(() => CreatePageUseCase(sl()));
   sl.registerFactory(() => SearchPagesUseCase(sl()));
   sl.registerFactory(() => UpdatePageUseCase(sl()));
@@ -155,6 +164,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => GetPageByIdUseCase(sl()));
   sl.registerFactory(() => GetRecentPagesUseCase(sl()));
   sl.registerFactory(() => ReorderPagesUseCase(sl()));
+  sl.registerFactory(() => TogglePageFavoriteUseCase(sl()));
 
   // UseCases - Workspaces
   sl.registerFactory(() => GetWorkspacesUseCase(sl()));
@@ -216,6 +226,8 @@ Future<void> initDependencies() async {
       getChildFoldersUseCase: sl(),
       moveFolderUseCase: sl(),
       getPagesUseCase: sl(),
+      getWorkspacePagesUseCase: sl(),
+      togglePageFavoriteUseCase: sl(),
       getTasksByFolderUseCase: sl(),
       reorderPagesUseCase: sl(),
       workspaceVM: sl(),

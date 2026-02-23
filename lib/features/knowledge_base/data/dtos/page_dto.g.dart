@@ -42,15 +42,20 @@ const PageDTOSchema = CollectionSchema(
       name: r'isDeleted',
       type: IsarType.bool,
     ),
-    r'sortOrder': PropertySchema(
+    r'isFavorite': PropertySchema(
       id: 5,
+      name: r'isFavorite',
+      type: IsarType.bool,
+    ),
+    r'sortOrder': PropertySchema(
+      id: 6,
       name: r'sortOrder',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 6, name: r'title', type: IsarType.string),
-    r'uid': PropertySchema(id: 7, name: r'uid', type: IsarType.string),
+    r'title': PropertySchema(id: 7, name: r'title', type: IsarType.string),
+    r'uid': PropertySchema(id: 8, name: r'uid', type: IsarType.string),
     r'updatedAt': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'updatedAt',
       type: IsarType.dateTime,
     ),
@@ -128,10 +133,11 @@ void _pageDTOSerialize(
   writer.writeString(offsets[2], object.folderUid);
   writer.writeString(offsets[3], object.iconEmoji);
   writer.writeBool(offsets[4], object.isDeleted);
-  writer.writeLong(offsets[5], object.sortOrder);
-  writer.writeString(offsets[6], object.title);
-  writer.writeString(offsets[7], object.uid);
-  writer.writeDateTime(offsets[8], object.updatedAt);
+  writer.writeBool(offsets[5], object.isFavorite);
+  writer.writeLong(offsets[6], object.sortOrder);
+  writer.writeString(offsets[7], object.title);
+  writer.writeString(offsets[8], object.uid);
+  writer.writeDateTime(offsets[9], object.updatedAt);
 }
 
 PageDTO _pageDTODeserialize(
@@ -147,10 +153,11 @@ PageDTO _pageDTODeserialize(
   object.iconEmoji = reader.readString(offsets[3]);
   object.id = id;
   object.isDeleted = reader.readBool(offsets[4]);
-  object.sortOrder = reader.readLong(offsets[5]);
-  object.title = reader.readString(offsets[6]);
-  object.uid = reader.readString(offsets[7]);
-  object.updatedAt = reader.readDateTime(offsets[8]);
+  object.isFavorite = reader.readBool(offsets[5]);
+  object.sortOrder = reader.readLong(offsets[6]);
+  object.title = reader.readString(offsets[7]);
+  object.uid = reader.readString(offsets[8]);
+  object.updatedAt = reader.readDateTime(offsets[9]);
   return object;
 }
 
@@ -172,12 +179,14 @@ P _pageDTODeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
     case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1017,6 +1026,16 @@ extension PageDTOQueryFilter
     });
   }
 
+  QueryBuilder<PageDTO, PageDTO, QAfterFilterCondition> isFavoriteEqualTo(
+    bool value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'isFavorite', value: value),
+      );
+    });
+  }
+
   QueryBuilder<PageDTO, PageDTO, QAfterFilterCondition> sortOrderEqualTo(
     int value,
   ) {
@@ -1495,6 +1514,18 @@ extension PageDTOQuerySortBy on QueryBuilder<PageDTO, PageDTO, QSortBy> {
     });
   }
 
+  QueryBuilder<PageDTO, PageDTO, QAfterSortBy> sortByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PageDTO, PageDTO, QAfterSortBy> sortByIsFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.desc);
+    });
+  }
+
   QueryBuilder<PageDTO, PageDTO, QAfterSortBy> sortBySortOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sortOrder', Sort.asc);
@@ -1618,6 +1649,18 @@ extension PageDTOQuerySortThenBy
     });
   }
 
+  QueryBuilder<PageDTO, PageDTO, QAfterSortBy> thenByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PageDTO, PageDTO, QAfterSortBy> thenByIsFavoriteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isFavorite', Sort.desc);
+    });
+  }
+
   QueryBuilder<PageDTO, PageDTO, QAfterSortBy> thenBySortOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sortOrder', Sort.asc);
@@ -1708,6 +1751,12 @@ extension PageDTOQueryWhereDistinct
     });
   }
 
+  QueryBuilder<PageDTO, PageDTO, QDistinct> distinctByIsFavorite() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isFavorite');
+    });
+  }
+
   QueryBuilder<PageDTO, PageDTO, QDistinct> distinctBySortOrder() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sortOrder');
@@ -1772,6 +1821,12 @@ extension PageDTOQueryProperty
   QueryBuilder<PageDTO, bool, QQueryOperations> isDeletedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isDeleted');
+    });
+  }
+
+  QueryBuilder<PageDTO, bool, QQueryOperations> isFavoriteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isFavorite');
     });
   }
 

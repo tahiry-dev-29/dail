@@ -25,6 +25,13 @@ class FloatingActionMenu extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    // Hide when viewing task or note (not dashboard)
+    final workspaceVM = sl<WorkspaceViewModel>();
+    final contentType = workspaceVM.selectedContentType.watch(context);
+    if (contentType != WorkspaceContentType.dashboard) {
+      return const SizedBox.shrink();
+    }
+
     // Hide if add task overlay is visible
     final isAddTaskVisible = homeVM.isAddTaskVisible.watch(context);
     if (isAddTaskVisible) {
@@ -32,7 +39,6 @@ class FloatingActionMenu extends StatelessWidget {
     }
 
     final colors = context.colors;
-    final workspaceVM = sl<WorkspaceViewModel>();
     final activePageVM = sl<ActivePageViewModel>();
     final taskListVM = sl<TaskListViewModel>();
 

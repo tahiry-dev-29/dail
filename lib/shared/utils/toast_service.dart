@@ -1,7 +1,8 @@
-import 'package:daily_os/core/di/injection_container.dart';
+import 'dart:ui';
+
 import 'package:daily_os/design_system/atoms/app_icons.dart';
-import 'package:daily_os/features/settings/views/bloc/theme_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ToastService {
   static void show(
@@ -10,6 +11,7 @@ class ToastService {
     ToastType type = ToastType.info,
     Duration duration = const Duration(seconds: 3),
   }) {
+    HapticFeedback.lightImpact();
     final messenger = ScaffoldMessenger.of(context);
     messenger.clearSnackBars();
 
@@ -25,9 +27,13 @@ class ToastService {
         backgroundColor: Colors.transparent,
         elevation: 0,
         duration: duration,
-        margin: const EdgeInsets.only(bottom: 100, left: 16, right: 16),
+        margin: const EdgeInsets.only(
+          bottom: 90, // Above navbar (~80px high)
+          left: 20,
+          right: 20,
+        ),
         padding: EdgeInsets.zero,
-        dismissDirection: DismissDirection.horizontal,
+        dismissDirection: DismissDirection.down,
       ),
     );
   }
@@ -47,7 +53,6 @@ class ToastService {
 
 enum ToastType { success, error, info, warning }
 
-/// Surgical StatefulWidget for [AnimationController] lifecycle.
 class _ToastContent extends StatefulWidget {
   final String message;
   final ToastType type;
@@ -86,124 +91,131 @@ class _ToastContentState extends State<_ToastContent>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: sl<ThemeViewModel>().getAdaptedDuration(
-        const Duration(milliseconds: 400),
-      ),
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.elasticOut,
       builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 40 * (1 - value)),
+        return Transform.scale(
+          scale: 0.8 + (0.2 * value),
           child: Opacity(opacity: value.clamp(0.0, 1.0), child: child),
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: _getGradientColors(),
-              begin: .topLeft,
-              end: .bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _getMainColor().withValues(alpha: 0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: .min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: (isDark ? Colors.black : Colors.white).withValues(
+                    alpha: 0.7,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: _getAccentColor().withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                      child: Icon(
-                        _getIcon(context),
-                        color: Colors.white,
-                        size: 18,
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _getAccentColor().withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _getIcon(context),
+                              color: _getAccentColor(),
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              widget.message,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: widget.onClose,
+                            icon: Icon(
+                              AppIcons.xmark(context),
+                              color: isDark ? Colors.white54 : Colors.black45,
+                              size: 14,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        widget.message,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: .w700,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: widget.onClose,
-                      icon: Icon(
-                        AppIcons.xmark(context),
-                        color: Colors.white70,
-                        size: 16,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      visualDensity: VisualDensity.compact,
+                    // Progress indicator (Sleek line)
+                    AnimatedBuilder(
+                      animation: _progressController,
+                      builder: (context, child) {
+                        return Container(
+                          alignment: Alignment.centerLeft,
+                          height: 3,
+                          child: FractionallySizedBox(
+                            widthFactor: 1.0 - _progressController.value,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: _getAccentColor().withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
-              // Progress indicator
-              AnimatedBuilder(
-                animation: _progressController,
-                builder: (context, child) {
-                  return LinearProgressIndicator(
-                    value: 1.0 - _progressController.value,
-                    backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white.withValues(alpha: 0.3),
-                    ),
-                    minHeight: 4,
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Color _getMainColor() {
+  Color _getAccentColor() {
     switch (widget.type) {
       case ToastType.success:
         return Colors.greenAccent;
       case ToastType.error:
         return Colors.redAccent;
       case ToastType.warning:
-        return Colors.amber;
+        return Colors.orangeAccent;
       case ToastType.info:
-        return Colors.indigoAccent;
-    }
-  }
-
-  List<Color> _getGradientColors() {
-    switch (widget.type) {
-      case ToastType.success:
-        return [Colors.greenAccent, Colors.teal];
-      case ToastType.error:
-        return [Colors.redAccent, Colors.red];
-      case ToastType.warning:
-        return [Colors.amber, Colors.orange];
-      case ToastType.info:
-        return [Colors.indigoAccent, Colors.blueAccent];
+        return Colors.blueAccent;
     }
   }
 

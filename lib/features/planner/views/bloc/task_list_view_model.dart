@@ -133,6 +133,24 @@ class TaskListViewModel {
     return AsyncData(tasks);
   });
 
+  late final dailyProgress = computed<double>(() {
+    final state = tasks.value;
+    if (state is! AsyncData<List<TaskEntity>>) return 0.0;
+
+    final now = DateTime.now();
+    final todayTasks = state.value.where((t) {
+      if (t.date == null) return false;
+      return t.date!.year == now.year &&
+          t.date!.month == now.month &&
+          t.date!.day == now.day;
+    }).toList();
+
+    if (todayTasks.isEmpty) return 0.0;
+
+    final completedCount = todayTasks.where((t) => t.isDone).length;
+    return completedCount / todayTasks.length;
+  });
+
   late final expiredTasks = computed<AsyncState<List<TaskEntity>>>(() {
     final state = filteredTasks.value;
     if (state is! AsyncData<List<TaskEntity>>) return state;

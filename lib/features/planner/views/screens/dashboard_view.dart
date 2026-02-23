@@ -51,15 +51,22 @@ class DashboardView extends StatelessWidget {
 
         // 2. Notes
         Watch((context) {
+          final activeWorkspaceId = workspaceVM.activeWorkspace.value?.id;
+
           final notesState = selectedFolderId != null
               ? folderTreeVM.getPagesSignal(selectedFolderId).watch(context)
-              : const AsyncData<List<PageEntity>>([]);
+              : (activeWorkspaceId != null
+                    ? folderTreeVM
+                          .getWorkspacePagesSignal(activeWorkspaceId)
+                          .watch(context)
+                    : const AsyncData<List<PageEntity>>([]));
 
           return SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: NotesSection(
               notesState: notesState,
               onNoteTap: (id) => workspaceVM.selectNote(id),
+              onFavorite: (id) => folderTreeVM.togglePageFavorite(id),
             ),
           );
         }),

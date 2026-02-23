@@ -6,8 +6,14 @@ import 'package:flutter/material.dart';
 class NoteTile extends StatelessWidget {
   final PageEntity note;
   final VoidCallback onTap;
+  final VoidCallback? onFavorite;
 
-  const NoteTile({super.key, required this.note, required this.onTap});
+  const NoteTile({
+    super.key,
+    required this.note,
+    required this.onTap,
+    this.onFavorite,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +32,28 @@ class NoteTile extends StatelessWidget {
                 style: TextStyle(fontSize: 14, color: colors.textPrimary),
               ),
             ),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 16,
-              color: colors.textSecondary.withValues(alpha: 0.3),
-            ),
+            if (onFavorite != null)
+              IconButton(
+                onPressed: onFavorite,
+                icon: Icon(
+                  note.isFavorite
+                      ? Icons.star_rounded
+                      : Icons.star_border_rounded,
+                  size: 16,
+                  color: note.isFavorite
+                      ? colors.accent
+                      : colors.textSecondary.withValues(alpha: 0.3),
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                splashRadius: 16,
+              )
+            else
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: colors.textSecondary.withValues(alpha: 0.3),
+              ),
           ],
         ),
       ),
